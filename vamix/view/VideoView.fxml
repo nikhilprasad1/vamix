@@ -41,10 +41,49 @@
                                           <Font name="System Bold" size="13.0" />
                                        </font>
                                     </Label>
-                                    <TabPane layoutX="21.0" layoutY="206.0" prefHeight="347.0" prefWidth="349.0" tabClosingPolicy="UNAVAILABLE">
+                                    <TabPane layoutX="21.0" layoutY="206.0" prefHeight="343.0" prefWidth="348.0" tabClosingPolicy="UNAVAILABLE">
                                       <tabs>
-                                        <Tab text="Title" />
-                                        <Tab text="Credits" />
+                                        <Tab text="Title">
+                                          <content>
+                                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                   <children>
+                                                      <Label layoutX="14.0" layoutY="9.0" text="Text to Add:" />
+                                                      <TextArea fx:id="titleText" layoutX="14.0" layoutY="24.0" prefHeight="103.0" prefWidth="320.0" text="Title text" />
+                                                      <Label layoutX="14.0" layoutY="136.0" text="Font:" />
+                                                      <Label layoutX="14.0" layoutY="163.0" text="Font Size:" />
+                                                      <Label layoutX="14.0" layoutY="192.0" text="Text colour:" />
+                                                      <Label layoutX="14.0" layoutY="219.0" text="Timestamp" underline="true" />
+                                                      <Label layoutX="14.0" layoutY="248.0" text="Start:" />
+                                                      <TextField fx:id="startTitle" alignment="CENTER" layoutX="54.0" layoutY="243.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
+                                                      <Label layoutX="174.0" layoutY="248.0" text="Finish:" />
+                                                      <TextField fx:id="endTitle" alignment="CENTER" layoutX="221.0" layoutY="243.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
+                                                      <Button fx:id="setTitle" layoutX="143.0" layoutY="277.0" mnemonicParsing="false" text="Set Text" />
+                                                      <ColorPicker fx:id="titleColour" layoutX="243.0" layoutY="187.0" />
+                                                      <ChoiceBox fx:id="titleSize" layoutX="243.0" layoutY="158.0" prefWidth="91.0" />
+                                                   </children></AnchorPane>
+                                          </content>
+                                        </Tab>
+                                          <Tab text="Credits">
+                                             <content>
+                                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                   <children>
+                                                      <Label layoutX="14.0" layoutY="9.0" text="Text to Add:" />
+                                                      <TextArea fx:id="creditsText" layoutX="14.0" layoutY="24.0" prefHeight="103.0" prefWidth="320.0" text="Credits text" />
+                                                      <Label layoutX="14.0" layoutY="136.0" text="Font:" />
+                                                      <Label layoutX="14.0" layoutY="163.0" text="Font Size:" />
+                                                      <Label layoutX="14.0" layoutY="192.0" text="Text colour:" />
+                                                      <Label layoutX="14.0" layoutY="219.0" text="Timestamp" underline="true" />
+                                                      <Label layoutX="14.0" layoutY="248.0" text="Start:" />
+                                                      <TextField fx:id="startCredits" alignment="CENTER" layoutX="54.0" layoutY="243.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
+                                                      <Label layoutX="174.0" layoutY="248.0" text="Finish:" />
+                                                      <TextField fx:id="endCredits" alignment="CENTER" layoutX="221.0" layoutY="243.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
+                                                      <Button fx:id="setCredits" layoutX="143.0" layoutY="277.0" mnemonicParsing="false" text="Set Text" />
+                                                      <ColorPicker fx:id="creditsColour" layoutX="243.0" layoutY="187.0" />
+                                                      <ChoiceBox fx:id="creditsSize" layoutX="243.0" layoutY="158.0" prefHeight="25.0" prefWidth="91.0" />
+                                                   </children>
+                                                </AnchorPane>
+                                             </content>
+                                          </Tab>
                                       </tabs>
                                     </TabPane>
                                  </children>
