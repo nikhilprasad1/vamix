@@ -14,7 +14,7 @@
    <children>
       <TabPane fx:id="tabMenu" prefHeight="600.0" prefWidth="1000.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <tabs>
-          <Tab fx:id="audioTab" text="Video">
+          <Tab fx:id="videoTab" text="Video">
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
@@ -99,7 +99,7 @@
                      </children></AnchorPane>
             </content>
           </Tab>
-          <Tab fx:id="videoTab" text="Audio">
+          <Tab fx:id="audioTab" text="Audio">
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
