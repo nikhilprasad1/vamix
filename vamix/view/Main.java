@@ -1,9 +1,7 @@
 package vamix.view;
 
 import java.io.IOException;
-
 import javax.swing.JComponent;
-
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -20,8 +18,8 @@ public class Main extends Application {
 	@Override
 	public void start(Stage initStage) {
 		try{
-			this.initStage=initStage;
-            this.initStage.setTitle("VAMIX");//set name as vamix
+			this.initStage = initStage;
+            this.initStage.setTitle("VAMIX"); //set name as vamix
             setupGUI(); //setup the gui
 		} catch(Exception ex){
 			//error
@@ -40,7 +38,6 @@ public class Main extends Application {
 			initStage.setScene(scene);
 	        initStage.show();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
