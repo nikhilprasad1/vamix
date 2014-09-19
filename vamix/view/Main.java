@@ -32,7 +32,7 @@ public class Main extends Application {
             loader.setLocation(Main.class.getResource("VideoView.fxml"));
             AnchorPane TabPane = (AnchorPane) loader.load();
             //get version number of javafx
-            //System.out.print(com.sun.javafx.runtime.VersionInfo.getRuntimeVersion());
+            //System.out.println(com.sun.javafx.runtime.VersionInfo.getRuntimeVersion());
             // Set person overview into the center of root layout.
             Scene scene = new Scene(TabPane);
 			initStage.setScene(scene);

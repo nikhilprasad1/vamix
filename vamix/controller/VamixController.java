@@ -1,7 +1,20 @@
 package vamix.controller;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
+import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -194,11 +207,16 @@ public class VamixController {
 
 	@FXML
 	private ProgressBar videoProgress;
+	
+	private EmbeddedMediaPlayerComponent mediaPlayerComponent;
+	
+	private String videoFileAdd="";
 
 	//initialising the functionality of the buttons
 	@FXML
 	void initialize() {
-		MainPanesCheck();
+		loadMedia();
+		mainPanesCheck();
 		videoTabCheck();
 		audioTabCheck();
 		previewTabCheck();
@@ -319,15 +337,117 @@ public class VamixController {
 		/*
 		 * Section for the media player functionality
 		 */
+		mediaPlayerComponent = new EmbeddedMediaPlayerComponent();
+		final EmbeddedMediaPlayer vid=mediaPlayerComponent.getMediaPlayer();
+		vid.playMedia(videoFileAdd);
 
+		//videoMediaView;
+		/*
+			
+			btnStart.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+				}
+			});
+			
+			btnPlayPause.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					vid.pause();
+				}
+			});
+			
+			btnFast.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					vid.skip(5000);
+				}
+			});
+			
+			btnRewind.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					vid.skip(-5000);
+				}
+			});
+		}*/
 	}
 	
-	private void MainPanesCheck(){
+	private void mainPanesCheck(){
 		assert tabMenu != null : "fx:id=\"tabMenu\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert tabPane != null : "fx:id=\"tabPane\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert videoTab != null : "fx:id=\"videoTab\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert previewTab != null : "fx:id=\"previewTab\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert audioTab != null : "fx:id=\"audioTab\" was not injected: check your FXML file 'VideoView.fxml'.";
+	}
+	
+	private void loadMedia(){
+		//intiliase validness varaible code reuse from a2
+		boolean valid=false; //
+		boolean isAudio=false; //
+		String partial=""; //variable for partial of path ie just the name of file
+		JOptionPane.showMessageDialog(null, "Please select the video to edit.");
+		//get input file
+		while(!valid){
+			//setup file chooser
+			JFileChooser chooser = new JFileChooser(Constants.CURRENT_DIR);
+		    FileNameExtensionFilter filter = new FileNameExtensionFilter("Video file","avi","mov","mp4");
+		    chooser.setFileFilter(filter); //set mp3 filter
+		    //get save path
+		    chooser.showOpenDialog(null);
+			File file =chooser.getSelectedFile();
+			try{
+				videoFileAdd=file.getAbsolutePath();//get path address
+			}catch(NullPointerException e){
+				valid=false; //cant return nothing
+			}
+			
+			//now get the path of file and just file name
+			Matcher m=Pattern.compile("(.*"+File.separator+")(.*)$").matcher(videoFileAdd);
+			if(m.find()){
+				partial=m.group(2); //get file name
+			}
+			
+			if(partial.equals("")){
+				//error message of empty file name
+				JOptionPane.showMessageDialog(null, "You have entered a empty file name. Please input a valid file name.");
+			}else{
+				//check if the file exist locally
+				if (Helper.fileExist(videoFileAdd)){
+					String bash =File.separator+"bin"+File.separator+"bash";
+					String cmd ="echo $(file "+videoFileAdd+")";
+					ProcessBuilder builder=new ProcessBuilder(bash,"-c",cmd); 
+					builder.redirectErrorStream(true);
+
+					try{
+						Process process = builder.start();
+						InputStream stdout = process.getInputStream();
+						BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+						String line;
+						while((line=stdoutBuffered.readLine())!=null){
+							//System.out.println(line);//debug file type
+							Matcher macth =Pattern.compile("(video)").matcher(line);
+							if(macth.find()){
+								isAudio=true;
+							}
+						}
+					}catch(Exception e){
+						e.printStackTrace();
+					}
+					//check if audio using bash commands
+					if (isAudio){
+						valid=true;
+					}else{
+						//file is not audio/mpeg type
+						JOptionPane.showMessageDialog(null, "You have entered a non-video file please enter a valid file.");
+					}
+				}else{
+					//file does not exist so give error
+					JOptionPane.showMessageDialog(null,"You have entered a non-existing file. Please input a valid file type.");
+				}
+			}
+		}
+		
 	}
 
 }
