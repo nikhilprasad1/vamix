@@ -3,7 +3,7 @@ package vamix.model;
 /*
  * This class is the model component of VAMIX. It holds all the data display
  * and all data required for user operations.
- * Authors: Nikhil Prasad, Gyver(Yeu-Shin) Fu
+ * Authors: Nikhil Prasad, Guyver(Yeu-Shin) Fu
  */
 
 

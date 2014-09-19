@@ -10,9 +10,9 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane fx:id="TabPane" maxHeight="600.0" maxWidth="1000.0" minHeight="600.0" minWidth="1000.0" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vamix.controller.VamixController">
+<AnchorPane fx:id="tabPane" maxHeight="600.0" maxWidth="1000.0" minHeight="600.0" minWidth="1000.0" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vamix.controller.VamixController">
    <children>
-      <SplitPane dividerPositions="0.39087301587301587" layoutY="2.0" prefHeight="600.0" prefWidth="1010.0">
+      <SplitPane dividerPositions="0.4" layoutY="2.0" maxHeight="600.0" maxWidth="1000.0" minHeight="600.0" minWidth="1000.0" prefHeight="600.0" prefWidth="1000.0">
          <items>
             <TabPane fx:id="tabMenu" prefHeight="600.0" prefWidth="1000.0" tabClosingPolicy="UNAVAILABLE">
               <tabs>
@@ -23,7 +23,7 @@
                               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="565.0" prefWidth="390.0">
                                  <children>
                                     <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#e1e4e8" height="165.0" layoutX="9.0" layoutY="10.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="372.0" />
-                                    <Label fx:id="addVideoLabel" layoutX="21.0" layoutY="14.0" text="Add Video" underline="true">
+                                    <Label layoutX="21.0" layoutY="14.0" text="Add Video" underline="true">
                                        <font>
                                           <Font name="System Bold" size="13.0" />
                                        </font>
@@ -107,17 +107,17 @@
                   <content>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>
-                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="565.0" prefWidth="500.0">
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="565.0" prefWidth="397.0">
                                  <children>
                                     <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#e1e4e8" height="105.0" layoutX="9.0" layoutY="10.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="372.0" />
-                                    <Label fx:id="StripAudioLabel" layoutX="21.0" layoutY="14.0" text="Strip Audio to file" underline="true">
+                                    <Label layoutX="21.0" layoutY="14.0" text="Strip Audio to file" underline="true">
                                        <font>
                                           <Font name="System Bold" size="13.0" />
                                        </font>
                                     </Label>
                                     <Button fx:id="strip_button" layoutX="19.0" layoutY="42.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="124.0" text="Strip and Save" />
-                                    <Label fx:id="StipeText" layoutX="29.0" layoutY="83.0" text="Save to" />
-                                    <TextField fx:id="Strip_add" layoutX="90.0" layoutY="78.0" prefHeight="25.0" prefWidth="246.0" text="~/Desktop" />
+                                    <Label layoutX="29.0" layoutY="83.0" text="Save to" />
+                                    <TextField fx:id="strip_add" layoutX="90.0" layoutY="78.0" prefHeight="25.0" prefWidth="246.0" text="~/Desktop" />
                                     <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#e1e4e8" height="239.0" layoutX="9.0" layoutY="319.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="372.0" />
                                     <Button fx:id="overlayAudioBtn" layoutX="138.0" layoutY="518.0" mnemonicParsing="false" text="Overlay Audio" />
                                     <TextField fx:id="overlayUseEnd" alignment="CENTER" layoutX="70.0" layoutY="475.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
@@ -126,10 +126,10 @@
                                     <Label layoutX="29.0" layoutY="454.0" text="Start:" />
                                     <Label layoutX="29.0" layoutY="425.0" text="Use from file" underline="true" />
                                     <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#e1e4e8" height="182.0" layoutX="9.0" layoutY="127.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="372.0" />
-                                    <TextField id="Strip_add" fx:id="ReplaceAdd" layoutX="95.0" layoutY="184.0" prefHeight="25.0" prefWidth="246.0" text="~/Desktop" />
+                                    <TextField id="Strip_add" fx:id="replaceAdd" layoutX="95.0" layoutY="184.0" prefHeight="25.0" prefWidth="246.0" text="~/Desktop" />
                                     <Label layoutX="13.0" layoutY="188.0" text="File chosen" />
                                     <Button id="strip_button" fx:id="chooseAudioButton" layoutX="24.0" layoutY="154.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="142.0" text="Choose Audio File" />
-                                    <Label fx:id="ReplaceAudioLabel" layoutX="20.0" layoutY="133.0" text="Replace Audio" underline="true">
+                                    <Label layoutX="20.0" layoutY="133.0" text="Replace Audio" underline="true">
                                        <font>
                                           <Font name="System Bold" size="13.0" />
                                        </font>
@@ -138,16 +138,16 @@
                                     <TextField fx:id="startReplace" alignment="CENTER" layoutX="70.0" layoutY="240.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
                                     <Label layoutX="190.0" layoutY="245.0" text="Finish:" />
                                     <TextField fx:id="endReplace" alignment="CENTER" layoutX="237.0" layoutY="240.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
-                                    <Button fx:id="ReplaceButton" layoutX="159.0" layoutY="274.0" mnemonicParsing="false" text="Replace" />
+                                    <Button fx:id="replaceButton" layoutX="159.0" layoutY="274.0" mnemonicParsing="false" text="Replace" />
                                     <Label layoutX="13.0" layoutY="217.0" text="Specify section of file to use (leave blank to use all)" />
-                                    <Label fx:id="OverlayAudioLabel" layoutX="20.0" layoutY="326.0" text="Overlay Audio" underline="true">
+                                    <Label layoutX="20.0" layoutY="326.0" text="Overlay Audio" underline="true">
                                        <font>
                                           <Font name="System Bold" size="13.0" />
                                        </font>
                                     </Label>
                                     <Button id="strip_button" fx:id="chooseOverlayBtn" layoutX="24.0" layoutY="347.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="142.0" text="Choose Audio File" />
                                     <Label layoutX="13.0" layoutY="381.0" text="File chosen" />
-                                    <TextField id="Strip_add" fx:id="OverlayAdd" layoutX="95.0" layoutY="377.0" prefHeight="25.0" prefWidth="246.0" text="~/Desktop" />
+                                    <TextField id="Strip_add" fx:id="overlayAdd" layoutX="95.0" layoutY="377.0" prefHeight="25.0" prefWidth="246.0" text="~/Desktop" />
                                     <Label layoutX="205.0" layoutY="454.0" text="Start:" />
                                     <TextField fx:id="overlayToStart" alignment="CENTER" layoutX="245.0" layoutY="449.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
                                     <Label layoutX="199.0" layoutY="480.0" text="Finish:" />
@@ -159,14 +159,14 @@
                         </AnchorPane>
                   </content>
                 </Tab>
-                  <Tab fx:id="PreviewTab" text="Preview &amp; Render">
+                  <Tab fx:id="previewTab" text="Preview &amp; Render">
                      <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>
-                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="565.0" prefWidth="500.0">
+                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="565.0" prefWidth="395.0">
                                  <children>
                                     <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#e1e4e8" height="121.0" layoutX="9.0" layoutY="10.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="372.0" />
-                                    <Label fx:id="addVideoLabel11" layoutX="21.0" layoutY="14.0" text="Render Video" underline="true">
+                                    <Label layoutX="21.0" layoutY="14.0" text="Render Video" underline="true">
                                        <font>
                                           <Font name="System Bold" size="13.0" />
                                        </font>
