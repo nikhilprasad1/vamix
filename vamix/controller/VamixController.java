@@ -32,6 +32,9 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
 
 
 public class VamixController {
@@ -187,7 +190,7 @@ public class VamixController {
 	 */
 
 	@FXML
-	private BorderPane videoMediaView;
+	private MediaView videoMediaView;
 
 	@FXML
 	private Button fastForwardBtn;
@@ -339,12 +342,9 @@ public class VamixController {
 		/*
 		 * Section for the media player functionality
 		 */
-		mediaPlayerComponent = new EmbeddedMediaPlayerComponent();
-		final EmbeddedMediaPlayer vid=mediaPlayerComponent.getMediaPlayer();
-		
-		//vid.playMedia(videoFileAdd);
-		//vamix.view.Main.vidPane.add(mediaPlayerComponent,0);
-		//videoMediaView.setHover(mediaPlayerComponent);
+		Media mediaAdd=new Media(videoFileAdd);
+		MediaPlayer vidPlayer=new MediaPlayer(mediaAdd);
+		videoMediaView= new MediaView(vidPlayer);
 		/*
 
 			btnStart.addActionListener(new ActionListener() {
