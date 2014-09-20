@@ -242,12 +242,15 @@ public class VamixController {
 		/*
 		 * Section for the video tab functionality
 		 */
+		//test mouse action event handler method
 		downloadBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {
 				videoURL.setText("No, you damn pirate.");
 			}
 		});
+		
+		//
 	}
 
 	private void audioTabCheck(){
