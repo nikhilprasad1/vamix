@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
@@ -213,8 +215,6 @@ public class VamixController {
 	@FXML
 	private ProgressBar videoProgress;
 
-	private EmbeddedMediaPlayerComponent mediaPlayerComponent;
-
 	private String videoFileAdd="";
 
 	//initialising the functionality of the buttons
@@ -341,10 +341,13 @@ public class VamixController {
 	private void player(){
 		/*
 		 * Section for the media player functionality
-		 */
-		Media mediaAdd=new Media(videoFileAdd);
-		MediaPlayer vidPlayer=new MediaPlayer(mediaAdd);
-		videoMediaView= new MediaView(vidPlayer);
+		 */	
+		playPauseBtn.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evt) {
+				vamix.view.Main.vid.playMedia(videoFileAdd);
+			}
+		});
 		/*
 
 			btnStart.addActionListener(new ActionListener() {
@@ -429,7 +432,7 @@ public class VamixController {
 						String line;
 						while((line=stdoutBuffered.readLine())!=null){
 							//System.out.println(line);//debug file type
-							Matcher macth =Pattern.compile("(video)").matcher(line);
+							Matcher macth =Pattern.compile("(video)|Media").matcher(line);
 							if(macth.find()){
 								isAudio=true;
 							}
