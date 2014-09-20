@@ -184,9 +184,9 @@
                   </Tab>
               </tabs>
             </TabPane>
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" SplitPane.resizableWithParent="false">
+            <AnchorPane fx:id="videoMediaViewAnch" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" SplitPane.resizableWithParent="false">
                <children>
-                  <MediaView fx:id="videoMediaView" fitHeight="560.0" fitWidth="610.0" />
+                  <MediaView fx:id="videoMediaView" fitHeight="540.0" fitWidth="590.0" />
                   <Button fx:id="playPauseBtn" layoutX="277.0" layoutY="565.0" mnemonicParsing="false" text="Play" />
                   <Button fx:id="fastForwardBtn" layoutX="331.0" layoutY="565.0" mnemonicParsing="false" text="FF" />
                   <Button fx:id="rewindBtn" layoutX="203.0" layoutY="565.0" mnemonicParsing="false" text="Rewind" />
@@ -196,7 +196,7 @@
                      <font>
                         <Font size="11.0" />
                      </font></Label>
-                  <ProgressBar fx:id="videoProgress" layoutY="540.0" opacity="0.35" prefWidth="610.0" progress="0.56" />
+                  <ProgressBar fx:id="videoProgress" layoutY="540.0" maxHeight="20.0" maxWidth="590.0" minHeight="20.0" minWidth="590.0" opacity="0.35" prefHeight="20.0" prefWidth="590.0" progress="0.0" />
                </children>
             </AnchorPane>
          </items>
