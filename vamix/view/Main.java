@@ -60,6 +60,7 @@ public class Main extends Application {
 			frame.addWindowListener(new WindowAdapter() {
 				@Override
 				public void windowClosing(WindowEvent e){
+					vamix.view.Main.vid.setVolume(100);
 					mediaPlayerComponent.release();
 				}
 			});

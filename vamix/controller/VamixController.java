@@ -1,28 +1,25 @@
 package vamix.controller;
 
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.ResourceBundle;
-import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.Timer;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import uk.co.caprica.vlcj.binding.internal.libvlc_state_t;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -345,12 +342,41 @@ public class VamixController {
 		 */	
 		//load video but dont play yet
 		vamix.view.Main.vid.prepareMedia(videoFileAdd);
+		//start counter for the
+		Timer videoTimer=new Timer(200, new ActionListener() {
+			@Override
+			public void actionPerformed(java.awt.event.ActionEvent e) {
+				Platform.runLater(new Runnable() {
+			        @Override
+			        public void run() {
+			        	double currentTime=(vamix.view.Main.vid.getTime()/1000.0);
+			        	double VidTime=(vamix.view.Main.vid.getLength()/1000.0);
+			        	videoProgress.setProgress((currentTime/VidTime));
+			        	if (currentTime>=VidTime){
+			        		vamix.view.Main.vid.playMedia(videoFileAdd);
+			        		if (!(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Playing)){
+			        			playPauseBtn.setText("Pause");
+			        		}
+			        		String videTime= Helper.timeOfVideo(currentTime,VidTime);
+			        		videoTime.setText(videTime);
+			        	}else{
+			        		String videTime= Helper.timeOfVideo(currentTime,VidTime);
+			        		videoTime.setText(videTime);
+			        	}
+			        }
+			   });
+				
+			}
+		});
+		videoTimer.start();
 		//System.out.println(vamix.view.Main.vid.getMediaPlayerState()+"");
 		playPauseBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {
 				if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_NothingSpecial){
 					vamix.view.Main.vid.play();
+					vamix.view.Main.vid.setVolume(500);
+					
 					playPauseBtn.setText("Pause");
 				}else if(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
 					vamix.view.Main.vid.startMedia(videoFileAdd);
@@ -423,7 +449,7 @@ public class VamixController {
 				//}
 			}
 		});
-		
+
 		/*fastForwardBtn.setOnMouseReleased(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
@@ -431,15 +457,27 @@ public class VamixController {
 			}
 
 		});*/
-		/*
-
-		@FXML
-		private Label videoTime;
-
-		@FXML
-		private ProgressBar videoProgress;
-		 */
+		
+		videoProgress.setOnMouseDragged(new EventHandler<MouseEvent>() {
+			//video slider set volume continously when slide
+			@Override
+			public void handle(MouseEvent arg0) {
+				//if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
+				vamix.view.Main.vid.setTime((long)arg0.getX()*vamix.view.Main.vid.getLength()/(long)videoProgress.getWidth());
+				//}
+			}
+		});
+		
+		videoProgress.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			//video slider set volume discret when slide
+			@Override
+			public void handle(MouseEvent arg0) {
+				vamix.view.Main.vid.setTime((long)(arg0.getX()*vamix.view.Main.vid.getLength()/(long)videoProgress.getWidth()));
+		
+			}
+		});
 	}
+	
 	private class SkipForward extends TimerTask{
 
 		@Override
