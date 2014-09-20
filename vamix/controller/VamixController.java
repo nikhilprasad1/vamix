@@ -18,6 +18,7 @@ import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
@@ -30,7 +31,8 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.media.MediaView;
+import javafx.scene.layout.BorderPane;
+
 
 public class VamixController {
 
@@ -122,10 +124,10 @@ public class VamixController {
 
 	@FXML
 	private TextField startReplace;
-	
+
 	@FXML
 	private TextField endReplace;
-	
+
 	@FXML
 	private TextField overlayUseEnd;
 
@@ -143,7 +145,7 @@ public class VamixController {
 
 	@FXML
 	private Button overlayAudioBtn;
-	
+
 	@FXML
 	private TextField overlayToStart;
 
@@ -185,7 +187,7 @@ public class VamixController {
 	 */
 
 	@FXML
-	private MediaView videoMediaView;
+	private BorderPane videoMediaView;
 
 	@FXML
 	private Button fastForwardBtn;
@@ -207,9 +209,9 @@ public class VamixController {
 
 	@FXML
 	private ProgressBar videoProgress;
-	
+
 	private EmbeddedMediaPlayerComponent mediaPlayerComponent;
-	
+
 	private String videoFileAdd="";
 
 	//initialising the functionality of the buttons
@@ -281,7 +283,7 @@ public class VamixController {
 		assert strip_add != null : "fx:id=\"strip_add\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert overlayAdd != null : "fx:id=\"overlayAdd\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert replaceAdd != null : "fx:id=\"replaceAdd\" was not injected: check your FXML file 'VideoView.fxml'.";
-		
+
 		assert endReplace != null : "fx:id=\"endReplace\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert startReplace != null : "fx:id=\"startReplace\" was not injected: check your FXML file 'VideoView.fxml'.";
 
@@ -289,23 +291,23 @@ public class VamixController {
 		assert overlayUseStart != null : "fx:id=\"overlayUseStart\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert overlayToEnd != null : "fx:id=\"overlayToEnd\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert overlayToStart != null : "fx:id=\"overlayToStart\" was not injected: check your FXML file 'VideoView.fxml'.";
-	
+
 	}
-	
+
 	private void audioTab(){
 		/*
 		 * Section for the audio tab functionality
 		 */
 
 	}
-	
+
 	private void previewTab(){
 		/*
 		 * Section for the audio tab functionality
 		 */
 
 	}
-	
+
 	private void previewTabCheck(){
 		/*
 		 * Section for the preview tab id check
@@ -330,7 +332,7 @@ public class VamixController {
 		assert volumeSlider != null : "fx:id=\"volumeSlider\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert videoMediaView != null : "fx:id=\"videoMediaView\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert muteCheckbox != null : "fx:id=\"muteCheckbox\" was not injected: check your FXML file 'VideoView.fxml'.";
-		
+
 	}
 
 	private void player(){
@@ -339,31 +341,32 @@ public class VamixController {
 		 */
 		mediaPlayerComponent = new EmbeddedMediaPlayerComponent();
 		final EmbeddedMediaPlayer vid=mediaPlayerComponent.getMediaPlayer();
-		vid.playMedia(videoFileAdd);
-
-		//videoMediaView;
+		
+		//vid.playMedia(videoFileAdd);
+		//vamix.view.Main.vidPane.add(mediaPlayerComponent,0);
+		//videoMediaView.setHover(mediaPlayerComponent);
 		/*
-			
+
 			btnStart.addActionListener(new ActionListener() {
 				@Override
-				public void actionPerformed(ActionEvent e) {
+				public void actionPerformed(AcvamtionEvent e) {
 				}
 			});
-			
+
 			btnPlayPause.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					vid.pause();
 				}
 			});
-			
+
 			btnFast.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					vid.skip(5000);
 				}
 			});
-			
+
 			btnRewind.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
@@ -372,7 +375,7 @@ public class VamixController {
 			});
 		}*/
 	}
-	
+
 	private void mainPanesCheck(){
 		assert tabMenu != null : "fx:id=\"tabMenu\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert tabPane != null : "fx:id=\"tabPane\" was not injected: check your FXML file 'VideoView.fxml'.";
@@ -380,7 +383,7 @@ public class VamixController {
 		assert previewTab != null : "fx:id=\"previewTab\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert audioTab != null : "fx:id=\"audioTab\" was not injected: check your FXML file 'VideoView.fxml'.";
 	}
-	
+
 	private void loadMedia(){
 		//intiliase validness varaible code reuse from a2
 		boolean valid=false; //
@@ -391,23 +394,23 @@ public class VamixController {
 		while(!valid){
 			//setup file chooser
 			JFileChooser chooser = new JFileChooser(Constants.CURRENT_DIR);
-		    FileNameExtensionFilter filter = new FileNameExtensionFilter("Video file","avi","mov","mp4");
-		    chooser.setFileFilter(filter); //set mp3 filter
-		    //get save path
-		    chooser.showOpenDialog(null);
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("Video file","avi","mov","mp4");
+			chooser.setFileFilter(filter); //set mp3 filter
+			//get save path
+			chooser.showOpenDialog(null);
 			File file =chooser.getSelectedFile();
 			try{
 				videoFileAdd=file.getAbsolutePath();//get path address
 			}catch(NullPointerException e){
 				valid=false; //cant return nothing
 			}
-			
+
 			//now get the path of file and just file name
 			Matcher m=Pattern.compile("(.*"+File.separator+")(.*)$").matcher(videoFileAdd);
 			if(m.find()){
 				partial=m.group(2); //get file name
 			}
-			
+
 			if(partial.equals("")){
 				//error message of empty file name
 				JOptionPane.showMessageDialog(null, "You have entered a empty file name. Please input a valid file name.");
@@ -447,7 +450,7 @@ public class VamixController {
 				}
 			}
 		}
-		
+
 	}
 
 }
