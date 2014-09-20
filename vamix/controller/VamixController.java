@@ -372,11 +372,9 @@ public class VamixController {
 		//System.out.println(vamix.view.Main.vid.getMediaPlayerState()+"");
 		playPauseBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
-			public void handle(ActionEvent evt) {
+			public void handle(ActionEvent evt) {//before video even got played
 				if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_NothingSpecial){
 					vamix.view.Main.vid.play();
-					vamix.view.Main.vid.setVolume(500);
-					
 					playPauseBtn.setText("Pause");
 				}else if(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
 					vamix.view.Main.vid.startMedia(videoFileAdd);
