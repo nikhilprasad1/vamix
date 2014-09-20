@@ -263,10 +263,50 @@ public class VamixController {
 		/*
 		 * Section for the video tab functionality
 		 */
+		
+		//test mouse action event handler method
 		downloadBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {
+				//first check to see if user entered a URL
+				if ((videoURL.getText().equals("URL")) || (videoURL.getText().equals(""))) {
+					JOptionPane.showMessageDialog(null, "You must enter a URL to download a video!", "Missing URL",
+							JOptionPane.WARNING_MESSAGE);
+				}
 				videoURL.setText("No, you damn pirate.");
+			}
+		});
+		
+		//the functionality for the set title text button
+		setTitle.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evt) {
+				//first check if the user has entered text to be overlaid
+				if (titleText.getText().equals("")) {
+					JOptionPane.showMessageDialog(null, "Please enter text to overlay on video", "Missing Input",
+							JOptionPane.WARNING_MESSAGE);
+				//otherwise if text has been entered, continue with function
+				} else {
+					//check if the start time and end time entered by user is in format required
+					String timeFormat = "^\\d\\d:\\d\\d:\\d\\d$";
+					boolean startMatched = false;
+					//boolean to show if both times entered by user are valid (within length of video)
+					boolean bothValid = true;
+					//first check the start time and if it matches check the finish time
+					Matcher matcher = Pattern.compile(timeFormat).matcher(startTitle.getText());
+					if (matcher.find()) {
+						startMatched = true;
+					}
+					if (startMatched) {
+						matcher = Pattern.compile(timeFormat).matcher(endTitle.getText());
+						//if the finish time also matches now go on to check if the times entered are 
+						//less than or equal to the length of the video
+						if (matcher.find()) {
+							String[] startTimeSplit = startTitle.getText().split(":");
+							String[] endTimeSplit = endTitle.getText().split(":");
+						}
+					}
+				}
 			}
 		});
 	}
@@ -429,7 +469,7 @@ public class VamixController {
 		});
 		
 		volumeSlider.setOnMouseDragged(new EventHandler<MouseEvent>() {
-			//volume slider set volume continously when slide
+			//volume slider set volume continuously when slide
 			@Override
 			public void handle(MouseEvent arg0) {
 				//if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
@@ -439,7 +479,7 @@ public class VamixController {
 		});
 		
 		volumeSlider.setOnMouseClicked(new EventHandler<MouseEvent>() {
-			//volume slider set volume continously when click
+			//volume slider set volume continuously when click
 			@Override
 			public void handle(MouseEvent arg0) {
 				//if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){

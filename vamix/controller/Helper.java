@@ -14,6 +14,8 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import uk.co.caprica.vlcj.player.MediaPlayer;
+
 /*
  * Class to provide function which help check file existence
  */
@@ -93,6 +95,7 @@ public class Helper {
 		return lines;
 	}
 	
+	
 	public static String timeOfVideo(double currenttime,double totalTime){
 		
 		return formatTime((int)currenttime)+"/"+formatTime((int)totalTime);
@@ -130,4 +133,37 @@ public class Helper {
 		return formatTime;
 	}
 	
+	/*
+	 * Function to get the length of the video in the format hh:mm:ss
+	 * Assumes length of video is not greater than 99hrs, 59mins and 59secs
+	 */
+//	public static String getVideoLength(MediaPlayer player) {
+//		//string to return
+//		String length = "";
+//		String hours = "00", minutes = "00", seconds = "00";
+//		long songLength = player.getLength();
+//		
+//		//divide song length by no. of milliseconds in an hour to get the no. of hours
+//		hours = String.valueOf((songLength % 3600000));
+//		//get the remaining time to sort into minutes and then seconds
+//		songLength = songLength - (Long.parseLong(hours)*3600000);
+//		//divide remaining length by no. of ms in an minute to get no. of minutes
+//		minutes = String.valueOf((songLength % 60000));
+//		//get remaining time and convert to seconds
+//		songLength = songLength - (Long.parseLong(minutes)*60000);
+//		seconds = String.valueOf((int)(songLength/1000));
+//		
+//		//now check to see if either of the three components are only one digit long
+//		if (hours.length() == 1) {
+//			hours = "0" + hours;
+//		}
+//		if (minutes.length() == 1) {
+//			minutes = "0" + minutes;
+//		}
+//		if (seconds.length() == 1) {
+//			seconds = "0" + seconds;
+//		}
+//		length = hours + ":" + minutes + ":" + seconds;
+//		return length;
+//	}
 }
