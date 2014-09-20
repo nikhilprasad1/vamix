@@ -60,7 +60,11 @@ public class Main extends Application {
 			frame.addWindowListener(new WindowAdapter() {
 				@Override
 				public void windowClosing(WindowEvent e){
+					//reset to initial and remove mediaplayer when close
 					vamix.view.Main.vid.setVolume(100);
+					if(vamix.view.Main.vid.isMute()){
+						vamix.view.Main.vid.mute();
+					}
 					mediaPlayerComponent.release();
 				}
 			});

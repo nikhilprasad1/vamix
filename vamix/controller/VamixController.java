@@ -382,24 +382,25 @@ public class VamixController {
 		 */	
 		//load video but dont play yet
 		vamix.view.Main.vid.prepareMedia(videoFileAdd);
-		//start counter for the
+		
+		//start counter for the video
 		Timer videoTimer=new Timer(200, new ActionListener() {
-			@Override
+			@Override //when clock interval met run following
 			public void actionPerformed(java.awt.event.ActionEvent e) {
-				Platform.runLater(new Runnable() {
+				Platform.runLater(new Runnable() { //need to invoke on javafx thread
 			        @Override
-			        public void run() {
+			        public void run() { //set the time text and progress bar
 			        	double currentTime=(vamix.view.Main.vid.getTime()/1000.0);
 			        	double VidTime=(vamix.view.Main.vid.getLength()/1000.0);
 			        	videoProgress.setProgress((currentTime/VidTime));
-			        	if (currentTime>=VidTime){
-			        		vamix.view.Main.vid.playMedia(videoFileAdd);
+			        	if (currentTime>=VidTime){//when reach end of file loop
+			        		vamix.view.Main.vid.playMedia(videoFileAdd); 
 			        		if (!(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Playing)){
 			        			playPauseBtn.setText("Pause");
 			        		}
 			        		String videTime= Helper.timeOfVideo(currentTime,VidTime);
 			        		videoTime.setText(videTime);
-			        	}else{
+			        	}else{ 
 			        		String videTime= Helper.timeOfVideo(currentTime,VidTime);
 			        		videoTime.setText(videTime);
 			        	}
@@ -415,13 +416,15 @@ public class VamixController {
 			public void handle(ActionEvent evt) {//before video even got played
 				if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_NothingSpecial){
 					vamix.view.Main.vid.play();
-					playPauseBtn.setText("Pause");
+					playPauseBtn.setText("Pause"); //when video ended play video
 				}else if(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
 					vamix.view.Main.vid.startMedia(videoFileAdd);
 				}else if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Playing){
+					//when play pause the video
 					vamix.view.Main.vid.pause();
 					playPauseBtn.setText("Play");
 				}else{
+					//when pause play the video
 					vamix.view.Main.vid.pause();
 					playPauseBtn.setText("Pause");
 				}
@@ -429,7 +432,7 @@ public class VamixController {
 		});
 
 		muteCheckbox.setOnAction(new EventHandler<ActionEvent>() {
-
+			//toggle mute of the video
 			@Override
 			public void handle(ActionEvent arg0) {
 				if (!(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_NothingSpecial)){
@@ -451,6 +454,7 @@ public class VamixController {
 				vamix.view.Main.vid.skip(2000);
 			}
 		});
+		
 		rewindBtn.setOnMouseDragged(new EventHandler<MouseEvent>() {
 			/*final Timer skiptimer=new Timer();
 			final SkipForward tasker=new SkipForward();
@@ -462,6 +466,7 @@ public class VamixController {
 			public void handle(MouseEvent arg0) {
 				if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
 					vamix.view.Main.vid.startMedia(videoFileAdd);
+					vamix.view.Main.vid.setTime(vamix.view.Main.vid.getLength()-2000);
 				}else{
 					vamix.view.Main.vid.skip(-2000);
 				}
@@ -480,6 +485,7 @@ public class VamixController {
 		
 		volumeSlider.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			//volume slider set volume continuously when click
+			//note volume is 0-200 so need to times 2 as slider is only to 100
 			@Override
 			public void handle(MouseEvent arg0) {
 				//if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
@@ -498,6 +504,7 @@ public class VamixController {
 		
 		videoProgress.setOnMouseDragged(new EventHandler<MouseEvent>() {
 			//video slider set volume continously when slide
+			//settime is in (ms) of time, get width is in the pixel unit
 			@Override
 			public void handle(MouseEvent arg0) {
 				//if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
@@ -538,12 +545,13 @@ public class VamixController {
 		boolean valid=false; //
 		boolean isAudio=false; //
 		String partial=""; //variable for partial of path ie just the name of file
-		JOptionPane.showMessageDialog(null, "Please select the video to edit.");
+		JOptionPane.showMessageDialog(null, "Please select the video or audio to edit.");
 		//get input file
 		while(!valid){
 			//setup file chooser
 			JFileChooser chooser = new JFileChooser(Constants.CURRENT_DIR);
-			FileNameExtensionFilter filter = new FileNameExtensionFilter("Video file","avi","mov","mp4");
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("Video/audio file","avi","mov","mp4"
+					,"mp3","wav","wmv");
 			chooser.setFileFilter(filter); //set mp3 filter
 			//get save path
 			chooser.showOpenDialog(null);

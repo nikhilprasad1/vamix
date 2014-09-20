@@ -97,7 +97,7 @@ public class Helper {
 	
 	
 	public static String timeOfVideo(double currenttime,double totalTime){
-		
+		//return the concatenation of time
 		return formatTime((int)currenttime)+"/"+formatTime((int)totalTime);
 	}
 	
