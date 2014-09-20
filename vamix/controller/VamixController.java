@@ -4,10 +4,14 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.lang.reflect.Array;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,12 +19,11 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
-import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
+import uk.co.caprica.vlcj.binding.internal.libvlc_state_t;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
@@ -32,10 +35,8 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 
 
@@ -342,41 +343,110 @@ public class VamixController {
 		/*
 		 * Section for the media player functionality
 		 */	
+		//load video but dont play yet
+		vamix.view.Main.vid.prepareMedia(videoFileAdd);
+		//System.out.println(vamix.view.Main.vid.getMediaPlayerState()+"");
 		playPauseBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {
-				vamix.view.Main.vid.playMedia(videoFileAdd);
+				if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_NothingSpecial){
+					vamix.view.Main.vid.play();
+					playPauseBtn.setText("Pause");
+				}else if(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
+					vamix.view.Main.vid.startMedia(videoFileAdd);
+				}else if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Playing){
+					vamix.view.Main.vid.pause();
+					playPauseBtn.setText("Play");
+				}else{
+					vamix.view.Main.vid.pause();
+					playPauseBtn.setText("Pause");
+				}
 			}
 		});
+
+		muteCheckbox.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent arg0) {
+				if (!(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_NothingSpecial)){
+					vamix.view.Main.vid.mute();
+				}				
+			}
+
+		});
+
+		fastForwardBtn.setOnMouseDragged(new EventHandler<MouseEvent>() {
+			/*final Timer skiptimer=new Timer();
+			final SkipForward tasker=new SkipForward();
+			@Override
+			public void handle(MouseEvent arg0) {
+				 skiptimer.scheduleAtFixedRate(tasker, 0, 250);
+			}*/
+			@Override
+			public void handle(MouseEvent arg0) {
+				vamix.view.Main.vid.skip(2000);
+			}
+		});
+		rewindBtn.setOnMouseDragged(new EventHandler<MouseEvent>() {
+			/*final Timer skiptimer=new Timer();
+			final SkipForward tasker=new SkipForward();
+			@Override
+			public void handle(MouseEvent arg0) {
+				 skiptimer.scheduleAtFixedRate(tasker, 0, 250);
+			}*/
+			@Override
+			public void handle(MouseEvent arg0) {
+				if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
+					vamix.view.Main.vid.startMedia(videoFileAdd);
+				}else{
+					vamix.view.Main.vid.skip(-2000);
+				}
+			}
+		});
+		
+		volumeSlider.setOnMouseDragged(new EventHandler<MouseEvent>() {
+			//volume slider set volume continously when slide
+			@Override
+			public void handle(MouseEvent arg0) {
+				//if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
+					vamix.view.Main.vid.setVolume((int) volumeSlider.getValue());
+				//}
+			}
+		});
+		
+		volumeSlider.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			//volume slider set volume continously when click
+			@Override
+			public void handle(MouseEvent arg0) {
+				//if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
+					vamix.view.Main.vid.setVolume((int) (2*volumeSlider.getValue()));
+				//}
+			}
+		});
+		
+		/*fastForwardBtn.setOnMouseReleased(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent arg0) {
+
+			}
+
+		});*/
 		/*
 
-			btnStart.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(AcvamtionEvent e) {
-				}
-			});
+		@FXML
+		private Label videoTime;
 
-			btnPlayPause.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					vid.pause();
-				}
-			});
+		@FXML
+		private ProgressBar videoProgress;
+		 */
+	}
+	private class SkipForward extends TimerTask{
 
-			btnFast.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					vid.skip(5000);
-				}
-			});
+		@Override
+		public void run() {
+			vamix.view.Main.vid.skip(1000);		
+		}
 
-			btnRewind.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					vid.skip(-5000);
-				}
-			});
-		}*/
 	}
 
 	private void mainPanesCheck(){
