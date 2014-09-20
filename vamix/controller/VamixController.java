@@ -409,7 +409,7 @@ public class VamixController {
 			@Override
 			public void handle(MouseEvent arg0) {
 				//if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
-					vamix.view.Main.vid.setVolume((int) volumeSlider.getValue());
+					vamix.view.Main.vid.setVolume((int) (2*volumeSlider.getValue()));
 				//}
 			}
 		});
