@@ -95,6 +95,44 @@ public class Helper {
 		return lines;
 	}
 	
+	
+	public static String timeOfVideo(double currenttime,double totalTime){
+		
+		return formatTime((int)currenttime)+"/"+formatTime((int)totalTime);
+	}
+	
+	public static String formatTime(int time){
+		String formatTime="";
+		//convert to hr 
+		if (time/3600>=1){
+			if (time/3600>=10){
+				formatTime=time/3600+":";
+			}else{
+				formatTime="0"+time/3600+":";
+			}			
+			time=time-(time/3600)*3600;
+		}else{
+			formatTime="00:";
+		}
+		//convert to minute
+		if (time/60>=1){
+			if (time/60>=10){
+				formatTime=formatTime+time/60+":";
+			}else{
+				formatTime=formatTime+"0"+time/60+":";
+			}
+			time=time-(time/60)*60;
+		}else{
+			formatTime=formatTime+"00:";
+		}
+		if (time<10){//work out second add addition zero
+			formatTime=formatTime+"0"+time;
+		}else{
+			formatTime=formatTime+time;
+		}
+		return formatTime;
+	}
+	
 	/*
 	 * Function to get the length of the video in the format hh:mm:ss
 	 * Assumes length of video is not greater than 99hrs, 59mins and 59secs
@@ -128,5 +166,4 @@ public class Helper {
 //		length = hours + ":" + minutes + ":" + seconds;
 //		return length;
 //	}
-
 }

@@ -1,11 +1,9 @@
 package vamix.view;
 
-
-import java.awt.Container;
-import java.awt.Dimension;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
 
@@ -56,25 +54,26 @@ public class Main extends Application {
 			frame.getLayeredPane().add(fxP, JLayeredPane.DEFAULT_LAYER);
 			Scene scene = new Scene(TabPane);
 			fxP.setScene(scene);
-			Container p=frame.getContentPane();
 
 			mediaPlayerComponent.setBounds(405, 10, 595, 500);
 			frame.getLayeredPane().add(mediaPlayerComponent, JLayeredPane.PALETTE_LAYER);
-
+			frame.addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosing(WindowEvent e){
+					vamix.view.Main.vid.setVolume(100);
+					mediaPlayerComponent.release();
+				}
+			});
 			frame.setSize(1001, 624);
 			frame.setResizable(false);
 			frame.setVisible(true);
 
 			//get version number of javafx
-			System.out.println(com.sun.javafx.runtime.VersionInfo.getRuntimeVersion());
-
+			//System.out.println(com.sun.javafx.runtime.VersionInfo.getRuntimeVersion());
 			//initStage.show();	
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-	public Container getFPane(){
-		return frame.getContentPane();
 	}
 
 	public static void main(String[] args) {
