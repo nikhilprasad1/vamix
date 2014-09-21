@@ -1,6 +1,7 @@
 package vamix.controller;
 
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
@@ -11,7 +12,10 @@ import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -318,7 +322,7 @@ public class VamixController {
 				//otherwise if text has been entered, continue with function
 				} else {
 					//check if the start time and end time entered by user is in format required
-					String timeFormat = "^\\d\\d:\\d\\d:\\d\\d$";
+					String timeFormat = "^\\d{2}:\\d{2}:\\d{2}$";
 					boolean startMatched = false;
 					//boolean to show if both times entered by user are valid (within length of video)
 					boolean bothValid = true;
@@ -334,7 +338,70 @@ public class VamixController {
 						if (matcher.find()) {
 							String[] startTimeSplit = startTitle.getText().split(":");
 							String[] endTimeSplit = endTitle.getText().split(":");
+							//calculate the length of the start and end times and make sure they are 
+							//less than length of the video and end time is greater than start time
+							long startLength = Long.parseLong(startTimeSplit[0])*3600000 + Long.parseLong(startTimeSplit[1])*60000
+									+ Long.parseLong(startTimeSplit[2])*1000;
+							long endLength = Long.parseLong(endTimeSplit[0])*3600000 + Long.parseLong(endTimeSplit[1])*60000
+									+ Long.parseLong(endTimeSplit[2])*1000;
+							long videoLength = vamix.view.Main.vid.getLength();
+							if ((startLength > videoLength) || (endLength > videoLength) || (endLength < startLength)) {
+								bothValid = false;
+							}
+							//if both times are valid continue with drawing text on video (font and font size still need to be implemented)
+							if (bothValid) {
+								//first get snapshot of video at start point specified by user
+								String fileSep = File.separator;								
+								//String duration = Helper.formatTime((int)((endLength - startLength)/1000));
+								String bash = fileSep + "bin"+ fileSep + "bash";
+								String cmd = "avconv -i " + videoFileAdd + " -ss " + startTitle.getText() + " -vsync 1 -t 0.01 "
+										+ Constants.LOG_DIR + fileSep + "sample.jpg";
+								
+								System.out.println(cmd);
+								ProcessBuilder builder = new ProcessBuilder(bash,"-c",cmd);
+								builder.redirectErrorStream(true);
+								try {
+									Process process = builder.start();
+									InputStream stdout = process.getInputStream();
+									BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+									String line;
+									while((line=stdoutBuffered.readLine())!=null){
+										System.out.println(line);
+									}
+									//now draw the text specified by user on screenshot
+									cmd = "avconv -i " + Constants.LOG_DIR + fileSep + "sample.jpg"
+											+ " -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
+											+ "truetype" + fileSep + "ubuntu-font-family" + fileSep + "Ubuntu-L.ttf':text='" + titleText.getText()
+											+ "':x=" + titleXPos.getText() + ":y=" + titleYPos.getText() + ":fontsize=16:fontcolor=black\" "
+											+ Constants.LOG_DIR + fileSep + "sample.jpg";
+									builder = new ProcessBuilder(bash, "-c", cmd);
+									builder.redirectErrorStream(true);
+									process = builder.start();
+									stdout = process.getInputStream();
+									stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+									while((line=stdoutBuffered.readLine())!=null){
+										System.out.println(line);
+									}
+									//now display this image to user as a preview in a pop-up window
+									BufferedImage image = ImageIO.read(new File(Constants.LOG_DIR + fileSep + "sample.jpg"));
+									JLabel picLabel = new JLabel(new ImageIcon(image));
+									JOptionPane.showMessageDialog(null, picLabel, "Preview of Text", JOptionPane.PLAIN_MESSAGE, null);
+									
+								} catch(Exception e) {
+									e.printStackTrace();
+								}
+							//otherwise display an error message to the user telling them times entered are invalid
+							} else {
+								JOptionPane.showMessageDialog(null, "Please enter a valid start time and end time for displaying the title text", 
+										"Invalid time entered", JOptionPane.ERROR_MESSAGE);
+							}							
+						} else {
+							JOptionPane.showMessageDialog(null, "Please enter the end time in the format hh:mm:ss", 
+									"Invalid time format", JOptionPane.ERROR_MESSAGE);
 						}
+					} else {
+						JOptionPane.showMessageDialog(null, "Please enter the start time in the format hh:mm:ss", 
+								"Invalid time format", JOptionPane.ERROR_MESSAGE);
 					}
 				}
 			}
@@ -607,7 +674,7 @@ public class VamixController {
 		});*/
 		
 		videoProgress.setOnMouseDragged(new EventHandler<MouseEvent>() {
-			//video slider set volume continously when slide
+			//video slider set volume continuously when slide
 			//settime is in (ms) of time, get width is in the pixel unit
 			@Override
 			public void handle(MouseEvent arg0) {
@@ -618,7 +685,7 @@ public class VamixController {
 		});
 		
 		videoProgress.setOnMouseClicked(new EventHandler<MouseEvent>() {
-			//video slider set volume discret when slide
+			//video slider set volume discrete when slide
 			@Override
 			public void handle(MouseEvent arg0) {
 				vamix.view.Main.vid.setTime((long)(arg0.getX()*vamix.view.Main.vid.getLength()/(long)videoProgress.getWidth()));

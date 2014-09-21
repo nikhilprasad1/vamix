@@ -166,11 +166,11 @@ public class Download {
 			switch(errorCode){
 			case -1://cancel button
 				//Helper.logFunction("d");
-				JOptionPane.showMessageDialog(null, "Download has been cancelled. Note download to: " +Constants.CURRENT_DIR);
+				JOptionPane.showMessageDialog(null, "Download has been cancelled. Note partially downloaded to: " +Constants.CURRENT_DIR);
 				break;
 			case 0://nothing wrong so write to log
 				//Helper.logFunction("d");
-				JOptionPane.showMessageDialog(null, "Download has finished. Note download to: " +Constants.CURRENT_DIR);
+				JOptionPane.showMessageDialog(null, "Download has finished. Note downloaded to: " +Constants.CURRENT_DIR);
 				break;
 			case 3://error message of File IO
 				JOptionPane.showMessageDialog(null, "File IO error. Make sure the directory is safe to write to. Or not denial by anti-virus.");

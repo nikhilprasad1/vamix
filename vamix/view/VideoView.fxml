@@ -57,7 +57,7 @@
                                                       <TextField fx:id="startTitle" alignment="CENTER" layoutX="47.0" layoutY="243.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
                                                       <Label layoutX="179.0" layoutY="248.0" text="Finish:" />
                                                       <TextField fx:id="endTitle" alignment="CENTER" layoutX="226.0" layoutY="243.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
-                                                      <Button fx:id="setTitle" layoutX="122.0" layoutY="277.0" mnemonicParsing="false" text="Set Title Text" />
+                                                      <Button fx:id="setTitle" layoutX="110.0" layoutY="277.0" mnemonicParsing="false" text="Title Text Preview" />
                                                       <ColorPicker fx:id="titleColour" layoutX="91.0" layoutY="187.0" />
                                                       <ChoiceBox fx:id="titleSize" layoutX="91.0" layoutY="158.0" prefWidth="91.0" />
                                                       <Label layoutX="203.0" layoutY="136.0" text="Text Position" underline="true" />
@@ -83,7 +83,7 @@
                                                       <TextField fx:id="startCredits" alignment="CENTER" layoutX="47.0" layoutY="243.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
                                                       <Label layoutX="179.0" layoutY="248.0" text="Finish:" />
                                                       <TextField fx:id="endCredits" alignment="CENTER" layoutX="226.0" layoutY="243.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
-                                                      <Button fx:id="setCredits" layoutX="118.0" layoutY="277.0" mnemonicParsing="false" text="Set Credits Text" />
+                                                      <Button fx:id="setCredits" layoutX="100.0" layoutY="277.0" mnemonicParsing="false" text="Credits Text Preview" />
                                                       <ColorPicker fx:id="creditsColour" layoutX="91.0" layoutY="187.0" />
                                                       <ChoiceBox fx:id="creditsSize" layoutX="91.0" layoutY="158.0" prefWidth="91.0" />
                                                       <Label layoutX="203.0" layoutY="136.0" text="Text Position" underline="true" />
