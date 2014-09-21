@@ -1,6 +1,7 @@
 package vamix.controller;
 
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
@@ -11,7 +12,10 @@ import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -264,16 +268,46 @@ public class VamixController {
 		 * Section for the video tab functionality
 		 */
 		
-		//test mouse action event handler method
+		//download function button
 		downloadBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {
-				//first check to see if user entered a URL
-				if ((videoURL.getText().equals("URL")) || (videoURL.getText().equals(""))) {
-					JOptionPane.showMessageDialog(null, "You must enter a URL to download a video!", "Missing URL",
-							JOptionPane.WARNING_MESSAGE);
-				}
-				videoURL.setText("No, you damn pirate.");
+				//send url to dl obj and invoke dl function
+				Download dl =new Download(videoURL.getText());
+				dl.downloadFunction();
+			}
+		});
+		
+		//load video function button when click browse
+		browseBtn.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evt) {
+				//load media and play it
+				String previousFile =videoFileAdd;//get current file
+				loadMedia();//only reload if different
+				if (!(previousFile.equals(videoFileAdd))){
+					vamix.view.Main.vid.prepareMedia(videoFileAdd);
+					playPauseBtn.setText("Pause");
+					vamix.view.Main.vid.start();
+					videoProgress.setProgress(0.0);
+					videoPath.setText(videoFileAdd);
+				}		
+			}
+		});
+		
+		videoPath.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent arg0) {
+				//load media and play it
+				String previousFile =videoFileAdd;//get current file
+				loadMedia();//only reload if different
+				if (!(previousFile.equals(videoFileAdd))){
+					vamix.view.Main.vid.prepareMedia(videoFileAdd);
+					playPauseBtn.setText("Pause");
+					videoProgress.setProgress(0.0);
+					vamix.view.Main.vid.start();
+					videoPath.setText(videoFileAdd);
+				}	
 			}
 		});
 		
@@ -288,7 +322,7 @@ public class VamixController {
 				//otherwise if text has been entered, continue with function
 				} else {
 					//check if the start time and end time entered by user is in format required
-					String timeFormat = "^\\d\\d:\\d\\d:\\d\\d$";
+					String timeFormat = "^\\d{2}:\\d{2}:\\d{2}$";
 					boolean startMatched = false;
 					//boolean to show if both times entered by user are valid (within length of video)
 					boolean bothValid = true;
@@ -304,7 +338,70 @@ public class VamixController {
 						if (matcher.find()) {
 							String[] startTimeSplit = startTitle.getText().split(":");
 							String[] endTimeSplit = endTitle.getText().split(":");
+							//calculate the length of the start and end times and make sure they are 
+							//less than length of the video and end time is greater than start time
+							long startLength = Long.parseLong(startTimeSplit[0])*3600000 + Long.parseLong(startTimeSplit[1])*60000
+									+ Long.parseLong(startTimeSplit[2])*1000;
+							long endLength = Long.parseLong(endTimeSplit[0])*3600000 + Long.parseLong(endTimeSplit[1])*60000
+									+ Long.parseLong(endTimeSplit[2])*1000;
+							long videoLength = vamix.view.Main.vid.getLength();
+							if ((startLength > videoLength) || (endLength > videoLength) || (endLength < startLength)) {
+								bothValid = false;
+							}
+							//if both times are valid continue with drawing text on video (font and font size still need to be implemented)
+							if (bothValid) {
+								//first get snapshot of video at start point specified by user
+								String fileSep = File.separator;								
+								//String duration = Helper.formatTime((int)((endLength - startLength)/1000));
+								String bash = fileSep + "bin"+ fileSep + "bash";
+								String cmd = "avconv -i " + videoFileAdd + " -ss " + startTitle.getText() + " -vsync 1 -t 0.01 "
+										+ Constants.LOG_DIR + fileSep + "sample.jpg";
+								
+								System.out.println(cmd);
+								ProcessBuilder builder = new ProcessBuilder(bash,"-c",cmd);
+								builder.redirectErrorStream(true);
+								try {
+									Process process = builder.start();
+									InputStream stdout = process.getInputStream();
+									BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+									String line;
+									while((line=stdoutBuffered.readLine())!=null){
+										System.out.println(line);
+									}
+									//now draw the text specified by user on screenshot
+									cmd = "avconv -i " + Constants.LOG_DIR + fileSep + "sample.jpg"
+											+ " -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
+											+ "truetype" + fileSep + "ubuntu-font-family" + fileSep + "Ubuntu-L.ttf':text='" + titleText.getText()
+											+ "':x=" + titleXPos.getText() + ":y=" + titleYPos.getText() + ":fontsize=16:fontcolor=black\" "
+											+ Constants.LOG_DIR + fileSep + "sample.jpg";
+									builder = new ProcessBuilder(bash, "-c", cmd);
+									builder.redirectErrorStream(true);
+									process = builder.start();
+									stdout = process.getInputStream();
+									stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+									while((line=stdoutBuffered.readLine())!=null){
+										System.out.println(line);
+									}
+									//now display this image to user as a preview in a pop-up window
+									BufferedImage image = ImageIO.read(new File(Constants.LOG_DIR + fileSep + "sample.jpg"));
+									JLabel picLabel = new JLabel(new ImageIcon(image));
+									JOptionPane.showMessageDialog(null, picLabel, "Preview of Text", JOptionPane.PLAIN_MESSAGE, null);
+									
+								} catch(Exception e) {
+									e.printStackTrace();
+								}
+							//otherwise display an error message to the user telling them times entered are invalid
+							} else {
+								JOptionPane.showMessageDialog(null, "Please enter a valid start time and end time for displaying the title text", 
+										"Invalid time entered", JOptionPane.ERROR_MESSAGE);
+							}							
+						} else {
+							JOptionPane.showMessageDialog(null, "Please enter the end time in the format hh:mm:ss", 
+									"Invalid time format", JOptionPane.ERROR_MESSAGE);
 						}
+					} else {
+						JOptionPane.showMessageDialog(null, "Please enter the start time in the format hh:mm:ss", 
+								"Invalid time format", JOptionPane.ERROR_MESSAGE);
 					}
 				}
 			}
@@ -339,7 +436,15 @@ public class VamixController {
 		/*
 		 * Section for the audio tab functionality
 		 */
-
+		//extract function button
+		strip_button.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evt) {
+				//send url to dl obj and invoke dl function
+				Extract extractor =new Extract(strip_add.getText());
+				extractor.extractFunction();
+			}
+		});
 	}
 
 	private void previewTab(){
@@ -382,26 +487,29 @@ public class VamixController {
 		 */	
 		//load video but dont play yet
 		vamix.view.Main.vid.prepareMedia(videoFileAdd);
-		//start counter for the
+		
+		//start counter for the video
 		Timer videoTimer=new Timer(200, new ActionListener() {
-			@Override
+			@Override //when clock interval met run following
 			public void actionPerformed(java.awt.event.ActionEvent e) {
-				Platform.runLater(new Runnable() {
+				Platform.runLater(new Runnable() { //need to invoke on javafx thread
 			        @Override
-			        public void run() {
-			        	double currentTime=(vamix.view.Main.vid.getTime()/1000.0);
-			        	double VidTime=(vamix.view.Main.vid.getLength()/1000.0);
-			        	videoProgress.setProgress((currentTime/VidTime));
-			        	if (currentTime>=VidTime){
-			        		vamix.view.Main.vid.playMedia(videoFileAdd);
-			        		if (!(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Playing)){
-			        			playPauseBtn.setText("Pause");
-			        		}
-			        		String videTime= Helper.timeOfVideo(currentTime,VidTime);
-			        		videoTime.setText(videTime);
-			        	}else{
-			        		String videTime= Helper.timeOfVideo(currentTime,VidTime);
-			        		videoTime.setText(videTime);
+			        public void run() { //set the time text and progress bar
+			        	if (!(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_NothingSpecial)){
+				        	double currentTime=(vamix.view.Main.vid.getTime()/1000.0);
+				        	double VidTime=(vamix.view.Main.vid.getLength()/1000.0);
+				        	videoProgress.setProgress((currentTime/VidTime));
+				        	if (currentTime>=VidTime){//when reach end of file loop
+				        		vamix.view.Main.vid.playMedia(videoFileAdd); 
+				        		if (!(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Playing)){
+				        			playPauseBtn.setText("Pause");
+				        		}
+				        		String videTime= Helper.timeOfVideo(currentTime,VidTime);
+				        		videoTime.setText(videTime);
+				        	}else{ 
+				        		String videTime= Helper.timeOfVideo(currentTime,VidTime);
+				        		videoTime.setText(videTime);
+				        	}
 			        	}
 			        }
 			   });
@@ -412,18 +520,18 @@ public class VamixController {
 		//System.out.println(vamix.view.Main.vid.getMediaPlayerState()+"");
 		playPauseBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
-			public void handle(ActionEvent evt) {
+			public void handle(ActionEvent evt) {//before video even got played
 				if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_NothingSpecial){
 					vamix.view.Main.vid.play();
-					vamix.view.Main.vid.setVolume(500);
-					
-					playPauseBtn.setText("Pause");
+					playPauseBtn.setText("Pause"); //when video ended play video
 				}else if(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
 					vamix.view.Main.vid.startMedia(videoFileAdd);
 				}else if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Playing){
+					//when play pause the video
 					vamix.view.Main.vid.pause();
 					playPauseBtn.setText("Play");
 				}else{
+					//when pause play the video
 					vamix.view.Main.vid.pause();
 					playPauseBtn.setText("Pause");
 				}
@@ -431,7 +539,7 @@ public class VamixController {
 		});
 
 		muteCheckbox.setOnAction(new EventHandler<ActionEvent>() {
-
+			//toggle mute of the video
 			@Override
 			public void handle(ActionEvent arg0) {
 				if (!(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_NothingSpecial)){
@@ -465,6 +573,7 @@ public class VamixController {
 			public void handle(MouseEvent arg0) {
 				if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
 					vamix.view.Main.vid.startMedia(videoFileAdd);
+					vamix.view.Main.vid.setTime(vamix.view.Main.vid.getLength()-2000);
 				}else{
 					vamix.view.Main.vid.skip(-2000);
 				}
@@ -483,6 +592,7 @@ public class VamixController {
 		
 		volumeSlider.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			//volume slider set volume continuously when click
+			//note volume is 0-200 so need to times 2 as slider is only to 100
 			@Override
 			public void handle(MouseEvent arg0) {
 				//if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
@@ -501,6 +611,7 @@ public class VamixController {
 		
 		videoProgress.setOnMouseDragged(new EventHandler<MouseEvent>() {
 			//video slider set volume continuously when slide
+			//settime is in (ms) of time, get width is in the pixel unit
 			@Override
 			public void handle(MouseEvent arg0) {
 				//if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
@@ -538,27 +649,32 @@ public class VamixController {
 
 	private void loadMedia(){
 		//intiliase validness varaible code reuse from a2
-		boolean valid=false; //
-		boolean isAudio=false; //
+		boolean valid=false; //if file is valid
+		boolean isAudio=false; //boolean for if file is video or audio
+		String tempVideoFileAdd="";//initialse the video file address
 		String partial=""; //variable for partial of path ie just the name of file
-		JOptionPane.showMessageDialog(null, "Please select the video to edit.");
+		JOptionPane.showMessageDialog(null, "Please select the video or audio to edit.");
 		//get input file
 		while(!valid){
 			//setup file chooser
 			JFileChooser chooser = new JFileChooser(Constants.CURRENT_DIR);
-			FileNameExtensionFilter filter = new FileNameExtensionFilter("Video file","avi","mov","mp4");
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("Video/audio file","avi","mov","mp4"
+					,"mp3","wav","wmv");
 			chooser.setFileFilter(filter); //set mp3 filter
 			//get save path
-			chooser.showOpenDialog(null);
+			int choice=chooser.showOpenDialog(null);
+			if (choice==JFileChooser.CANCEL_OPTION){
+				break;
+			}
 			File file =chooser.getSelectedFile();
 			try{
-				videoFileAdd=file.getAbsolutePath();//get path address
+				tempVideoFileAdd=file.getAbsolutePath();//get path address
 			}catch(NullPointerException e){
-				valid=false; //cant return nothing
+				valid=true; //cant return nothing
 			}
 
 			//now get the path of file and just file name
-			Matcher m=Pattern.compile("(.*"+File.separator+")(.*)$").matcher(videoFileAdd);
+			Matcher m=Pattern.compile("(.*"+File.separator+")(.*)$").matcher(tempVideoFileAdd);
 			if(m.find()){
 				partial=m.group(2); //get file name
 			}
@@ -568,9 +684,9 @@ public class VamixController {
 				JOptionPane.showMessageDialog(null, "You have entered a empty file name. Please input a valid file name.");
 			}else{
 				//check if the file exist locally
-				if (Helper.fileExist(videoFileAdd)){
+				if (Helper.fileExist(tempVideoFileAdd)){
 					String bash =File.separator+"bin"+File.separator+"bash";
-					String cmd ="echo $(file "+videoFileAdd+")";
+					String cmd ="echo $(file "+tempVideoFileAdd+")";
 					ProcessBuilder builder=new ProcessBuilder(bash,"-c",cmd); 
 					builder.redirectErrorStream(true);
 
@@ -581,7 +697,7 @@ public class VamixController {
 						String line;
 						while((line=stdoutBuffered.readLine())!=null){
 							//System.out.println(line);//debug file type
-							Matcher macth =Pattern.compile("(video)|Media").matcher(line);
+							Matcher macth =Pattern.compile("(video)|Media|Audio|MPEG").matcher(line);
 							if(macth.find()){
 								isAudio=true;
 							}
@@ -591,6 +707,7 @@ public class VamixController {
 					}
 					//check if audio using bash commands
 					if (isAudio){
+						videoFileAdd=tempVideoFileAdd;
 						valid=true;
 					}else{
 						//file is not audio/mpeg type

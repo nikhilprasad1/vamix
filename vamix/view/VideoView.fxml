@@ -23,16 +23,16 @@
                               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="565.0" prefWidth="390.0">
                                  <children>
                                     <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#e1e4e8" height="165.0" layoutX="9.0" layoutY="10.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="372.0" />
-                                    <Label layoutX="21.0" layoutY="14.0" text="Add Video" underline="true">
+                                    <Label layoutX="21.0" layoutY="14.0" text="Add Video/Audio" underline="true">
                                        <font>
                                           <Font name="System Bold" size="13.0" />
                                        </font>
                                     </Label>
-                                    <Label layoutX="21.0" layoutY="37.0" text="Local Video" />
+                                    <Label layoutX="21.0" layoutY="37.0" text="Local Video/Audio" />
                                     <TextField fx:id="videoPath" editable="false" layoutX="21.0" layoutY="52.0" prefHeight="25.0" prefWidth="246.0" text="..." />
                                     <Button fx:id="browseBtn" layoutX="278.0" layoutY="51.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="94.0" text="Browse" />
                                     <Label layoutX="186.0" layoutY="90.0" text="OR" />
-                                    <Label layoutX="21.0" layoutY="108.0" text="Download Video" />
+                                    <Label layoutX="21.0" layoutY="108.0" text="Download Video/Audio files" />
                                     <TextField fx:id="videoURL" layoutX="21.0" layoutY="123.0" prefHeight="25.0" prefWidth="246.0" text="URL" />
                                     <Button fx:id="downloadBtn" layoutX="278.0" layoutY="123.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="94.0" text="Download" />
                                     <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#e1e4e8" height="374.0" layoutX="9.0" layoutY="184.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="372.0" />
@@ -57,7 +57,7 @@
                                                       <TextField fx:id="startTitle" alignment="CENTER" layoutX="47.0" layoutY="243.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
                                                       <Label layoutX="179.0" layoutY="248.0" text="Finish:" />
                                                       <TextField fx:id="endTitle" alignment="CENTER" layoutX="226.0" layoutY="243.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
-                                                      <Button fx:id="setTitle" layoutX="122.0" layoutY="277.0" mnemonicParsing="false" text="Set Title Text" />
+                                                      <Button fx:id="setTitle" layoutX="110.0" layoutY="277.0" mnemonicParsing="false" text="Title Text Preview" />
                                                       <ColorPicker fx:id="titleColour" layoutX="91.0" layoutY="187.0" />
                                                       <ChoiceBox fx:id="titleSize" layoutX="91.0" layoutY="158.0" prefWidth="91.0" />
                                                       <Label layoutX="203.0" layoutY="136.0" text="Text Position" underline="true" />
@@ -83,7 +83,7 @@
                                                       <TextField fx:id="startCredits" alignment="CENTER" layoutX="47.0" layoutY="243.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
                                                       <Label layoutX="179.0" layoutY="248.0" text="Finish:" />
                                                       <TextField fx:id="endCredits" alignment="CENTER" layoutX="226.0" layoutY="243.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
-                                                      <Button fx:id="setCredits" layoutX="118.0" layoutY="277.0" mnemonicParsing="false" text="Set Credits Text" />
+                                                      <Button fx:id="setCredits" layoutX="100.0" layoutY="277.0" mnemonicParsing="false" text="Credits Text Preview" />
                                                       <ColorPicker fx:id="creditsColour" layoutX="91.0" layoutY="187.0" />
                                                       <ChoiceBox fx:id="creditsSize" layoutX="91.0" layoutY="158.0" prefWidth="91.0" />
                                                       <Label layoutX="203.0" layoutY="136.0" text="Text Position" underline="true" />
