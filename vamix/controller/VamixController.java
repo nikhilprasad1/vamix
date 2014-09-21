@@ -369,15 +369,63 @@ public class VamixController {
 		/*
 		 * Section for the audio tab functionality
 		 */
-		//extract function button
+		//strip audio function button
 		strip_button.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {
-				//send url to dl obj and invoke dl function
-				Extract extractor =new Extract(strip_add.getText());
-				extractor.extractFunction();
+				//send in and out file to obj then invoke function
+				String temp=Helper.saveFileChooser();
+				strip_add.setText(temp);
+				Strip stripAudio =new Strip(videoFileAdd,temp);
+				stripAudio.stripFunction();
 			}
 		});
+		
+		/*
+		 * Section for the audio tab functionality
+		 */
+		//strip audio function button
+		strip_add.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent arg0) {
+				//send in and out file to obj then invoke function
+				String temp=Helper.saveFileChooser();
+				strip_add.setText(temp);
+				Strip stripAudio =new Strip(videoFileAdd,temp);
+				stripAudio.stripFunction();
+			}
+		});
+		
+		//replace audio function button
+		replaceButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evt) {
+				//send in and out file to obj then invoke function
+				ReplaceAudio r=new ReplaceAudio(videoFileAdd,replaceAdd.getText(),startReplace.getText(),endReplace.getText());
+				r.replaceAudioFunction();
+			}
+		});
+		
+		//replace file chooser button
+		chooseAudioButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evt) {
+				//choose replace audio
+				String temp=Helper.audioFileChooser();
+				replaceAdd.setText(temp);
+			}
+		});
+		
+		//replace file chooser address
+		replaceAdd.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent arg0) {
+				//choose replace audio
+				String temp=Helper.audioFileChooser();
+				replaceAdd.setText(temp);
+			}
+		});
+		
 	}
 
 	private void previewTab(){
@@ -419,7 +467,9 @@ public class VamixController {
 		 * Section for the media player functionality
 		 */	
 		//load video but dont play yet
-		vamix.view.Main.vid.prepareMedia(videoFileAdd);
+		if (!(videoFileAdd.equals(""))){
+			vamix.view.Main.vid.prepareMedia(videoFileAdd);
+		}
 		
 		//start counter for the video
 		Timer videoTimer=new Timer(200, new ActionListener() {
@@ -443,27 +493,41 @@ public class VamixController {
 				        		String videTime= Helper.timeOfVideo(currentTime,VidTime);
 				        		videoTime.setText(videTime);
 				        	}
+			        	}else if(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_NothingSpecial){
+			        		if (!(videoFileAdd.equals(""))){
+				        		vamix.view.Main.vid.start();
+				        		try {//sleep thread so can execute next command when previous finish
+				        			Thread.sleep(50);
+				        		} catch (InterruptedException e1) {
+				        		}
+				        		vamix.view.Main.vid.pause();
+				        		vamix.view.Main.vid.setVolume(100);
+				        		if (vamix.view.Main.vid.isMute()){
+				        			vamix.view.Main.vid.mute();
+				        		}
+			        		}
 			        	}
 			        }
 			   });
 				
 			}
 		});
+		
 		videoTimer.start();
 		//System.out.println(vamix.view.Main.vid.getMediaPlayerState()+"");
 		playPauseBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {//before video even got played
-				if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_NothingSpecial){
+				/*if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_NothingSpecial){
 					vamix.view.Main.vid.play();
 					playPauseBtn.setText("Pause"); //when video ended play video
-				}else if(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
+				}else */if(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
 					vamix.view.Main.vid.startMedia(videoFileAdd);
 				}else if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Playing){
 					//when play pause the video
 					vamix.view.Main.vid.pause();
 					playPauseBtn.setText("Play");
-				}else{
+				}else if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Paused){
 					//when pause play the video
 					vamix.view.Main.vid.pause();
 					playPauseBtn.setText("Pause");
@@ -558,7 +622,6 @@ public class VamixController {
 			@Override
 			public void handle(MouseEvent arg0) {
 				vamix.view.Main.vid.setTime((long)(arg0.getX()*vamix.view.Main.vid.getLength()/(long)videoProgress.getWidth()));
-		
 			}
 		});
 	}

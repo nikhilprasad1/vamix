@@ -6,15 +6,20 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-
-import uk.co.caprica.vlcj.player.MediaPlayer;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /*
  * Class to provide function which help check file existence
@@ -95,12 +100,22 @@ public class Helper {
 		return lines;
 	}
 	
-	
+	/*
+	 * Function which change time in milsec to the xx:xx:xx/xx:xx:xx format
+	 * @param input: double currentTime (current time of file)
+	 * 				 double totalTime (total time of file)
+	 * 		  output: String formatted time as string xx:xx:xx/xx:xx:xx 
+	 */
 	public static String timeOfVideo(double currenttime,double totalTime){
 		//return the concatenation of time
 		return formatTime((int)currenttime)+"/"+formatTime((int)totalTime);
 	}
 	
+	/*
+	 * Function which change time in milsec to the xx:xx:xxformat
+	 * @param input: int time
+	 * 		  output: String formatted time as string xx:xx:xx
+	 */
 	public static String formatTime(int time){
 		String formatTime="";
 		//convert to hr 
@@ -166,4 +181,108 @@ public class Helper {
 //		length = hours + ":" + minutes + ":" + seconds;
 //		return length;
 //	}
+	
+	/*
+	 * Function to choose where to save file only allow mp3
+	 * @param input: none
+	 * 		  output: String full path name of file
+	 */
+	public static String saveFileChooser(){
+		String tempName = null;
+		//setup chooser
+		JFileChooser chooser = new JFileChooser(Constants.CURRENT_DIR);
+	    FileNameExtensionFilter filter = new FileNameExtensionFilter("Mp3 File","mp3");
+	    chooser.setFileFilter(filter); //set mp3 filter
+	    //get save path
+	    int choice =chooser.showSaveDialog(null);
+		if (!(choice==JFileChooser.CANCEL_OPTION)){
+			File file =chooser.getSelectedFile();
+			tempName=file.getAbsolutePath();//get path address
+			//check if it is mp3 if not add
+			if (!tempName.substring(tempName.length()-4, tempName.length()).equals(".mp3")){
+				tempName=tempName+".mp3"; //add the .png to end of file
+			}
+		}
+
+		return tempName;
+	}
+	
+	/*
+	 * Function to check whether file is valid
+	 * @param input: String file name
+	 * 		  output: boolean if file is valid
+	 */
+	public static boolean validInFile(String fileName,String pattern){
+		String inFileName="";
+		String path="";
+		boolean isValid=false;
+		boolean isVideoAudio=false;
+		//now get the path of file and just file name
+		Matcher m=Pattern.compile("(.*"+File.separator+")(.*)$").matcher(fileName);
+		if(m.find()){
+			path = m.group(1); //get path
+			inFileName=m.group(2); //get file name
+		}
+		
+		if(inFileName.equals("")){
+			//error message of empty file name
+			JOptionPane.showMessageDialog(null, "You have entered a empty file name. Please input a valid file name.");
+		}else{
+			//check if the file exist locally
+			if (Helper.fileExist(path+inFileName)){
+				String bash =File.separator+"bin"+File.separator+"bash";
+				String cmd ="echo $(file "+path+inFileName+")";
+				ProcessBuilder builder=new ProcessBuilder(bash,"-c",cmd); 
+				builder.redirectErrorStream(true);
+
+				try{
+					Process process = builder.start();
+					InputStream stdout = process.getInputStream();
+					BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+					String line;
+					while((line=stdoutBuffered.readLine())!=null){
+						Matcher macth =Pattern.compile(pattern,Pattern.CASE_INSENSITIVE).matcher(line);
+						if(macth.find()){
+							isVideoAudio=true;
+						}
+					}
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+				//check if video audio using bash commands
+				if (isVideoAudio){
+					isValid=true;
+				}else{
+					//file is not audio/mpeg type
+					JOptionPane.showMessageDialog(null, "You have entered a non-video/audio file please enter a valid file.");
+				}
+			}else{
+				//file does not exist so give error
+				JOptionPane.showMessageDialog(null, "You have entered a non-existing file. Please input a valid file type.");
+			}
+		}
+		return isValid;
+	}
+
+	/*
+	 * Function to choose audio file for replace
+	 * @param input: none
+	 * 		  output: String full path name of file
+	 */
+	public static String audioFileChooser(){
+		String tempName = null;
+		//setup chooser
+		JFileChooser chooser = new JFileChooser(Constants.CURRENT_DIR);
+	    FileNameExtensionFilter filter = new FileNameExtensionFilter("Mp3 File","mp3");
+	    chooser.setFileFilter(filter); //set mp3 filter
+	    //get save path
+	    int choice =chooser.showOpenDialog(null);
+		if (!(choice==JFileChooser.CANCEL_OPTION)){
+			File file =chooser.getSelectedFile();
+			tempName=file.getAbsolutePath();//get path address
+		}
+
+		return tempName;
+	}
+	
 }

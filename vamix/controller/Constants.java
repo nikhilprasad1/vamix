@@ -1,8 +1,6 @@
 package vamix.controller;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 
 public class Constants {
 	//setup finals
