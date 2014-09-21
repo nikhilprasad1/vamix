@@ -453,6 +453,7 @@ public class VamixController {
 				vamix.view.Main.vid.skip(2000);
 			}
 		});
+		
 		rewindBtn.setOnMouseDragged(new EventHandler<MouseEvent>() {
 			/*final Timer skiptimer=new Timer();
 			final SkipForward tasker=new SkipForward();
@@ -499,7 +500,7 @@ public class VamixController {
 		});*/
 		
 		videoProgress.setOnMouseDragged(new EventHandler<MouseEvent>() {
-			//video slider set volume continously when slide
+			//video slider set volume continuously when slide
 			@Override
 			public void handle(MouseEvent arg0) {
 				//if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
@@ -509,7 +510,7 @@ public class VamixController {
 		});
 		
 		videoProgress.setOnMouseClicked(new EventHandler<MouseEvent>() {
-			//video slider set volume discret when slide
+			//video slider set volume discrete when slide
 			@Override
 			public void handle(MouseEvent arg0) {
 				vamix.view.Main.vid.setTime((long)(arg0.getX()*vamix.view.Main.vid.getLength()/(long)videoProgress.getWidth()));
