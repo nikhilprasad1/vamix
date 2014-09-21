@@ -441,9 +441,7 @@ public class VamixController {
 			@Override
 			public void handle(ActionEvent evt) {
 				//send in and out file to obj then invoke function
-				String temp=Helper.saveFileChooser();
-				strip_add.setText(temp);
-				Strip stripAudio =new Strip(videoFileAdd,temp);
+				Strip stripAudio =new Strip(videoFileAdd,strip_add.getText());
 				stripAudio.stripFunction();
 			}
 		});
@@ -493,6 +491,34 @@ public class VamixController {
 			}
 		});
 		
+		//overlay file chooser when address clicked
+		overlayAdd.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent arg0) {
+				//choose replace audio
+				String temp=Helper.audioFileChooser();
+				overlayAdd.setText(temp);
+			}
+		});
+		
+		//overlay file chooser button
+		chooseOverlayBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent arg0) {
+				//choose replace audio
+				String temp=Helper.audioFileChooser();
+				overlayAdd.setText(temp);
+			}
+		});
+		
+		overlayAudioBtn.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evt) {
+				//send in and out file to obj then invoke function
+				//ReplaceAudio r=new ReplaceAudio(videoFileAdd,replaceAdd.getText(),startReplace.getText(),endReplace.getText());
+				//r.replaceAudioFunction();
+			}
+		});
 	}
 
 	private void previewTab(){

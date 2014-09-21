@@ -50,7 +50,7 @@ public class Strip {
 		if(Helper.validInFile(inFileName,"(MPEG)")){
 			valid=false; //set corretness of outfile to false
 			if (outFileName==null){
-				JOptionPane.showMessageDialog(null, "You have not entered a outfile name. Please input a valid file name.");
+				valid=false;
 			}else if(outFileName.equals("")){
 				//error message of empty file name
 				JOptionPane.showMessageDialog(null, "You have entered a empty file name. Please input a valid file name.");

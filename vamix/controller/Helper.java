@@ -112,13 +112,10 @@ public class Helper {
 	}
 	
 	/*
-<<<<<<< HEAD
 	 * Function which change time in milsec to the xx:xx:xxformat
 	 * @param input: int time
 	 * 		  output: String formatted time as string xx:xx:xx
-=======
 	 * Formats time given in seconds? in to hh:mm:ss
->>>>>>> f903b306faf438f2e9c96a6854a8a7462bfef4d8
 	 */
 	public static String formatTime(int time){
 		String formatTime="";

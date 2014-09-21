@@ -23,24 +23,28 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 
-public class ReplaceAudio {
-	ReplaceAudioWorker raWork;//class variable for worker so cancel button can work
+public class OverlayAudio {
+	OverlayAudioWorker oaWork;//class variable for worker so cancel button can work
 	private String _inFile;
 	private String _inAudio;
 	private	String _startTime;
 	private String _endtime;
+	private	String _startTimeOri;
+	private String _endtimeOri;
 	//constructor for replace audio pass infile and out file
-	ReplaceAudio(String inFile,String inAudio,String startTime,String endtime){
+	OverlayAudio(String inFile,String inAudio,String startTime,String endtime,String startTimeOri,String endtimeOri){
 		_inFile=inFile;//current directory input to be replace file
 		_inAudio=inAudio;//current directory input audio file
 		_startTime=startTime;//start time for replace audio
-		_endtime=endtime;//end time for replace audio
+		_endtime=endtime;//duration for replace audio
+		_startTimeOri=startTimeOri; //start time on orginal file
+		_endtimeOri=endtimeOri; //duration on orginal file
 	}
 
 	/*
 	 * Function to perform replace audio of a file and basic error handle
 	 */
-	public void replaceAudioFunction(){
+	public void overlayAudioFunction(){
 		//set validness of filename to false as initialisation and other general initialisation
 		boolean valid=false; //if inputs are valid
 		boolean isAudio=false;//if file is audio
@@ -121,50 +125,50 @@ public class ReplaceAudio {
 		}
 		if(valid){
 			//create the gui of replace audio which consist of cancel and progress bar
-			JFrame replaceAudioFrame=new JFrame("Replace audio");
-			Container pane=replaceAudioFrame.getContentPane();
+			JFrame overlayAudioFrame=new JFrame("Replace audio");
+			Container pane=overlayAudioFrame.getContentPane();
 			pane.setLayout(new GridLayout(2,0));
 			JButton cancelButton =new JButton("Cancel Replace Audio");
 			JProgressBar dlProgressBar=new JProgressBar();
-			replaceAudioFrame.setSize(300, 100); //set size of frame
+			overlayAudioFrame.setSize(300, 100); //set size of frame
 			cancelButton.addActionListener(new ActionListener() {
 				//setup cancel button listener
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					raWork.cancel(true);
+					oaWork.cancel(true);
 				}
 			});
 			//add window listener to close button (cross hair) so it cancel as well
-			replaceAudioFrame.addWindowListener(new WindowAdapter() {
+			overlayAudioFrame.addWindowListener(new WindowAdapter() {
 				@Override
 				public void windowClosing(WindowEvent e){
-					raWork.cancel(true);
+					oaWork.cancel(true);
 				}
 			});
-			replaceAudioFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-			replaceAudioFrame.add(cancelButton,pane); //add cancel button to new frame
-			replaceAudioFrame.add(dlProgressBar,pane); //add progress bar to new frame
-			replaceAudioFrame.setVisible(true); //set visiblity of frame on
-			replaceAudioFrame.setResizable(false); //set frame so it cant be resize
+			overlayAudioFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+			overlayAudioFrame.add(cancelButton,pane); //add cancel button to new frame
+			overlayAudioFrame.add(dlProgressBar,pane); //add progress bar to new frame
+			overlayAudioFrame.setVisible(true); //set visiblity of frame on
+			overlayAudioFrame.setResizable(false); //set frame so it cant be resize
 			//create swing worker obejct and run it
-			raWork=new ReplaceAudioWorker(inFileName,audioFile,replaceAudioFrame,dlProgressBar);
-			raWork.execute();
+			oaWork=new OverlayAudioWorker(inFileName,audioFile,overlayAudioFrame,dlProgressBar);
+			oaWork.execute();
 		}
 	}
 
-	class ReplaceAudioWorker extends SwingWorker<Void,Integer>{
+	class OverlayAudioWorker extends SwingWorker<Void,Integer>{
 
 		private Process process;
 		private String _inFileName;
 		private String _audioFileName;
-		private JFrame _replaceAudioFrame;
+		private JFrame _overlayAudioFrame;
 		private JProgressBar _dlProgressBar;
 		private String infileType="";
 		//constructor to allow the input from user to be use in extractworker
-		ReplaceAudioWorker(String inFileName,String audioFileName,JFrame replaceAudioFrame,JProgressBar dlProgressBar){
+		OverlayAudioWorker(String inFileName,String audioFileName,JFrame overlayAudioFrame,JProgressBar dlProgressBar){
 			_inFileName=inFileName;
 			_audioFileName=audioFileName;
-			_replaceAudioFrame=replaceAudioFrame;
+			_overlayAudioFrame=overlayAudioFrame;
 			_dlProgressBar=dlProgressBar;
 		}
 
@@ -250,7 +254,7 @@ public class ReplaceAudio {
 				JOptionPane.showMessageDialog(null, "An error have occured. Please try again. The error code is: "+errorCode);
 				break;
 			}
-			this._replaceAudioFrame.dispose();
+			this._overlayAudioFrame.dispose();
 		}
 		
 		@Override
