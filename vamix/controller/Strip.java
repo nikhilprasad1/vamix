@@ -43,14 +43,12 @@ public class Strip {
 		String outFileName=_saveDir; //output file name
 		int overrideChoice=-1; //for override button choice
 		String path=""; //variable for path
-		
-		
 
 		//get output file
-		if(Helper.validInFile(inFileName,"(MPEG)")){
+		if(Helper.validInFile(inFileName,"video|(MPEG)")){
 			valid=false; //set corretness of outfile to false
 			if (outFileName==null){
-				valid=false;
+				JOptionPane.showMessageDialog(null, "You have not entered a save file name. Please input a valid file name.");
 			}else if(outFileName.equals("")){
 				//error message of empty file name
 				JOptionPane.showMessageDialog(null, "You have entered a empty file name. Please input a valid file name.");

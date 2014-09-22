@@ -102,8 +102,8 @@ public class Helper {
 	
 	/*
 	 * Function which change time in milsec to the xx:xx:xx/xx:xx:xx format
-	 * @param input: double currentTime (current time of file)
-	 * 				 double totalTime (total time of file)
+	 * @param input: double currentTime (current time of file) in sec
+	 * 				 double totalTime (total time of file) in sec
 	 * 		  output: String formatted time as string xx:xx:xx/xx:xx:xx 
 	 */
 	public static String timeOfVideo(double currenttime,double totalTime){
@@ -112,7 +112,7 @@ public class Helper {
 	}
 	
 	/*
-	 * Function which change time in milsec to the xx:xx:xxformat
+	 * Function which change time in sec to the xx:xx:xxformat
 	 * @param input: int time
 	 * 		  output: String formatted time as string xx:xx:xx
 	 * Formats time given in seconds? in to hh:mm:ss

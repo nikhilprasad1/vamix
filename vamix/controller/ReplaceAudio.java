@@ -172,33 +172,27 @@ public class ReplaceAudio {
 		@Override
 		protected Void doInBackground() throws Exception {
 			//make sure the correct process Builder is setup as it is weird
-			List<String> cmds=new ArrayList<String>();//jumbo all cmd into a list
-			cmds.add("avconv");//use avconv
-			cmds.add("-i");//set avconv to i input
-			cmds.add(_inFileName);//add file name
-			cmds.add("-i");//set inout
-			cmds.add(_audioFileName);
-			cmds.add("-map"); //map video of input stream 1 to ouput video
-			cmds.add("0:v"); 
-			cmds.add("-map"); //map audio of input stream 2 to output audio
-			cmds.add("1:a");
-			cmds.add("-c:v");//option of avconv of copying video
-			cmds.add("copy");//just copy video
-			cmds.add("-c:a");//option of avconv of copying audio
-			cmds.add("libmp3lame"); //format of output of audio extraction
-			cmds.add("-ss");//set start time of file
-			cmds.add(_startTime); //set time of extraction
-			cmds.add("-t");//set duration time of file
-			cmds.add(_endtime); //set time of extraction duration
-			infileType=_inFileName.substring(_inFileName.length()-4, _inFileName.length());
-			cmds.add(_inFileName.substring(0, _inFileName.length()-4)+"_trackReplace"+infileType); //the output file name
+			//extract replace audio into set size
+			List<String> cmdsplit=new ArrayList<String>();//jumbo all cmd into a list
+			cmdsplit.add("avconv");//use avconv
+			cmdsplit.add("-i");//set inout
+			cmdsplit.add(_audioFileName);
+			cmdsplit.add("-vn");//
+			cmdsplit.add("-c:a");//option of avconv of copying audio
+			cmdsplit.add("libmp3lame"); //format of output of audio extraction
+			cmdsplit.add("-ss");//set start time of file
+			cmdsplit.add(_startTime); //set time of extraction
+			cmdsplit.add("-t");//set duration time of file
+			cmdsplit.add(_endtime); //set time of extraction duration
+			cmdsplit.add(_audioFileName+"_replaceNeede.mp3"); //the output file name
 
 			ProcessBuilder builder;
 
-			builder=new ProcessBuilder(cmds); 
+			builder=new ProcessBuilder(cmdsplit); 
 			builder.redirectErrorStream(true);
 			// workout the length of the extracted file tho work out progress bar
-			int totalLength=(int)(vamix.view.Main.vid.getLength()/1000.0);
+			String[] durationBits = _endtime.split(":",-1);
+			int totalLength=(int)Integer.parseInt(durationBits[0])*60*60+Integer.parseInt(durationBits[1])*60+Integer.parseInt(durationBits[2]);
 			try{
 				process = builder.start();
 				InputStream stdout = process.getInputStream();
@@ -218,10 +212,58 @@ public class ReplaceAudio {
 						}
 					}
 				}
+				//make sure the correct process Builder is setup as it is weird
+				List<String> cmds=new ArrayList<String>();//jumbo all cmd into a list
+				cmds.add("avconv");//use avconv
+				cmds.add("-i");//set avconv to i input
+				cmds.add(_inFileName);//add file name
+				cmds.add("-i");//set inout
+				cmds.add(_audioFileName+"_replaceNeede.mp3");
+				cmds.add("-map"); //map video of input stream 1 to ouput video
+				cmds.add("0:v"); 
+				cmds.add("-map"); //map audio of input stream 2 to output audio
+				cmds.add("1:a");
+				cmds.add("-c:v");//option of avconv of copying video
+				cmds.add("copy");//just copy video
+				cmds.add("-c:a");//option of avconv of copying audio
+				cmds.add("libmp3lame"); //format of output of audio extraction
+				//cmds.add("-ss");//set start time of file
+				//cmds.add(_startTime); //set time of extraction
+				//cmds.add("-t");//set duration time of file
+				//cmds.add(_endtime); //set time of extraction duration
+				infileType=_inFileName.substring(_inFileName.length()-4, _inFileName.length());
+				cmds.add(_inFileName.substring(0, _inFileName.length()-4)+"_trackReplace"+infileType); //the output file name
 
+				builder=new ProcessBuilder(cmds); 
+				builder.redirectErrorStream(true);
+				// workout the length of the extracted file tho work out progress bar
+				totalLength=(int)(vamix.view.Main.vid.getLength()/1000.0);
+				try{
+					process = builder.start();
+					stdout = process.getInputStream();
+					stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+					while((line=stdoutBuffered.readLine())!=null){
+						if (isCancelled()){
+							process.destroy();//force quit extract
+						}else {
+							//check time use this as indication for progress
+							Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
+							if(m.find()){
+								//weird problem sometimes avconv gives int 100000000 so dont read it
+								if (!(m.group(1).equals("10000000000"))){
+									publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
+								}
+							}
+						}
+					}
+
+				}catch(Exception er){
+					//exWork.cancel(true);//cancel the extract work when error encounterd
+				}
 			}catch(Exception er){
 				//exWork.cancel(true);//cancel the extract work when error encounterd
 			}
+			
 			return null;
 		}
 

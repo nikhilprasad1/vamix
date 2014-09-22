@@ -30,7 +30,8 @@
                                     </Label>
                                     <Label layoutX="21.0" layoutY="37.0" text="Local Video/Audio" />
                                     <TextField fx:id="videoPath" layoutX="21.0" layoutY="52.0" prefHeight="25.0" prefWidth="246.0" text="..." />
-                                    <Button fx:id="browseBtn" layoutX="278.0" layoutY="51.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="94.0" text="Load" />
+                                    <Button fx:id="browseBtn" layoutX="258.0" layoutY="20.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="114.0" text="File chooser" />
+                                    <Button fx:id="loadBtn" layoutX="278.0" layoutY="51.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="94.0" text="Load" />
                                     <Label layoutX="186.0" layoutY="90.0" text="OR" />
                                     <Label layoutX="21.0" layoutY="108.0" text="Download Video/Audio files" />
                                     <TextField fx:id="videoURL" layoutX="21.0" layoutY="123.0" prefHeight="25.0" prefWidth="246.0" text="URL" />
@@ -117,7 +118,8 @@
                                           <Font name="System Bold" size="13.0" />
                                        </font>
                                     </Label>
-                                    <Button fx:id="strip_button" layoutX="19.0" layoutY="42.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="124.0" text="Strip and Save" />
+                                    <Button fx:id="strip_button" layoutX="219.0" layoutY="42.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="124.0" text="Strip and Save" />
+									<Button fx:id="save_file_chooser" layoutX="19.0" layoutY="42.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="150.0" text="Save file chooser" />
                                     <Label layoutX="29.0" layoutY="83.0" text="Save to" />
                                     <TextField fx:id="strip_add" layoutX="90.0" layoutY="78.0" prefHeight="25.0" prefWidth="246.0" text="..." />
                                     <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#e1e4e8" height="239.0" layoutX="9.0" layoutY="319.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="372.0" />
@@ -190,7 +192,7 @@
                <children>
                   <MediaView fx:id="videoMediaView" fitHeight="540.0" fitWidth="590.0" />
                   <Button fx:id="playPauseBtn" layoutX="277.0" layoutY="565.0" mnemonicParsing="false" text="Play" />
-                  <Button fx:id="fastForwardBtn" layoutX="331.0" layoutY="565.0" mnemonicParsing="false" text="FF" />
+                  <Button fx:id="fastForwardBtn" layoutX="341.0" layoutY="565.0" mnemonicParsing="false" text="FF" />
                   <Button fx:id="rewindBtn" layoutX="203.0" layoutY="565.0" mnemonicParsing="false" text="Rewind" />
                   <Slider fx:id="volumeSlider" layoutX="419.0" layoutY="572.0" prefHeight="16.0" prefWidth="99.0" showTickLabels="true" showTickMarks="true" value="50.0" />
                   <CheckBox fx:id="muteCheckbox" layoutX="533.0" layoutY="569.0" mnemonicParsing="false" prefHeight="18.0" prefWidth="63.0" text="Mute" />
