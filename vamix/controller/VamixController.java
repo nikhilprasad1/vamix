@@ -22,6 +22,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import uk.co.caprica.vlcj.binding.internal.libvlc_state_t;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -29,6 +31,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Slider;
@@ -63,11 +66,14 @@ public class VamixController {
 	private TextField titleXPos;
 
 	@FXML
-	private TextField endTitle;
-
-	@FXML
-	private TextField startTitle;
-
+	private TextField durationTitle;
+	
+//	@FXML
+//	private TextField titleBGAddr;
+//	
+//	@FXML
+//	private Button titleBGBtn;
+	
 	@FXML
 	private TextField creditsXPos;
 
@@ -75,8 +81,14 @@ public class VamixController {
 	private Button browseBtn;
 
 	@FXML
-	private TextField startCredits;
-
+	private TextField durationCredits;
+	
+//	@FXML
+//	private TextField creditsBGAddr;
+//	
+//	@FXML
+//	private Button creditsBGBtn;
+	
 	@FXML
 	private TextArea titleText;
 
@@ -85,22 +97,37 @@ public class VamixController {
 
 	@FXML
 	private ColorPicker titleColour;
+	
+	@FXML
+	private ComboBox<String> titleFont;
 
 	@FXML
 	private TextArea creditText;
-
+	
+	@FXML
+	private ComboBox<String> creditsFont;
+	
 	@FXML
 	private TextField videoURL;
-
-	@FXML
-	private TextField endCredits;
 
 	@FXML
 	private Button setCredits;
 
 	@FXML
 	private ColorPicker creditsColour;
-
+	
+	@FXML
+	private TextField startTitle;
+	
+	@FXML
+	private TextField endTitle;
+	
+	@FXML
+	private TextField startCredits;
+	
+	@FXML
+	private TextField endCredits;
+	
 	@FXML
 	private TextField titleYPos;
 
@@ -117,10 +144,10 @@ public class VamixController {
 	private Tab videoTab;
 
 	@FXML
-	private ChoiceBox<?> titleSize;
+	private ComboBox<String> titleSize;
 
 	@FXML
-	private ChoiceBox<?> creditsSize;
+	private ComboBox<String> creditsSize;
 
 	/*
 	 * Varaible for the audio tab
@@ -172,10 +199,10 @@ public class VamixController {
 	private TextField replaceAdd;
 
 	/*
-	 * Varaible for the preview tab
+	 * Varaible for the render tab
 	 */
 	@FXML
-	private Tab previewTab;
+	private Tab renderTab;
 
 	@FXML
 	private Button renderNoAudioBtn;
@@ -226,11 +253,11 @@ public class VamixController {
 		mainPanesCheck();
 		videoTabCheck();
 		audioTabCheck();
-		previewTabCheck();
+		renderTabCheck();
 		playerCheck();
 		videoTab();
 		audioTab();
-		previewTab();
+		renderTab();
 		player();
 	}
 
@@ -248,25 +275,74 @@ public class VamixController {
 
 		assert titleText != null : "fx:id=\"titleText\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert titleXPos != null : "fx:id=\"titleXPos\" was not injected: check your FXML file 'VideoView.fxml'.";
-		assert endTitle != null : "fx:id=\"endTitle\" was not injected: check your FXML file 'VideoView.fxml'.";
-		assert startTitle != null : "fx:id=\"startTitle\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert durationTitle != null : "fx:id=\"durationTitle\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert titleYPos != null : "fx:id=\"titleYPos\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert titleSize != null : "fx:id=\"titleSize\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert titleColour != null : "fx:id=\"titleColour\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert startTitle != null : "fx:id=\"startTitle\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert endTitle != null : "fx:id=\"endTitle\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert titleFont != null : "fx:id=\"titleFont\" was not injected: check your FXML file 'VideoView.fxml'.";
+//		assert titleBGAddr != null : "fx:id=\"titleBGAddr\" was not injected: check your FXML file 'VideoView.fxml'.";
+//		assert titleBGBtn != null : "fx:id=\"titleBGBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 
 		assert creditText != null : "fx:id=\"creditText\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert creditsXPos != null : "fx:id=\"creditsXPos\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert creditsYPos != null : "fx:id=\"creditsYPos\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert creditsColour != null : "fx:id=\"creditsColour\" was not injected: check your FXML file 'VideoView.fxml'.";
-		assert startCredits != null : "fx:id=\"startCredits\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert durationCredits != null : "fx:id=\"durationCredits\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert creditsSize != null : "fx:id=\"creditsSize\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert startCredits != null : "fx:id=\"startCredits\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert endCredits != null : "fx:id=\"endCredits\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert creditsFont != null : "fx:id=\"creditsFont\" was not injected: check your FXML file 'VideoView.fxml'.";
+//		assert creditsBGAddr != null : "fx:id=\"creditsBGAddr\" was not injected: check your FXML file 'VideoView.fxml'.";
+//		assert creditsBGBtn != null : "fx:id=\"creditsBGBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 	}
 
 	private void videoTab(){
 		/*
 		 * Section for the video tab functionality
 		 */
+		
+		//populate font size combo boxes with font sizes
+		ObservableList<String> fontSizes = FXCollections.observableArrayList(
+			"4",
+			"6",
+			"8",
+			"10",
+			"12",
+			"14",
+			"16",
+			"18",
+			"20",
+			"22",
+			"24"
+		);
+		titleSize.setItems(fontSizes);
+		creditsSize.setItems(fontSizes);
+		//set their defaults
+		titleSize.setValue("14");
+		creditsSize.setValue("14");
+		
+		//populate font combo boxes with free fonts
+		ObservableList<String> fonts = FXCollections.observableArrayList(
+			"FreeMono",
+			"FreeMonoBold",
+			"FreeMonoBoldOblique",
+			"FreeMonoOblique",
+			"FreeSans",
+			"FreeSansBold",
+			"FreeSansBoldOblique",
+			"FreeSansOblique",
+			"FreeSerif",
+			"FreeSerifBold",
+			"FreeSerifBoldItalic",
+			"FreeSerifItalic"
+		);
+		titleFont.setItems(fonts);
+		creditsFont.setItems(fonts);
+		//set their defaults
+		titleFont.setValue("FreeSans");
+		creditsFont.setValue("FreeSans");
 		
 		//download function button
 		downloadBtn.setOnAction(new EventHandler<ActionEvent>() {
@@ -317,11 +393,11 @@ public class VamixController {
 			public void handle(ActionEvent evt) {
 				//first check if the user has entered text to be overlaid
 				if (titleText.getText().equals("")) {
-					JOptionPane.showMessageDialog(null, "Please enter text to overlay on video", "Missing Input",
+					JOptionPane.showMessageDialog(null, "Please enter text to overlay on background image", "Missing Input",
 							JOptionPane.WARNING_MESSAGE);
 				//otherwise if text has been entered, continue with function
 				} else {
-					//check if the start time and end time entered by user is in format required
+					//check if the duration entered by user is in format required
 					String timeFormat = "^\\d{2}:\\d{2}:\\d{2}$";
 					boolean startMatched = false;
 					//boolean to show if both times entered by user are valid (within length of video)
@@ -333,12 +409,12 @@ public class VamixController {
 					}
 					if (startMatched) {
 						matcher = Pattern.compile(timeFormat).matcher(endTitle.getText());
-						//if the finish time also matches now go on to check if the times entered are 
+						//if the finish time also matches now go on to check if the times entered are
 						//less than or equal to the length of the video
 						if (matcher.find()) {
 							String[] startTimeSplit = startTitle.getText().split(":");
 							String[] endTimeSplit = endTitle.getText().split(":");
-							//calculate the length of the start and end times and make sure they are 
+							//calculate the length of the start and end times and make sure they are
 							//less than length of the video and end time is greater than start time
 							long startLength = Long.parseLong(startTimeSplit[0])*3600000 + Long.parseLong(startTimeSplit[1])*60000
 									+ Long.parseLong(startTimeSplit[2])*1000;
@@ -350,58 +426,23 @@ public class VamixController {
 							}
 							//if both times are valid continue with drawing text on video (font and font size still need to be implemented)
 							if (bothValid) {
-								//first get snapshot of video at start point specified by user
-								String fileSep = File.separator;								
-								//String duration = Helper.formatTime((int)((endLength - startLength)/1000));
-								String bash = fileSep + "bin"+ fileSep + "bash";
-								String cmd = "avconv -i " + videoFileAdd + " -ss " + startTitle.getText() + " -vsync 1 -t 0.01 "
-										+ Constants.LOG_DIR + fileSep + "sample.jpg";
-								
-								System.out.println(cmd);
-								ProcessBuilder builder = new ProcessBuilder(bash,"-c",cmd);
-								builder.redirectErrorStream(true);
-								try {
-									Process process = builder.start();
-									InputStream stdout = process.getInputStream();
-									BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-									String line;
-									while((line=stdoutBuffered.readLine())!=null){
-										System.out.println(line);
-									}
-									//now draw the text specified by user on screenshot
-									cmd = "avconv -i " + Constants.LOG_DIR + fileSep + "sample.jpg"
-											+ " -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
-											+ "truetype" + fileSep + "ubuntu-font-family" + fileSep + "Ubuntu-L.ttf':text='" + titleText.getText()
-											+ "':x=" + titleXPos.getText() + ":y=" + titleYPos.getText() + ":fontsize=16:fontcolor=black\" "
-											+ Constants.LOG_DIR + fileSep + "sample.jpg";
-									builder = new ProcessBuilder(bash, "-c", cmd);
-									builder.redirectErrorStream(true);
-									process = builder.start();
-									stdout = process.getInputStream();
-									stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-									while((line=stdoutBuffered.readLine())!=null){
-										System.out.println(line);
-									}
-									//now display this image to user as a preview in a pop-up window
-									BufferedImage image = ImageIO.read(new File(Constants.LOG_DIR + fileSep + "sample.jpg"));
-									JLabel picLabel = new JLabel(new ImageIcon(image));
-									JOptionPane.showMessageDialog(null, picLabel, "Preview of Text", JOptionPane.PLAIN_MESSAGE, null);
-									
-								} catch(Exception e) {
-									e.printStackTrace();
-								}
+								System.out.println(titleColour.getValue().toString());
+								TextEdit textEditor = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
+										startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), null, null,
+										null, null, null, null, null, null, "PREVIEW", videoFileAdd, null, "title");
+								textEditor.setText();
 							//otherwise display an error message to the user telling them times entered are invalid
 							} else {
-								JOptionPane.showMessageDialog(null, "Please enter a valid start time and end time for displaying the title text", 
-										"Invalid time entered", JOptionPane.ERROR_MESSAGE);
-							}							
+								JOptionPane.showMessageDialog(null, "Please enter a valid start time and end time for displaying the title text",
+								"Invalid time entered", JOptionPane.ERROR_MESSAGE);
+							}	
 						} else {
-							JOptionPane.showMessageDialog(null, "Please enter the end time in the format hh:mm:ss", 
-									"Invalid time format", JOptionPane.ERROR_MESSAGE);
+							JOptionPane.showMessageDialog(null, "Please enter the end time in the format hh:mm:ss",
+							"Invalid time format", JOptionPane.ERROR_MESSAGE);
 						}
 					} else {
-						JOptionPane.showMessageDialog(null, "Please enter the start time in the format hh:mm:ss", 
-								"Invalid time format", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(null, "Please enter the start time in the format hh:mm:ss",
+						"Invalid time format", JOptionPane.ERROR_MESSAGE);
 					}
 				}
 			}
@@ -521,16 +562,16 @@ public class VamixController {
 		});
 	}
 
-	private void previewTab(){
+	private void renderTab(){
 		/*
-		 * Section for the audio tab functionality
+		 * Section for the render tab functionality
 		 */
 
 	}
 
-	private void previewTabCheck(){
+	private void renderTabCheck(){
 		/*
-		 * Section for the preview tab id check
+		 * Section for the render tab id check
 		 */
 		assert outputFilePath != null : "fx:id=\"outputFilePath\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert saveToBtn != null : "fx:id=\"saveToBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
@@ -732,7 +773,7 @@ public class VamixController {
 		assert tabMenu != null : "fx:id=\"tabMenu\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert tabPane != null : "fx:id=\"tabPane\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert videoTab != null : "fx:id=\"videoTab\" was not injected: check your FXML file 'VideoView.fxml'.";
-		assert previewTab != null : "fx:id=\"previewTab\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert renderTab != null : "fx:id=\"renderTab\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert audioTab != null : "fx:id=\"audioTab\" was not injected: check your FXML file 'VideoView.fxml'.";
 	}
 
