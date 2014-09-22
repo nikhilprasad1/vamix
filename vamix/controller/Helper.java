@@ -21,9 +21,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-/*
+/**
  * Class to provide function which help check file existence
- */
+ **/
 public class Helper {
 
 
@@ -115,7 +115,6 @@ public class Helper {
 	 * Function which change time in milsec to the xx:xx:xxformat
 	 * @param input: int time
 	 * 		  output: String formatted time as string xx:xx:xx
-	 * Formats time given in seconds? in to hh:mm:ss
 	 */
 	public static String formatTime(int time){
 		String formatTime="";
