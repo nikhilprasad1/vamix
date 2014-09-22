@@ -37,7 +37,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.media.MediaView;
 
-
+/**
+ * Controller class for the VAMIX GUI
+ **/
 public class VamixController {
 
 	@FXML
@@ -449,9 +451,9 @@ public class VamixController {
 							if (bothValid) {
 								System.out.println(titleColour.getValue().toString());
 								TextEdit textEditor = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
-										startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), null, null,
-										null, null, null, null, null, null, "PREVIEW", videoFileAdd, null, "title");
-								textEditor.setText();
+										startTitle.getText(), titleXPos.getText(), titleYPos.getText(), null, null,
+										null, null, null, null, null, videoFileAdd, null, "title", null, null);
+								textEditor.showScenePreviewAsync();
 							//otherwise display an error message to the user telling them times entered are invalid
 							} else {
 								JOptionPane.showMessageDialog(null, "Please enter a valid start time and end time for displaying the title text",
@@ -747,7 +749,7 @@ public class VamixController {
 			}
 		});
 		
-		//rewind when mouse pressed using swingworker as it can continuosly skip
+		//rewind when mouse pressed using swingworker as it can continuously skip
 		rewindBtn.setOnMousePressed(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {

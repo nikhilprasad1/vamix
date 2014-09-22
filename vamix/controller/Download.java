@@ -22,10 +22,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 
-/*
+/**
  * This class handles the download function for the program it uses 
  * swingworker for concurrency
- */
+ **/
 public class Download {
 
 	private DownloadWorker worker;
