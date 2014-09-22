@@ -36,7 +36,7 @@
                                     <TextField fx:id="videoURL" layoutX="21.0" layoutY="123.0" prefHeight="25.0" prefWidth="246.0" text="URL" />
                                     <Button fx:id="downloadBtn" layoutX="278.0" layoutY="123.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="94.0" text="Download" />
                                     <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#e1e4e8" height="374.0" layoutX="9.0" layoutY="184.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="372.0" />
-                                    <Label layoutX="21.0" layoutY="190.0" text="Add Text" underline="true">
+                                    <Label layoutX="21.0" layoutY="190.0" text="Create Opening/Closing Scenes" underline="true">
                                        <font>
                                           <Font name="System Bold" size="13.0" />
                                        </font>
@@ -50,21 +50,22 @@
                                                       <Label layoutX="7.0" layoutY="9.0" text="Text to Add:" />
                                                       <TextArea fx:id="titleText" layoutX="8.0" layoutY="24.0" prefHeight="103.0" prefWidth="332.0" text="Title text" />
                                                       <Label layoutX="7.0" layoutY="136.0" text="Font:" />
-                                                      <Label layoutX="7.0" layoutY="163.0" text="Font Size:" />
+                                                      <Label layoutX="7.0" layoutY="164.0" text="Font Size:" />
                                                       <Label layoutX="7.0" layoutY="192.0" text="Text colour:" />
-                                                      <Label layoutX="7.0" layoutY="219.0" text="Timestamp" underline="true" />
-                                                      <Label layoutX="7.0" layoutY="248.0" text="Start:" />
-                                                      <TextField fx:id="startTitle" alignment="CENTER" layoutX="47.0" layoutY="243.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
-                                                      <Label layoutX="179.0" layoutY="248.0" text="Finish:" />
-                                                      <TextField fx:id="endTitle" alignment="CENTER" layoutX="226.0" layoutY="243.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
+                                                      <Label layoutX="7.0" layoutY="246.0" text="Start:" />
+                                                      <TextField fx:id="startTitle" alignment="CENTER" layoutX="51.0" layoutY="241.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
                                                       <Button fx:id="setTitle" layoutX="110.0" layoutY="277.0" mnemonicParsing="false" text="Title Text Preview" />
                                                       <ColorPicker fx:id="titleColour" layoutX="91.0" layoutY="187.0" />
-                                                      <ChoiceBox fx:id="titleSize" layoutX="91.0" layoutY="158.0" prefWidth="91.0" />
                                                       <Label layoutX="203.0" layoutY="136.0" text="Text Position" underline="true" />
-                                                      <Label layoutX="204.0" layoutY="163.0" text="X:" />
+                                                      <Label layoutX="204.0" layoutY="164.0" text="X:" />
                                                       <Label layoutX="204.0" layoutY="192.0" text="Y:" />
-                                                      <TextField fx:id="titleXPos" layoutX="225.0" layoutY="158.0" prefHeight="25.0" prefWidth="111.0" text="0" />
+                                                      <TextField fx:id="titleXPos" layoutX="225.0" layoutY="159.0" prefHeight="25.0" prefWidth="111.0" text="0" />
                                                       <TextField fx:id="titleYPos" layoutX="225.0" layoutY="187.0" prefHeight="25.0" prefWidth="111.0" text="0" />
+                                                      <ComboBox fx:id="titleSize" layoutX="91.0" layoutY="159.0" prefWidth="91.0" />
+                                                      <Label layoutX="8.0" layoutY="218.0" text="Timestamp" underline="true" />
+                                                      <Label layoutX="174.0" layoutY="246.0" text="Finish:" />
+                                                      <TextField fx:id="endTitle" alignment="CENTER" layoutX="225.0" layoutY="241.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
+                                                      <ComboBox fx:id="titleFont" layoutX="91.0" layoutY="131.0" prefWidth="91.0" />
                                                    </children>
                                                 </AnchorPane>
                                              </content>
@@ -76,21 +77,22 @@
                                                       <Label layoutX="7.0" layoutY="9.0" text="Text to Add:" />
                                                       <TextArea fx:id="creditText" layoutX="8.0" layoutY="24.0" prefHeight="103.0" prefWidth="332.0" text="Credits text" />
                                                       <Label layoutX="7.0" layoutY="136.0" text="Font:" />
-                                                      <Label layoutX="7.0" layoutY="163.0" text="Font Size:" />
+                                                      <Label layoutX="7.0" layoutY="164.0" text="Font Size:" />
                                                       <Label layoutX="7.0" layoutY="192.0" text="Text colour:" />
-                                                      <Label layoutX="7.0" layoutY="219.0" text="Timestamp" underline="true" />
-                                                      <Label layoutX="7.0" layoutY="248.0" text="Start:" />
-                                                      <TextField fx:id="startCredits" alignment="CENTER" layoutX="47.0" layoutY="243.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
-                                                      <Label layoutX="179.0" layoutY="248.0" text="Finish:" />
-                                                      <TextField fx:id="endCredits" alignment="CENTER" layoutX="226.0" layoutY="243.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
-                                                      <Button fx:id="setCredits" layoutX="100.0" layoutY="277.0" mnemonicParsing="false" text="Credits Text Preview" />
+                                                      <Button fx:id="setCredits" layoutX="96.0" layoutY="277.0" mnemonicParsing="false" text="Credits Text Preview" />
                                                       <ColorPicker fx:id="creditsColour" layoutX="91.0" layoutY="187.0" />
-                                                      <ChoiceBox fx:id="creditsSize" layoutX="91.0" layoutY="158.0" prefWidth="91.0" />
                                                       <Label layoutX="203.0" layoutY="136.0" text="Text Position" underline="true" />
-                                                      <Label layoutX="204.0" layoutY="163.0" text="X:" />
+                                                      <Label layoutX="204.0" layoutY="164.0" text="X:" />
                                                       <Label layoutX="204.0" layoutY="192.0" text="Y:" />
-                                                      <TextField fx:id="creditsXPos" layoutX="225.0" layoutY="158.0" prefHeight="25.0" prefWidth="111.0" text="0" />
+                                                      <TextField fx:id="creditsXPos" layoutX="225.0" layoutY="159.0" prefHeight="25.0" prefWidth="111.0" text="0" />
                                                       <TextField fx:id="creditsYPos" layoutX="225.0" layoutY="187.0" prefHeight="25.0" prefWidth="111.0" text="0" />
+                                                      <Label layoutX="8.0" layoutY="218.0" text="Timestamp" underline="true" />
+                                                      <Label layoutX="7.0" layoutY="246.0" text="Start:" />
+                                                      <TextField fx:id="startCredits" alignment="CENTER" layoutX="51.0" layoutY="241.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
+                                                      <Label layoutX="174.0" layoutY="246.0" text="Finish:" />
+                                                      <TextField fx:id="endCredits" alignment="CENTER" layoutX="225.0" layoutY="241.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
+                                                      <ComboBox fx:id="creditsFont" layoutX="91.0" layoutY="131.0" prefWidth="91.0" />
+                                                      <ComboBox fx:id="creditsSize" layoutX="91.0" layoutY="159.0" prefWidth="91.0" />
                                                    </children>
                                                 </AnchorPane>
                                              </content>
@@ -159,7 +161,7 @@
                         </AnchorPane>
                   </content>
                 </Tab>
-                  <Tab fx:id="previewTab" text="Preview &amp; Render">
+                  <Tab fx:id="renderTab" text="Render">
                      <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>

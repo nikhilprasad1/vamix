@@ -582,8 +582,11 @@ public class VamixController {
 
 	private void renderTab(){
 		/*
+<<<<<<< HEAD
 		 * Section for the preview tab functionality
+=======
 		 * Section for the render tab functionality
+>>>>>>> 53f8c33dd9e4c17b01b99e616722e9bf95fbe07d
 		 */
 
 	}
