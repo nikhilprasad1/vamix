@@ -225,7 +225,7 @@ public class Helper {
 			inFileName=m.group(2); //get file name
 		}
 		
-		if(inFileName.equals("")){
+		if(fileName.equals("")){
 			//error message of empty file name
 			JOptionPane.showMessageDialog(null, "You have entered a empty file name. Please input a valid file name.");
 		}else{

@@ -218,7 +218,8 @@ public class VamixController {
 	private ProgressBar videoProgress;
 
 	private String videoFileAdd="";
-
+	
+	private SkipWorker sW;
 	//initialising the functionality of the buttons
 	@FXML
 	void initialize() {
@@ -232,6 +233,9 @@ public class VamixController {
 		audioTab();
 		previewTab();
 		player();
+		if (!(videoFileAdd.equals(""))){
+			videoPath.setText(videoFileAdd);
+		}
 	}
 
 	private void videoTabCheck(){
@@ -282,10 +286,9 @@ public class VamixController {
 		browseBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {
-				//load media and play it
+				//play media if its different from the current one
 				String previousFile =videoFileAdd;//get current file
-				loadMedia();//only reload if different
-				if (!(previousFile.equals(videoFileAdd))){
+				if (!(previousFile.equals(videoPath.getText()))&Helper.validInFile(videoPath.getText(),"(Audio)|Video|MPEG")){
 					vamix.view.Main.vid.prepareMedia(videoFileAdd);
 					playPauseBtn.setText("Pause");
 					vamix.view.Main.vid.start();
@@ -298,16 +301,23 @@ public class VamixController {
 		videoPath.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
-				//load media and play it
-				String previousFile =videoFileAdd;//get current file
-				loadMedia();//only reload if different
-				if (!(previousFile.equals(videoFileAdd))){
-					vamix.view.Main.vid.prepareMedia(videoFileAdd);
-					playPauseBtn.setText("Pause");
-					videoProgress.setProgress(0.0);
-					vamix.view.Main.vid.start();
-					videoPath.setText(videoFileAdd);
-				}	
+				if ((arg0.getClickCount()>=2)&& !arg0.isConsumed()){
+					//load media and play it
+					String previousFile =videoFileAdd;//get current file
+					loadMedia();//only reload if different
+					if (!(previousFile.equals(videoFileAdd))){
+						vamix.view.Main.vid.prepareMedia(videoFileAdd);
+						vamix.view.Main.vid.start();
+						try {//sleep thread so can execute next command when previous finish
+		        			Thread.sleep(50);
+		        		} catch (InterruptedException e1) {
+		        		}
+						vamix.view.Main.vid.pause();
+						playPauseBtn.setText("Play");
+						videoProgress.setProgress(0.0);		
+						videoPath.setText(videoFileAdd);
+					}	
+				}
 			}
 		});
 		
@@ -453,11 +463,15 @@ public class VamixController {
 		strip_add.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
-				//send in and out file to obj then invoke function
-				String temp=Helper.saveFileChooser();
-				strip_add.setText(temp);
-				Strip stripAudio =new Strip(videoFileAdd,temp);
-				stripAudio.stripFunction();
+				if ((arg0.getClickCount()>=2)&& !arg0.isConsumed()){
+					//get the address of file to be save
+					String temp=Helper.saveFileChooser();
+					strip_add.setText(temp);
+				}else{
+					if(arg0.getClickCount()>=2){
+						System.out.print("it wroked");
+					}
+				}
 			}
 		});
 		
@@ -485,9 +499,11 @@ public class VamixController {
 		replaceAdd.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
-				//choose replace audio
-				String temp=Helper.audioFileChooser();
-				replaceAdd.setText(temp);
+				if ((arg0.getClickCount()>=2)&& !arg0.isConsumed()){
+					//choose replace audio
+					String temp=Helper.audioFileChooser();
+					replaceAdd.setText(temp);
+				}
 			}
 		});
 		
@@ -495,9 +511,11 @@ public class VamixController {
 		overlayAdd.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
-				//choose replace audio
-				String temp=Helper.audioFileChooser();
-				overlayAdd.setText(temp);
+				if ((arg0.getClickCount()>=2)&& !arg0.isConsumed()){
+					//choose replace audio
+					String temp=Helper.audioFileChooser();
+					overlayAdd.setText(temp);
+				}
 			}
 		});
 		
@@ -523,7 +541,7 @@ public class VamixController {
 
 	private void previewTab(){
 		/*
-		 * Section for the audio tab functionality
+		 * Section for the preview tab functionality
 		 */
 
 	}
@@ -638,35 +656,38 @@ public class VamixController {
 			}
 
 		});
-
-		fastForwardBtn.setOnMouseDragged(new EventHandler<MouseEvent>() {
-			/*final Timer skiptimer=new Timer();
-			final SkipForward tasker=new SkipForward();
+		
+		///fast forward when mouse pressed using swingworker as it can continuosly skip
+		fastForwardBtn.setOnMousePressed(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
-				 skiptimer.scheduleAtFixedRate(tasker, 0, 250);
-			}*/
-			@Override
-			public void handle(MouseEvent arg0) {
-				vamix.view.Main.vid.skip(2000);
+				sW=new SkipWorker(Constants.SKIP_RATE);
+				sW.execute();
 			}
 		});
 		
-		rewindBtn.setOnMouseDragged(new EventHandler<MouseEvent>() {
-			/*final Timer skiptimer=new Timer();
-			final SkipForward tasker=new SkipForward();
+		//cancel fast forward when mouse released
+		fastForwardBtn.setOnMouseReleased(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
-				 skiptimer.scheduleAtFixedRate(tasker, 0, 250);
-			}*/
+				sW.cancel(true);
+			}
+		});
+		
+		//rewind when mouse pressed using swingworker as it can continuosly skip
+		rewindBtn.setOnMousePressed(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
-				if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
-					vamix.view.Main.vid.startMedia(videoFileAdd);
-					vamix.view.Main.vid.setTime(vamix.view.Main.vid.getLength()-2000);
-				}else{
-					vamix.view.Main.vid.skip(-2000);
-				}
+				sW=new SkipWorker(-Constants.SKIP_RATE);
+				sW.execute();
+			}
+		});
+		
+		//cancel rewind when mouse released
+		rewindBtn.setOnMouseReleased(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent arg0) {
+				sW.cancel(true);
 			}
 		});
 		
@@ -718,6 +739,7 @@ public class VamixController {
 			}
 		});
 	}
+	
 	
 	private class SkipForward extends TimerTask{
 
