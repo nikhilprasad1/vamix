@@ -160,7 +160,13 @@ public class VamixController {
 
 	@FXML
 	private TextField endReplace;
+	
+	@FXML
+	private TextField startReplace2;
 
+	@FXML
+	private TextField endReplace2;
+	
 	@FXML
 	private TextField overlayUseEnd;
 
@@ -394,7 +400,7 @@ public class VamixController {
 					vamix.view.Main.vid.prepareMedia(videoPath.getText());
 					videoFileAdd=videoPath.getText();
 				}else if (previousFile.equals(videoPath.getText())){
-					JOptionPane.showMessageDialog(null,"You have entered the file thats already been play.");
+					JOptionPane.showMessageDialog(null,"You have selected the file thats is currently playing.");
 				}
 			}
 		});
@@ -410,7 +416,7 @@ public class VamixController {
 						vamix.view.Main.vid.prepareMedia(videoPath.getText());
 						videoFileAdd=videoPath.getText();
 					}else if (previousFile.equals(videoPath.getText())){
-						JOptionPane.showMessageDialog(null,"You have entered the file thats already been play.");
+						JOptionPane.showMessageDialog(null,"You have selected the file thats is currently playing.");
 					}
 				}
 			}
@@ -464,7 +470,9 @@ public class VamixController {
 
 		assert endReplace != null : "fx:id=\"endReplace\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert startReplace != null : "fx:id=\"startReplace\" was not injected: check your FXML file 'VideoView.fxml'.";
-
+		assert endReplace2 != null : "fx:id=\"endReplace2\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert startReplace2 != null : "fx:id=\"startReplace2\" was not injected: check your FXML file 'VideoView.fxml'.";
+		
 		assert overlayUseEnd != null : "fx:id=\"overlayUseEnd\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert overlayUseStart != null : "fx:id=\"overlayUseStart\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert overlayToEnd != null : "fx:id=\"overlayToEnd\" was not injected: check your FXML file 'VideoView.fxml'.";
@@ -516,7 +524,7 @@ public class VamixController {
 			@Override
 			public void handle(ActionEvent evt) {
 				//send in and out file to obj then invoke function
-				ReplaceAudio r=new ReplaceAudio(videoFileAdd,replaceAdd.getText(),startReplace.getText(),endReplace.getText());
+				ReplaceAudio r=new ReplaceAudio(videoFileAdd,replaceAdd.getText(),startReplace.getText(),endReplace.getText(),startReplace2.getText(),endReplace2.getText());
 				r.replaceAudioFunction();
 			}
 		});
@@ -568,9 +576,9 @@ public class VamixController {
 		overlayAudioBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {
-				//send in and out file to obj then invoke function
-				//ReplaceAudio r=new ReplaceAudio(videoFileAdd,replaceAdd.getText(),startReplace.getText(),endReplace.getText());
-				//r.replaceAudioFunction();
+				//send in and out file to obj then invoke function for overlay
+				OverlayAudio o=new OverlayAudio(videoFileAdd,overlayAdd.getText(),overlayUseStart.getText(),overlayUseEnd.getText(),overlayToStart.getText(),overlayToEnd.getText());
+				o.overlayAudioFunction();
 			}
 		});
 	}

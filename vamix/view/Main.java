@@ -64,7 +64,7 @@ public class Main extends Application {
 					mediaPlayerComponent.release();
 				}
 			});
-			frame.setSize(1001, 624);
+			frame.setSize(1001, 627);
 			frame.setResizable(false);
 			frame.setVisible(true);
 

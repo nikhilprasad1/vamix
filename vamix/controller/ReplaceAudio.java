@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -23,18 +24,24 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 
+import com.sun.jna.platform.win32.OaIdl.TYPEDESC._TYPEDESC;
+
 public class ReplaceAudio {
 	ReplaceAudioWorker raWork;//class variable for worker so cancel button can work
 	private String _inFile;
 	private String _inAudio;
 	private	String _startTime;
 	private String _endtime;
+	private	String _startTime2;
+	private String _endtime2;
 	//constructor for replace audio pass infile and out file
-	ReplaceAudio(String inFile,String inAudio,String startTime,String endtime){
+	ReplaceAudio(String inFile,String inAudio,String startTime,String endtime,String startTime2,String endtime2){
 		_inFile=inFile;//current directory input to be replace file
 		_inAudio=inAudio;//current directory input audio file
 		_startTime=startTime;//start time for replace audio
 		_endtime=endtime;//end time for replace audio
+		_startTime2=startTime2;//start time for replace audio
+		_endtime2=endtime2;//end time for replace audio
 	}
 
 	/*
@@ -119,6 +126,13 @@ public class ReplaceAudio {
 				}
 			}
 		}
+		
+		if (valid){ //check if start time and end time make logic sense after the format is valid
+			valid=false;
+			valid=Helper.timeValidChecker(_startTime, _endtime, "audio file for replace");
+			valid=Helper.timeValidChecker(_startTime2, _endtime2, "file to be replace");
+		}
+		
 		if(valid){
 			//create the gui of replace audio which consist of cancel and progress bar
 			JFrame replaceAudioFrame=new JFrame("Replace audio");
@@ -173,7 +187,7 @@ public class ReplaceAudio {
 		protected Void doInBackground() throws Exception {
 			//make sure the correct process Builder is setup as it is weird
 			//extract replace audio into set size
-			List<String> cmdsplit=new ArrayList<String>();//jumbo all cmd into a list
+			/*List<String> cmdsplit=new ArrayList<String>();//jumbo all cmd into a list
 			cmdsplit.add("avconv");//use avconv
 			cmdsplit.add("-i");//set inout
 			cmdsplit.add(_audioFileName);
@@ -184,15 +198,18 @@ public class ReplaceAudio {
 			cmdsplit.add(_startTime); //set time of extraction
 			cmdsplit.add("-t");//set duration time of file
 			cmdsplit.add(_endtime); //set time of extraction duration
-			cmdsplit.add(_audioFileName+"_replaceNeede.mp3"); //the output file name
+			cmdsplit.add(_audioFileName+"_replaceNeede.mp3"); //the output file name*/
 
+			// workout the length of the extracted file tho work out progress bar
+			int duration=Helper.timeInSec(_endtime)-Helper.timeInSec(_startTime);
+			String[] cmdsArray=("avconv -i "+_audioFileName+" -vn -c:a libmp3lame -ss "+_startTime+" -t "+Helper.formatTime(duration)+" "+_audioFileName+"1.mp3").split(" ");
+			List<String> cmds=Arrays.asList(cmdsArray);
 			ProcessBuilder builder;
 
-			builder=new ProcessBuilder(cmdsplit); 
+			builder=new ProcessBuilder(cmds); 
 			builder.redirectErrorStream(true);
 			// workout the length of the extracted file tho work out progress bar
-			String[] durationBits = _endtime.split(":",-1);
-			int totalLength=(int)Integer.parseInt(durationBits[0])*60*60+Integer.parseInt(durationBits[1])*60+Integer.parseInt(durationBits[2]);
+			int totalLength=(int)(vamix.view.Main.vid.getLength()/1000.0);
 			try{
 				process = builder.start();
 				InputStream stdout = process.getInputStream();
@@ -212,58 +229,123 @@ public class ReplaceAudio {
 						}
 					}
 				}
-				//make sure the correct process Builder is setup as it is weird
-				List<String> cmds=new ArrayList<String>();//jumbo all cmd into a list
-				cmds.add("avconv");//use avconv
-				cmds.add("-i");//set avconv to i input
-				cmds.add(_inFileName);//add file name
-				cmds.add("-i");//set inout
-				cmds.add(_audioFileName+"_replaceNeede.mp3");
-				cmds.add("-map"); //map video of input stream 1 to ouput video
-				cmds.add("0:v"); 
-				cmds.add("-map"); //map audio of input stream 2 to output audio
-				cmds.add("1:a");
-				cmds.add("-c:v");//option of avconv of copying video
-				cmds.add("copy");//just copy video
-				cmds.add("-c:a");//option of avconv of copying audio
-				cmds.add("libmp3lame"); //format of output of audio extraction
-				//cmds.add("-ss");//set start time of file
-				//cmds.add(_startTime); //set time of extraction
-				//cmds.add("-t");//set duration time of file
-				//cmds.add(_endtime); //set time of extraction duration
-				infileType=_inFileName.substring(_inFileName.length()-4, _inFileName.length());
-				cmds.add(_inFileName.substring(0, _inFileName.length()-4)+"_trackReplace"+infileType); //the output file name
-
-				builder=new ProcessBuilder(cmds); 
-				builder.redirectErrorStream(true);
-				// workout the length of the extracted file tho work out progress bar
-				totalLength=(int)(vamix.view.Main.vid.getLength()/1000.0);
-				try{
-					process = builder.start();
-					stdout = process.getInputStream();
-					stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-					while((line=stdoutBuffered.readLine())!=null){
-						if (isCancelled()){
-							process.destroy();//force quit extract
-						}else {
-							//check time use this as indication for progress
-							Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
-							if(m.find()){
-								//weird problem sometimes avconv gives int 100000000 so dont read it
-								if (!(m.group(1).equals("10000000000"))){
-									publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
-								}
-							}
-						}
-					}
-
-				}catch(Exception er){
-					//exWork.cancel(true);//cancel the extract work when error encounterd
-				}
+				
 			}catch(Exception er){
 				//exWork.cancel(true);//cancel the extract work when error encounterd
 			}
 			
+			//get part before overlay
+			cmdsArray=("avconv -i "+_inFileName+" -vn -c:a libmp3lame -ss 00:00:00 -t "+_startTime2+" "+_inFileName+"1.mp3").split(" ");
+			cmds=Arrays.asList(cmdsArray);
+			builder=new ProcessBuilder(cmds);
+			try{
+				process = builder.start();
+				InputStream stdout = process.getInputStream();
+				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+				String line;
+				while((line=stdoutBuffered.readLine())!=null){
+					if (isCancelled()){
+						process.destroy();//force quit extract
+					}else {
+						//check time use this as indication for progress
+						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
+						if(m.find()){
+							//weird problem sometimes avconv gives int 100000000 so dont read it
+							if (!(m.group(1).equals("10000000000"))){
+								publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
+							}
+						}
+					}
+				}
+				
+			}catch(Exception er){
+				//exWork.cancel(true);//cancel the extract work when error encounterd
+			}
+			
+			//get part for after overlay
+			duration=Helper.timeInSec(_endtime2);
+			cmdsArray=("avconv -i "+_inFileName+" -vn -c:a libmp3lame -ss "+Helper.formatTime(duration)+" -t "+Helper.formatTime(totalLength)+" "+_inFileName+"2.mp3").split(" ");
+			cmds=Arrays.asList(cmdsArray);
+			builder=new ProcessBuilder(cmds);
+			try{
+				process = builder.start();
+				InputStream stdout = process.getInputStream();
+				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+				String line;
+				while((line=stdoutBuffered.readLine())!=null){
+					if (isCancelled()){
+						process.destroy();//force quit extract
+					}else {
+						//check time use this as indication for progress
+						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
+						if(m.find()){
+							//weird problem sometimes avconv gives int 100000000 so dont read it
+							if (!(m.group(1).equals("10000000000"))){
+								publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
+							}
+						}
+					}
+				}
+				
+			}catch(Exception er){
+				//exWork.cancel(true);//cancel the extract work when error encounterd
+			}
+			
+			//merge the audios
+			cmdsArray=("avconv -i concat:"+_inFileName+"1.mp3"+"|"+_audioFileName+"1.mp3"+"|"+_inFileName+"2.mp3"+" -c copy "+_inFileName+"3.mp3").split(" ");
+			cmds=Arrays.asList(cmdsArray);
+			builder=new ProcessBuilder(cmds);
+			try{
+				process = builder.start();
+				InputStream stdout = process.getInputStream();
+				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+				String line;
+				while((line=stdoutBuffered.readLine())!=null){
+					if (isCancelled()){
+						process.destroy();//force quit extract
+					}else {
+						//check time use this as indication for progress
+						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
+						if(m.find()){
+							//weird problem sometimes avconv gives int 100000000 so dont read it
+							if (!(m.group(1).equals("10000000000"))){
+								publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
+							}
+						}
+					}
+				}
+				
+			}catch(Exception er){
+				//exWork.cancel(true);//cancel the extract work when error encounterd
+			}
+			
+			//replace video's audio with transformed audio
+			cmdsArray=("avconv -i "+_inFileName+" -i "+_inFileName+"3.mp3 -map 0:v -map 1:a -c:v copy -c:a libmp3lame "+_inFileName+"1.mp4").split(" ");
+			cmds=Arrays.asList(cmdsArray);
+			builder=new ProcessBuilder(cmds);
+			try{
+				process = builder.start();
+				InputStream stdout = process.getInputStream();
+				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+				String line;
+				while((line=stdoutBuffered.readLine())!=null){
+					if (isCancelled()){
+						process.destroy();//force quit extract
+					}else {
+						//check time use this as indication for progress
+						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
+						if(m.find()){
+							//weird problem sometimes avconv gives int 100000000 so dont read it
+							if (!(m.group(1).equals("10000000000"))){
+								publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
+							}
+						}
+					}
+				}
+				
+			}catch(Exception er){
+				//exWork.cancel(true);//cancel the extract work when error encounterd
+			}
 			return null;
 		}
 
