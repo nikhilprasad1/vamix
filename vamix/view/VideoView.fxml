@@ -174,7 +174,7 @@
                            <children>
                               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="565.0" prefWidth="395.0">
                                  <children>
-                                    <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#e1e4e8" height="121.0" layoutX="9.0" layoutY="10.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="372.0" />
+                                    <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#e1e4e8" height="185.0" layoutX="9.0" layoutY="10.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="372.0" />
                                     <Label layoutX="21.0" layoutY="14.0" text="Render Video" underline="true">
                                        <font>
                                           <Font name="System Bold" size="13.0" />
@@ -183,8 +183,11 @@
                                     <Label layoutX="21.0" layoutY="37.0" text="Destination" />
                                     <TextField fx:id="outputFilePath" editable="false" layoutX="21.0" layoutY="52.0" prefHeight="25.0" prefWidth="246.0" text="..." />
                                     <Button fx:id="saveToBtn" layoutX="278.0" layoutY="51.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="94.0" text="Save To" />
-                                    <Button fx:id="renderWithAudioBtn" layoutX="24.0" layoutY="93.0" mnemonicParsing="false" prefWidth="159.0" text="Render" />
-                                    <Button fx:id="renderNoAudioBtn" layoutX="207.0" layoutY="93.0" mnemonicParsing="false" text="Render without Audio" />
+                                    <Button fx:id="renderWithAudioBtn" layoutX="24.0" layoutY="144.0" mnemonicParsing="false" prefWidth="159.0" text="Render" />
+                                    <Button fx:id="renderNoAudioBtn" layoutX="207.0" layoutY="144.0" mnemonicParsing="false" text="Render without Audio" />
+                                    <Label layoutX="21.0" layoutY="88.0" text="Choose to include text" underline="true" />
+                                    <CheckBox fx:id="includeTitle" layoutX="55.0" layoutY="113.0" mnemonicParsing="false" text="Title Scene" />
+                                    <CheckBox fx:id="includeCredits" layoutX="210.0" layoutY="113.0" mnemonicParsing="false" text="Credits Scene" />
                                  </children>
                               </AnchorPane>
                            </children>
