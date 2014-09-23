@@ -217,6 +217,12 @@ public class VamixController {
 
 	@FXML
 	private Button saveToBtn;
+	
+	@FXML
+	private CheckBox includeTitle;
+	
+	@FXML
+	private CheckBox includeCredits;
 
 	/*
 	 * Varaible for the section for the media player
@@ -414,59 +420,27 @@ public class VamixController {
 		setTitle.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {
-				//first check if the user has entered text to be overlaid
-				if (titleText.getText().equals("")) {
-					JOptionPane.showMessageDialog(null, "Please enter text to overlay on background image", "Missing Input",
-							JOptionPane.WARNING_MESSAGE);
-				//otherwise if text has been entered, continue with function
-				} else {
-					//check if the duration entered by user is in format required
-					String timeFormat = "^\\d{2}:\\d{2}:\\d{2}$";
-					boolean startMatched = false;
-					//boolean to show if both times entered by user are valid (within length of video)
-					boolean bothValid = true;
-					//first check the start time and if it matches check the finish time
-					Matcher matcher = Pattern.compile(timeFormat).matcher(startTitle.getText());
-					if (matcher.find()) {
-						startMatched = true;
-					}
-					if (startMatched) {
-						matcher = Pattern.compile(timeFormat).matcher(endTitle.getText());
-						//if the finish time also matches now go on to check if the times entered are
-						//less than or equal to the length of the video
-						if (matcher.find()) {
-							String[] startTimeSplit = startTitle.getText().split(":");
-							String[] endTimeSplit = endTitle.getText().split(":");
-							//calculate the length of the start and end times and make sure they are
-							//less than length of the video and end time is greater than start time
-							long startLength = Long.parseLong(startTimeSplit[0])*3600000 + Long.parseLong(startTimeSplit[1])*60000
-									+ Long.parseLong(startTimeSplit[2])*1000;
-							long endLength = Long.parseLong(endTimeSplit[0])*3600000 + Long.parseLong(endTimeSplit[1])*60000
-									+ Long.parseLong(endTimeSplit[2])*1000;
-							long videoLength = vamix.view.Main.vid.getLength();
-							if ((startLength > videoLength) || (endLength > videoLength) || (endLength < startLength)) {
-								bothValid = false;
-							}
-							//if both times are valid continue with drawing text on video (font and font size still need to be implemented)
-							if (bothValid) {
-								System.out.println(titleColour.getValue().toString());
-								TextEdit textEditor = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
-										startTitle.getText(), titleXPos.getText(), titleYPos.getText(), null, null,
-										null, null, null, null, null, videoFileAdd, null, "title", null, null);
-								textEditor.showScenePreviewAsync();
-							//otherwise display an error message to the user telling them times entered are invalid
-							} else {
-								JOptionPane.showMessageDialog(null, "Please enter a valid start time and end time for displaying the title text",
-								"Invalid time entered", JOptionPane.ERROR_MESSAGE);
-							}	
-						} else {
-							JOptionPane.showMessageDialog(null, "Please enter the end time in the format hh:mm:ss",
-							"Invalid time format", JOptionPane.ERROR_MESSAGE);
-						}
-					} else {
-						JOptionPane.showMessageDialog(null, "Please enter the start time in the format hh:mm:ss",
-						"Invalid time format", JOptionPane.ERROR_MESSAGE);
-					}
+				//first check if the inputs entered by user for this function are valid, if they are then continue
+				if (checkTitleInputs()) {
+					TextEdit textEditor = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
+							startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), null, null,
+							null, null, null, null, null, null, videoFileAdd, null, "title", null, null, -1, -1);
+					textEditor.showScenePreviewAsync();
+				}
+			}
+		});
+		
+		//the functionality for the set credits text button
+		setCredits.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evt) {
+				//first check if the inputs entered by user for this function are valid, if they are then continue
+				if (checkCreditsInputs()) {
+					TextEdit textEditor = new TextEdit(null, null, null, null, null, null, null, null,
+							creditText.getText(), creditsFont.getValue(), creditsSize.getValue(), creditsColour.getValue().toString(), 
+							startCredits.getText(), endCredits.getText(), creditsXPos.getText(), creditsYPos.getText(), 
+							videoFileAdd, null, "credits", null, null, -1, -1);
+					textEditor.showScenePreviewAsync();
 				}
 			}
 		});
@@ -603,9 +577,32 @@ public class VamixController {
 
 	private void renderTab(){
 		/*
-		 * Section for the preview tab functionality
 		 * Section for the render tab functionality
 		 */
+//		renderWithAudioBtn.setOnAction(new EventHandler<ActionEvent>() {
+//			@Override
+//			public void handle(ActionEvent evt) {
+//				TextEdit textRenderer = null;
+//				//check if an output file has been chosen
+//				
+//					//check which text scenes the user wants to render with the video
+//					if (includeTitle.isSelected() && includeCredits.isSelected()) {
+//						if (checkTitleInputs() && checkCreditsInputs()) {
+//							
+//						}
+//					} else if (includeTitle.isSelected()) {
+//						if (checkTitleInputs()) {
+//							textRenderer = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
+//									startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), null, null, null, null, null, null,
+//									null, null, videoFileAdd, outputFilePath.getText(), null, )
+//						}
+//					} else if (includeCredits.isSelected()) {
+//						if (checkCreditsInputs()) {
+//							
+//						}
+//					}
+//			}
+//		});
 
 	}
 
@@ -617,6 +614,8 @@ public class VamixController {
 		assert saveToBtn != null : "fx:id=\"saveToBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert renderWithAudioBtn != null : "fx:id=\"renderWithAudioBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert renderNoAudioBtn != null : "fx:id=\"renderNoAudioBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert includeTitle != null : "fx:id=\"includeTitle\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert includeCredits != null : "fx:id=\"includeCredits\" was not injected: check your FXML file 'VideoView.fxml'.";
 
 	}
 
@@ -700,7 +699,8 @@ public class VamixController {
 				/*if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_NothingSpecial){
 					vamix.view.Main.vid.play();
 					playPauseBtn.setText("Pause"); //when video ended play video
-				}else */if(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
+				}else */
+				if(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
 					vamix.view.Main.vid.startMedia(videoFileAdd);
 				}else if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Playing){
 					//when play pause the video
@@ -897,5 +897,114 @@ public class VamixController {
 		}
 
 	}
-
+	
+	//method that checks the inputs for the title scene filter
+	private boolean checkTitleInputs() {
+		//first check if the user has entered text to be overlaid
+		if (titleText.getText().equals("")) {
+			JOptionPane.showMessageDialog(null, "Please enter text to overlay on video", "Missing Input",
+					JOptionPane.WARNING_MESSAGE);
+		//otherwise if text has been entered, continue with function
+		} else {
+			//check if the duration entered by user is in format required
+			String timeFormat = "^\\d{2}:\\d{2}:\\d{2}$";
+			boolean startMatched = false;
+			//boolean to show if both times entered by user are valid (within length of video)
+			boolean bothValid = true;
+			//first check the start time and if it matches check the finish time
+			Matcher matcher = Pattern.compile(timeFormat).matcher(startTitle.getText());
+			if (matcher.find()) {
+				startMatched = true;
+			}
+			if (startMatched) {
+				matcher = Pattern.compile(timeFormat).matcher(endTitle.getText());
+				//if the finish time also matches now go on to check if the times entered are
+				//less than or equal to the length of the video
+				if (matcher.find()) {
+					String[] startTimeSplit = startTitle.getText().split(":");
+					String[] endTimeSplit = endTitle.getText().split(":");
+					//calculate the length of the start and end times and make sure they are
+					//less than length of the video and end time is greater than start time
+					long startLength = Long.parseLong(startTimeSplit[0])*3600000 + Long.parseLong(startTimeSplit[1])*60000
+							+ Long.parseLong(startTimeSplit[2])*1000;
+					long endLength = Long.parseLong(endTimeSplit[0])*3600000 + Long.parseLong(endTimeSplit[1])*60000
+							+ Long.parseLong(endTimeSplit[2])*1000;
+					long videoLength = vamix.view.Main.vid.getLength();
+					if ((startLength > videoLength) || (endLength > videoLength) || (endLength < startLength)) {
+						bothValid = false;
+					}
+					//if both times are valid continue with drawing text on video
+					if (bothValid) {
+						return true;
+						//otherwise display an error message to the user telling them times entered are invalid
+					} else {
+						JOptionPane.showMessageDialog(null, "Please enter a valid start time and end time for displaying the title text",
+						"Invalid time entered", JOptionPane.ERROR_MESSAGE);
+					}	
+				} else {
+					JOptionPane.showMessageDialog(null, "Please enter the end time in the format hh:mm:ss",
+					"Invalid time format", JOptionPane.ERROR_MESSAGE);
+				}
+			} else {
+				JOptionPane.showMessageDialog(null, "Please enter the start time in the format hh:mm:ss",
+				"Invalid time format", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+		return false;
+	}
+	
+	//method that checks the inputs for the title scene filter
+	private boolean checkCreditsInputs() {
+		//first check if the user has entered text to be overlaid
+		if (creditText.getText().equals("")) {
+			JOptionPane.showMessageDialog(null, "Please enter text to overlay on video", "Missing Input",
+					JOptionPane.WARNING_MESSAGE);
+		//otherwise if text has been entered, continue with function
+		} else {
+			//check if the duration entered by user is in format required
+			String timeFormat = "^\\d{2}:\\d{2}:\\d{2}$";
+			boolean startMatched = false;
+			//boolean to show if both times entered by user are valid (within length of video)
+			boolean bothValid = true;
+			//first check the start time and if it matches check the finish time
+			Matcher matcher = Pattern.compile(timeFormat).matcher(startCredits.getText());
+			if (matcher.find()) {
+				startMatched = true;
+			}
+			if (startMatched) {
+				matcher = Pattern.compile(timeFormat).matcher(endCredits.getText());
+				//if the finish time also matches now go on to check if the times entered are
+				//less than or equal to the length of the video
+				if (matcher.find()) {
+					String[] startTimeSplit = startCredits.getText().split(":");
+					String[] endTimeSplit = endCredits.getText().split(":");
+					//calculate the length of the start and end times and make sure they are
+					//less than length of the video and end time is greater than start time
+					long startLength = Long.parseLong(startTimeSplit[0])*3600000 + Long.parseLong(startTimeSplit[1])*60000
+							+ Long.parseLong(startTimeSplit[2])*1000;
+					long endLength = Long.parseLong(endTimeSplit[0])*3600000 + Long.parseLong(endTimeSplit[1])*60000
+							+ Long.parseLong(endTimeSplit[2])*1000;
+					long videoLength = vamix.view.Main.vid.getLength();
+					if ((startLength > videoLength) || (endLength > videoLength) || (endLength < startLength)) {
+						bothValid = false;
+					}
+					//if both times are valid continue with drawing text on video
+					if (bothValid) {
+						return true;
+					//otherwise display an error message to the user telling them times entered are invalid
+					} else {
+						JOptionPane.showMessageDialog(null, "Please enter a valid start time and end time for displaying the credits text",
+						"Invalid time entered", JOptionPane.ERROR_MESSAGE);
+					}	
+				} else {
+					JOptionPane.showMessageDialog(null, "Please enter the end time in the format hh:mm:ss",
+					"Invalid time format", JOptionPane.ERROR_MESSAGE);
+				}
+			} else {
+				JOptionPane.showMessageDialog(null, "Please enter the start time in the format hh:mm:ss",
+				"Invalid time format", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+		return false;
+	}
 }
