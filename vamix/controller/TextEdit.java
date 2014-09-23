@@ -26,7 +26,6 @@ public class TextEdit {
 	private String _durationTitle, _durationCredits;
 	private String _creditsText, _creditsFont, _creditsSize, _creditsColor, _startCredits, _endCredits, _creditsXPos, _creditsYPos;
 	private String _titleOrCredits, _inputAddr, _outputAddr;
-	private int _titleDiff, _creditsDiff;
 	
 	private String fileSep = File.separator;
 	
@@ -40,7 +39,7 @@ public class TextEdit {
 	
 	public TextEdit(String titleText, String titleFont, String titleSize, String titleColor, String startTitle, String endTitle, String titleXPos, String titleYPos,
 			String creditsText, String creditsFont, String creditsSize, String creditsColor, String startCredits, String endCredits, String creditsXPos, String creditsYPos,
-			String inputAddr, String outputAddr, String titleOrCredits, String durationTitle, String durationCredits, int titleDiff, int creditsDiff) {
+			String inputAddr, String outputAddr, String titleOrCredits, String durationTitle, String durationCredits) {
 		_titleText = titleText;
 		_titleFont = titleFont;
 		_titleSize = titleSize;
@@ -62,8 +61,6 @@ public class TextEdit {
 		_outputAddr = outputAddr;
 		_durationTitle = durationTitle;
 		_durationCredits = durationCredits;
-		_titleDiff = titleDiff;
-		_creditsDiff = creditsDiff;
 	}
 	
 	/*
@@ -179,8 +176,7 @@ public class TextEdit {
 			String inFileName = "";
 			String path = "";
 			//now get length of video being edited
-			int totalLength = (int)(vamix.view.Main.vid.getLength());
-			String vidLength = Helper.formatTime(totalLength);			
+			int totalLength = (int)(vamix.view.Main.vid.getLength()/1000);	
 			Matcher m=Pattern.compile("(.*"+File.separator+")(\\S+).*$").matcher(_inputAddr);
 			if(m.find()){
 				path = m.group(1); //get path
@@ -188,27 +184,29 @@ public class TextEdit {
 			}
 			//if user only wants to add a title OR a credits scene
 			if (_renderType == RenderType.OPENING) {
+				int endLength = Helper.timeInSec(_endTitle);
 				//get duration left (if any) after finish time specified by user
-				String timeAtEnd = Helper.formatTime(totalLength - _titleDiff);
+				String timeAtEnd = Helper.formatTime(totalLength - endLength);
 				//create the bash command strings that will split the input video into 2 or 3 parts depending on start time and
 				//finish time specified by user
 				String cmd = "avconv -ss 00:00:00 -i " + _inputAddr + " -t " + _startTitle + " -vcodec libx264 -acodec aac "
-						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " + inFileName + "1.mp4";
+						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " + inFileName + "1.ts";
 				cmds.add(cmd);
 				cmd = "avconv -ss " + _startTitle + " -i " + _inputAddr + " -t " + _durationTitle + " -vcodec libx264 -acodec aac "
-						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " + inFileName + "2.mp4";
+						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " + inFileName + "2.ts";
 				cmds.add(cmd);
 				cmd = "avconv -ss " + _endTitle + " -i " + _inputAddr + " -t " + timeAtEnd + " -vcodec libx264 -acodec aac "
-						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " + inFileName + "3.mp4";
+						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " + inFileName + "3.ts";
 				cmds.add(cmd);
 				//now create the bash command that draws the text on the bit of video specified by the user
-				cmd = "avconv -i " + path + inFileName + "2.mp4" + " -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
+				cmd = "avconv -i " + path + inFileName + "2.ts"  + " -vcodec libx264 -acodec aac" + " -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
 						+ "truetype" + fileSep + "freefont" + fileSep + _titleFont + ".ttf':text='" + _titleText
-						+ "':x=" + _titleXPos + ":y=" + _titleYPos + ":fontsize=" + _titleSize +":fontcolor=" + _titleColor + "\" "
-						+ inFileName + "2.mp4";
+						+ "':x=" + _titleXPos + ":y=" + _titleYPos + ":fontsize=" + _titleSize +":fontcolor=" + _titleColor + "\" -strict experimental -y "
+						+ inFileName + "2.ts";
 				cmds.add(cmd);
 				//now create the bash command that will combine all the split videos together
-				cmd = "avconv -i concat:\"" + inFileName + "1.mp4|" + inFileName + "2.mp4|" + inFileName + "3.mp4" + " -c copy -bsf:a aac_adtstoasc -y " + _outputAddr;
+				//cmd = "avconv -i concat:\"" + inFileName + "1.ts|" + inFileName + "2.ts|" + inFileName + "3.ts\"" + " -c copy -bsf:a aac_adtstoasc -y " + _outputAddr;
+				cmd = "avconv -i video.mp42.ts -vcodec libx264 -acodec acc -strict experimental test.mp4";
 				cmds.add(cmd);
 			} else if (_renderType == RenderType.CLOSING) {
 				
