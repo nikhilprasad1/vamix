@@ -304,7 +304,7 @@ public class Helper {
 	 * input: String time is time to check and String timeType is which time eg start time
 	 * output boolean validness of time ie true if format is ok
 	 */
-	public static boolean timeValidChecker(String time, String timeType){
+	public static boolean timeValidTypeChecker(String time, String timeType){
 		boolean valid=false;
 		if(time.equals("")){
 			//error message of empty starttime
@@ -317,6 +317,26 @@ public class Helper {
 				//error message of empty file name
 				JOptionPane.showMessageDialog(null, "You have entered a invalid format for "+timeType +". Please input a valid format for start time.");
 			}
+		}
+		return valid;
+	}
+	
+	/**
+	 * Function to check validness of time start input relative to the end time
+	 * @param
+	 * input: String timeStart is the start time to check 
+	 * 		  String start timeEnd String 
+	 * 		  timeType is which time eg from file
+	 * output boolean validness of time ie true if format is ok
+	 */
+	public static boolean timeValidChecker(String timeStart,String timeEnd, String timeType){
+		boolean valid=false;
+		if (timeStart.equals(timeEnd)){
+			JOptionPane.showMessageDialog(null, "You have entered the same start time and end time for "+timeType+". Please enter a different end time.");
+		}else if (timeInSec(timeStart)>=timeInSec(timeEnd)){
+			JOptionPane.showMessageDialog(null, "You have entered a greater start time than end time for "+timeType+". Please enter a different start or end time.");
+		}else{
+			valid=true;//if didnt fail checks set to valid
 		}
 		return valid;
 	}

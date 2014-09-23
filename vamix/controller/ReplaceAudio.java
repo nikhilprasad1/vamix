@@ -24,6 +24,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 
+import com.sun.jna.platform.win32.OaIdl.TYPEDESC._TYPEDESC;
+
 public class ReplaceAudio {
 	ReplaceAudioWorker raWork;//class variable for worker so cancel button can work
 	private String _inFile;
@@ -124,6 +126,13 @@ public class ReplaceAudio {
 				}
 			}
 		}
+		
+		if (valid){ //check if start time and end time make logic sense after the format is valid
+			valid=false;
+			valid=Helper.timeValidChecker(_startTime, _endtime, "audio file for replace");
+			valid=Helper.timeValidChecker(_startTime2, _endtime2, "file to be replace");
+		}
+		
 		if(valid){
 			//create the gui of replace audio which consist of cancel and progress bar
 			JFrame replaceAudioFrame=new JFrame("Replace audio");

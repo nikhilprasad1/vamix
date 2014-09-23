@@ -97,21 +97,21 @@ public class OverlayAudio {
 		
 		if (valid){
 			//send startTime of audio for overlay to get check
-			valid=Helper.timeValidChecker(_startTime,"start time for the audio file used for overlay");
+			valid=Helper.timeValidTypeChecker(_startTime,"start time for the audio file used for overlay");
 		}
 		
 		if (valid){
 			//send endtime of audio for overlay to get check
-			valid=Helper.timeValidChecker(_endtime,"end time for the audio file used for overlay");
+			valid=Helper.timeValidTypeChecker(_endtime,"end time for the audio file used for overlay");
 		}
 		if (valid){
 			//send startTime of audio for overlay to get check
-			valid=Helper.timeValidChecker(_startTimeOri,"start time for the audio file to be overlay");
+			valid=Helper.timeValidTypeChecker(_startTimeOri,"start time for the audio file to be overlay");
 		}
 		
 		if (valid){
 			//send endtime of audio for overlay to get check
-			valid=Helper.timeValidChecker(_endtimeOri,"end time for the audio file to be overlay");
+			valid=Helper.timeValidTypeChecker(_endtimeOri,"end time for the audio file to be overlay");
 		}
 		
 		if(valid){
