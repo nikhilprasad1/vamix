@@ -114,6 +114,12 @@ public class OverlayAudio {
 			valid=Helper.timeValidTypeChecker(_endtimeOri,"end time for the audio file to be overlay");
 		}
 		
+		if (valid){ //check if start time and end time make logic sense after the format is valid
+			valid=false;
+			valid=Helper.timeValidChecker(_startTime, _endtime, "audio file for overlay");
+			valid=Helper.timeValidChecker(_startTimeOri, _endtimeOri, "file to be overlay");
+		}
+		
 		if(valid){
 			//create the gui of replace audio which consist of cancel and progress bar
 			JFrame overlayAudioFrame=new JFrame("Overlay audio");
@@ -187,6 +193,7 @@ public class OverlayAudio {
 			cmds.add(_endtime); //set time of extraction duration
 			infileType=_inFileName.substring(_inFileName.length()-4, _inFileName.length());
 			cmds.add(_inFileName.substring(0, _inFileName.length()-4)+"_trackReplace"+infileType); //the output file name*/
+			
 			//get the required overlay audio section
 			//calculate duration from input
 			int duration=Helper.timeInSec(_endtime)-Helper.timeInSec(_startTime);
@@ -204,6 +211,7 @@ public class OverlayAudio {
 				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				String line;
 				while((line=stdoutBuffered.readLine())!=null){
+					System.out.println(line); //==============================here
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -232,6 +240,7 @@ public class OverlayAudio {
 				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				String line;
 				while((line=stdoutBuffered.readLine())!=null){
+					System.out.println(line); //==============================here
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -261,6 +270,7 @@ public class OverlayAudio {
 				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				String line;
 				while((line=stdoutBuffered.readLine())!=null){
+					System.out.println(line); //==============================here
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -290,6 +300,7 @@ public class OverlayAudio {
 				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				String line;
 				while((line=stdoutBuffered.readLine())!=null){
+					System.out.println(line); //==============================here
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -310,7 +321,7 @@ public class OverlayAudio {
 			
 			//make overlay
 			duration=duration+Helper.timeInSec(_startTimeOri);
-			cmdsArray=("avconv -i "+_inFileName+"2.mp3 -i "+_audioFileName+"1.mp3 -vn -strict experimental -filter_complex amix=inputs=2 "+_inFileName+"4.mp3").split(" ");
+			cmdsArray=("avconv -i "+_inFileName+"2.mp3 -i "+_audioFileName+"1.mp3 -vn -strict experimental -filter_complex amix=inputs=2:duration=first "+_inFileName+"4.mp3").split(" ");
 			cmds=Arrays.asList(cmdsArray);
 			builder=new ProcessBuilder(cmds);
 			try{
@@ -319,6 +330,7 @@ public class OverlayAudio {
 				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				String line;
 				while((line=stdoutBuffered.readLine())!=null){
+					System.out.println(line); //==============================here
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -347,6 +359,7 @@ public class OverlayAudio {
 				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				String line;
 				while((line=stdoutBuffered.readLine())!=null){
+					System.out.println(line); //==============================here
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -375,6 +388,7 @@ public class OverlayAudio {
 				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				String line;
 				while((line=stdoutBuffered.readLine())!=null){
+					System.out.println(line); //==============================here
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {

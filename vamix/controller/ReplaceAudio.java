@@ -10,7 +10,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CancellationException;
@@ -24,7 +23,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 
-import com.sun.jna.platform.win32.OaIdl.TYPEDESC._TYPEDESC;
 
 public class ReplaceAudio {
 	ReplaceAudioWorker raWork;//class variable for worker so cancel button can work
@@ -95,36 +93,22 @@ public class ReplaceAudio {
 		}
 		
 		if (valid){
-			valid=false;
-			if(_startTime.equals("")){
-				//error message of empty starttime
-				JOptionPane.showMessageDialog(null, "You have entered a empty start time. Please input a start time.");
-			}else{
-				Matcher m =Pattern.compile("^\\d{2}:\\d{2}:\\d{2}$").matcher(_startTime);
-				if (m.find()){
-					valid=true;
-				}else{
-					//error message of empty file name
-					JOptionPane.showMessageDialog(null, "You have entered a invalid format. Please input a valid format for start time.");
-				}
-			}
+			//send startTime of audio for overlay to get check
+			valid=Helper.timeValidTypeChecker(_startTime,"start time for the audio file used for overlay");
 		}
 		
 		if (valid){
-			valid=false;
-			if(_endtime.equals("")){
-				//error message of empty duration Time
-				JOptionPane.showMessageDialog(null, "You have entered a empty start time. Please input a non-empty duration.");
-			}else{
-				//set up matcher that reads the correct format of starThh:mm:ssEnd
-				Matcher m =Pattern.compile("^\\d{2}:\\d{2}:\\d{2}$").matcher(_endtime);
-				if (m.find()){
-					valid=true;
-				}else{
-					//error message of empty file name
-					JOptionPane.showMessageDialog(null, "You have entered a invalid format. Please input a valid format for duration time.");
-				}
-			}
+			//send endtime of audio for overlay to get check
+			valid=Helper.timeValidTypeChecker(_endtime,"end time for the audio file used for overlay");
+		}
+		if (valid){
+			//send startTime of audio for overlay to get check
+			valid=Helper.timeValidTypeChecker(_startTime2,"start time for the audio file to be overlay");
+		}
+		
+		if (valid){
+			//send endtime of audio for overlay to get check
+			valid=Helper.timeValidTypeChecker(_endtime2,"end time for the audio file to be overlay");
 		}
 		
 		if (valid){ //check if start time and end time make logic sense after the format is valid
@@ -199,13 +183,19 @@ public class ReplaceAudio {
 			cmdsplit.add("-t");//set duration time of file
 			cmdsplit.add(_endtime); //set time of extraction duration
 			cmdsplit.add(_audioFileName+"_replaceNeede.mp3"); //the output file name*/
-
-			// workout the length of the extracted file tho work out progress bar
-			int duration=Helper.timeInSec(_endtime)-Helper.timeInSec(_startTime);
+			
+			String line;
+			
+			//get the required replace audio section
+			//calculate duration from input
+			int duration=Helper.timeInSec(_endtime2)-Helper.timeInSec(_startTime2);
+			//get part for after replace
+			if ((Helper.timeInSec(_endtime)-Helper.timeInSec(_startTime))<(Helper.timeInSec(_endtime2)-Helper.timeInSec(_startTime2))){
+				duration=Helper.timeInSec(_endtime)-Helper.timeInSec(_startTime);
+			}
 			String[] cmdsArray=("avconv -i "+_audioFileName+" -vn -c:a libmp3lame -ss "+_startTime+" -t "+Helper.formatTime(duration)+" "+_audioFileName+"1.mp3").split(" ");
 			List<String> cmds=Arrays.asList(cmdsArray);
 			ProcessBuilder builder;
-
 			builder=new ProcessBuilder(cmds); 
 			builder.redirectErrorStream(true);
 			// workout the length of the extracted file tho work out progress bar
@@ -214,8 +204,8 @@ public class ReplaceAudio {
 				process = builder.start();
 				InputStream stdout = process.getInputStream();
 				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-				String line;
 				while((line=stdoutBuffered.readLine())!=null){
+					System.out.println(line); //==============================here
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -230,20 +220,16 @@ public class ReplaceAudio {
 					}
 				}
 				
-			}catch(Exception er){
-				//exWork.cancel(true);//cancel the extract work when error encounterd
-			}
-			
-			//get part before overlay
-			cmdsArray=("avconv -i "+_inFileName+" -vn -c:a libmp3lame -ss 00:00:00 -t "+_startTime2+" "+_inFileName+"1.mp3").split(" ");
-			cmds=Arrays.asList(cmdsArray);
-			builder=new ProcessBuilder(cmds);
-			try{
+				//get part before replacae
+				cmdsArray=("avconv -i "+_inFileName+" -vn -c:a libmp3lame -ss 00:00:00 -t "+_startTime2+" "+_inFileName+"1.mp3").split(" ");
+				cmds=Arrays.asList(cmdsArray);
+				builder=new ProcessBuilder(cmds);
+				
 				process = builder.start();
-				InputStream stdout = process.getInputStream();
-				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-				String line;
+				stdout = process.getInputStream();
+				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				while((line=stdoutBuffered.readLine())!=null){
+					System.out.println(line); //==============================here
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -258,21 +244,22 @@ public class ReplaceAudio {
 					}
 				}
 				
-			}catch(Exception er){
-				//exWork.cancel(true);//cancel the extract work when error encounterd
-			}
-			
-			//get part for after overlay
-			duration=Helper.timeInSec(_endtime2);
-			cmdsArray=("avconv -i "+_inFileName+" -vn -c:a libmp3lame -ss "+Helper.formatTime(duration)+" -t "+Helper.formatTime(totalLength)+" "+_inFileName+"2.mp3").split(" ");
-			cmds=Arrays.asList(cmdsArray);
-			builder=new ProcessBuilder(cmds);
-			try{
+				//get part for after replace
+				if ((Helper.timeInSec(_endtime)-Helper.timeInSec(_startTime))<(Helper.timeInSec(_endtime2)-Helper.timeInSec(_startTime2))){
+					duration=Helper.timeInSec(_startTime2)+Helper.timeInSec(_endtime)-Helper.timeInSec(_startTime);
+				}else{
+					duration=Helper.timeInSec(_endtime2);
+				}
+
+				cmdsArray=("avconv -i "+_inFileName+" -vn -c:a libmp3lame -ss "+Helper.formatTime(duration)+" -t "+Helper.formatTime(totalLength)+" "+_inFileName+"2.mp3").split(" ");
+				cmds=Arrays.asList(cmdsArray);
+				builder=new ProcessBuilder(cmds);
+
 				process = builder.start();
-				InputStream stdout = process.getInputStream();
-				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-				String line;
+				stdout = process.getInputStream();
+				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				while((line=stdoutBuffered.readLine())!=null){
+					System.out.println(line); //==============================here
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -286,21 +273,17 @@ public class ReplaceAudio {
 						}
 					}
 				}
-				
-			}catch(Exception er){
-				//exWork.cancel(true);//cancel the extract work when error encounterd
-			}
-			
-			//merge the audios
-			cmdsArray=("avconv -i concat:"+_inFileName+"1.mp3"+"|"+_audioFileName+"1.mp3"+"|"+_inFileName+"2.mp3"+" -c copy "+_inFileName+"3.mp3").split(" ");
-			cmds=Arrays.asList(cmdsArray);
-			builder=new ProcessBuilder(cmds);
-			try{
+
+				//merge the audios
+				cmdsArray=("avconv -i concat:"+_inFileName+"1.mp3"+"|"+_audioFileName+"1.mp3"+"|"+_inFileName+"2.mp3"+" -c copy "+_inFileName+"3.mp3").split(" ");
+				cmds=Arrays.asList(cmdsArray);
+				builder=new ProcessBuilder(cmds);
+
 				process = builder.start();
-				InputStream stdout = process.getInputStream();
-				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-				String line;
+				stdout = process.getInputStream();
+				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				while((line=stdoutBuffered.readLine())!=null){
+					System.out.println(line); //==============================here
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -315,20 +298,16 @@ public class ReplaceAudio {
 					}
 				}
 				
-			}catch(Exception er){
-				//exWork.cancel(true);//cancel the extract work when error encounterd
-			}
-			
-			//replace video's audio with transformed audio
-			cmdsArray=("avconv -i "+_inFileName+" -i "+_inFileName+"3.mp3 -map 0:v -map 1:a -c:v copy -c:a libmp3lame "+_inFileName+"1.mp4").split(" ");
-			cmds=Arrays.asList(cmdsArray);
-			builder=new ProcessBuilder(cmds);
-			try{
+				//replace video's audio with transformed audio
+				cmdsArray=("avconv -i "+_inFileName+" -i "+_inFileName+"3.mp3 -map 0:v -map 1:a -c:v copy -c:a libmp3lame "+_inFileName+"1.mp4").split(" ");
+				cmds=Arrays.asList(cmdsArray);
+				builder=new ProcessBuilder(cmds);
+
 				process = builder.start();
-				InputStream stdout = process.getInputStream();
-				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-				String line;
+				stdout = process.getInputStream();
+				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				while((line=stdoutBuffered.readLine())!=null){
+					System.out.println(line); //==============================here
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -342,10 +321,12 @@ public class ReplaceAudio {
 						}
 					}
 				}
-				
+					
+
 			}catch(Exception er){
 				//exWork.cancel(true);//cancel the extract work when error encounterd
 			}
+
 			return null;
 		}
 
