@@ -149,6 +149,19 @@ public class Helper {
 	}
 	
 	/*
+	 * Function which change time in  xx:xx:xx format to sec
+	 * @param input:String formatted time as string xx:xx:xx 
+	 * 		  output: int time
+	 */
+	public static int timeInSec(String formattime){
+		int time=0;
+		//split string then convert
+		String[] durationBits = formattime.split(":",-1);
+		time=(int)Integer.parseInt(durationBits[0])*60*60+Integer.parseInt(durationBits[1])*60+Integer.parseInt(durationBits[2]);
+		return time;
+	}
+	
+	/*
 	 * Function to get the length of the video in the format hh:mm:ss
 	 * Assumes length of video is not greater than 99hrs, 59mins and 59secs
 	 */
@@ -283,6 +296,29 @@ public class Helper {
 		}
 
 		return tempName;
+	}
+	
+	/**
+	 * Function to check validness of time input need to be informat of dd:dd:dd
+	 * @param
+	 * input: String time is time to check and String timeType is which time eg start time
+	 * output boolean validness of time ie true if format is ok
+	 */
+	public static boolean timeValidChecker(String time, String timeType){
+		boolean valid=false;
+		if(time.equals("")){
+			//error message of empty starttime
+			JOptionPane.showMessageDialog(null, "You have entered a empty "+timeType+". Please input a start time.");
+		}else{
+			Matcher m =Pattern.compile("^\\d{2}:\\d{2}:\\d{2}$").matcher(time);
+			if (m.find()){
+				valid=true;
+			}else{
+				//error message of empty file name
+				JOptionPane.showMessageDialog(null, "You have entered a invalid format for "+timeType +". Please input a valid format for start time.");
+			}
+		}
+		return valid;
 	}
 	
 }
