@@ -157,7 +157,7 @@ public class ReplaceAudio {
 		private String _audioFileName;
 		private JFrame _replaceAudioFrame;
 		private JProgressBar _dlProgressBar;
-		private String infileType="";
+		private String outputName="";
 		//constructor to allow the input from user to be use in extractworker
 		ReplaceAudioWorker(String inFileName,String audioFileName,JFrame replaceAudioFrame,JProgressBar dlProgressBar){
 			_inFileName=inFileName;
@@ -185,7 +185,10 @@ public class ReplaceAudio {
 			cmdsplit.add(_audioFileName+"_replaceNeede.mp3"); //the output file name*/
 			
 			String line;
-			
+			outputName=Helper.fileNameGen(_inFileName, "replace"); //generate output filename
+			//get the audio file name and get the
+			String audio=Helper.fileNameGetter(_audioFileName);
+			String input=Helper.fileNameGetter(_inFileName);
 			//get the required replace audio section
 			//calculate duration from input
 			int duration=Helper.timeInSec(_endtime2)-Helper.timeInSec(_startTime2);
@@ -193,7 +196,7 @@ public class ReplaceAudio {
 			if ((Helper.timeInSec(_endtime)-Helper.timeInSec(_startTime))<(Helper.timeInSec(_endtime2)-Helper.timeInSec(_startTime2))){
 				duration=Helper.timeInSec(_endtime)-Helper.timeInSec(_startTime);
 			}
-			String[] cmdsArray=("avconv -i "+_audioFileName+" -vn -c:a libmp3lame -ss "+_startTime+" -t "+Helper.formatTime(duration)+" "+_audioFileName+"1.mp3").split(" ");
+			String[] cmdsArray=("avconv -i "+_audioFileName+" -vn -c:a libmp3lame -ss "+_startTime+" -t "+Helper.formatTime(duration)+" -y "+Constants.LOG_DIR+File.separator+audio+"1.mp3").split(" ");
 			List<String> cmds=Arrays.asList(cmdsArray);
 			ProcessBuilder builder;
 			builder=new ProcessBuilder(cmds); 
@@ -205,7 +208,6 @@ public class ReplaceAudio {
 				InputStream stdout = process.getInputStream();
 				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				while((line=stdoutBuffered.readLine())!=null){
-					System.out.println(line); //==============================here
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -214,14 +216,15 @@ public class ReplaceAudio {
 						if(m.find()){
 							//weird problem sometimes avconv gives int 100000000 so dont read it
 							if (!(m.group(1).equals("10000000000"))){
-								publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
+								publish((int)(Integer.parseInt(m.group(1))*100/duration));
 							}
 						}
 					}
 				}
 				
+				duration=Helper.timeInSec(_startTime2);
 				//get part before replacae
-				cmdsArray=("avconv -i "+_inFileName+" -vn -c:a libmp3lame -ss 00:00:00 -t "+_startTime2+" "+_inFileName+"1.mp3").split(" ");
+				cmdsArray=("avconv -i "+_inFileName+" -vn -c:a libmp3lame -ss 00:00:00 -t "+_startTime2+" -y "+Constants.LOG_DIR+File.separator+input+"1.mp3").split(" ");
 				cmds=Arrays.asList(cmdsArray);
 				builder=new ProcessBuilder(cmds);
 				builder.redirectErrorStream(true);
@@ -229,7 +232,6 @@ public class ReplaceAudio {
 				stdout = process.getInputStream();
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				while((line=stdoutBuffered.readLine())!=null){
-					System.out.println(line); //==============================here
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -238,7 +240,7 @@ public class ReplaceAudio {
 						if(m.find()){
 							//weird problem sometimes avconv gives int 100000000 so dont read it
 							if (!(m.group(1).equals("10000000000"))){
-								publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
+								publish((int)(Integer.parseInt(m.group(1))*100/duration));
 							}
 						}
 					}
@@ -251,7 +253,7 @@ public class ReplaceAudio {
 					duration=Helper.timeInSec(_endtime2);
 				}
 
-				cmdsArray=("avconv -i "+_inFileName+" -vn -c:a libmp3lame -ss "+Helper.formatTime(duration)+" -t "+Helper.formatTime(totalLength)+" "+_inFileName+"2.mp3").split(" ");
+				cmdsArray=("avconv -i "+_inFileName+" -vn -c:a libmp3lame -ss "+Helper.formatTime(duration)+" -t "+Helper.formatTime(totalLength)+" -y "+Constants.LOG_DIR+File.separator+input+"2.mp3").split(" ");
 				cmds=Arrays.asList(cmdsArray);
 				builder=new ProcessBuilder(cmds);
 				builder.redirectErrorStream(true);
@@ -259,7 +261,6 @@ public class ReplaceAudio {
 				stdout = process.getInputStream();
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				while((line=stdoutBuffered.readLine())!=null){
-					System.out.println(line); //==============================here
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -268,14 +269,14 @@ public class ReplaceAudio {
 						if(m.find()){
 							//weird problem sometimes avconv gives int 100000000 so dont read it
 							if (!(m.group(1).equals("10000000000"))){
-								publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
+								publish((int)(Integer.parseInt(m.group(1))*100/duration));
 							}
 						}
 					}
 				}
 
 				//merge the audios
-				cmdsArray=("avconv -i concat:"+_inFileName+"1.mp3"+"|"+_audioFileName+"1.mp3"+"|"+_inFileName+"2.mp3"+" -c copy "+_inFileName+"3.mp3").split(" ");
+				cmdsArray=("avconv -i concat:"+Constants.LOG_DIR+File.separator+input+"1.mp3"+"|"+Constants.LOG_DIR+File.separator+audio+"1.mp3"+"|"+Constants.LOG_DIR+File.separator+input+"2.mp3"+" -c copy -y "+Constants.LOG_DIR+File.separator+input+"3.mp3").split(" ");
 				cmds=Arrays.asList(cmdsArray);
 				builder=new ProcessBuilder(cmds);
 				builder.redirectErrorStream(true);
@@ -283,7 +284,6 @@ public class ReplaceAudio {
 				stdout = process.getInputStream();
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				while((line=stdoutBuffered.readLine())!=null){
-					System.out.println(line); //==============================here
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -299,7 +299,7 @@ public class ReplaceAudio {
 				}
 				
 				//replace video's audio with transformed audio
-				cmdsArray=("avconv -i "+_inFileName+" -i "+_inFileName+"3.mp3 -map 0:v -map 1:a -c:v copy -c:a libmp3lame "+_inFileName+"1.mp4").split(" ");
+				cmdsArray=("avconv -i "+_inFileName+" -i "+Constants.LOG_DIR+File.separator+input+"3.mp3 -map 0:v -map 1:a -c:v copy -c:a libmp3lame "+outputName).split(" ");
 				cmds=Arrays.asList(cmdsArray);
 				builder=new ProcessBuilder(cmds);
 				builder.redirectErrorStream(true);
@@ -307,7 +307,6 @@ public class ReplaceAudio {
 				stdout = process.getInputStream();
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				while((line=stdoutBuffered.readLine())!=null){
-					System.out.println(line); //==============================here
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -343,17 +342,32 @@ public class ReplaceAudio {
 			} catch (CancellationException e){
 				errorCode=-1; //when cancel error code is -1 
 			}
-			
+
 			switch(errorCode){
 			case 0://nothing wrong so write to log
-				JOptionPane.showMessageDialog(null, "Replace audio has finished. Note output is saved to "+_inFileName.substring(0, _inFileName.length()-4)+"_trackReplace"+infileType+".");
+				JOptionPane.showMessageDialog(null, "Replace audio has finished. \nNote output is saved to "+outputName+".");
 				break;
 			case -1://extract cancelled
-				JOptionPane.showMessageDialog(null, "Replace audio  has been cancelled. Note output is saved to "+_inFileName.substring(0, _inFileName.length()-4)+"_trackReplace"+infileType+".");
+				JOptionPane.showMessageDialog(null, "Replace audio  has been cancelled.");
 				break;
 			default://error message of generic
 				JOptionPane.showMessageDialog(null, "An error have occured. Please try again. The error code is: "+errorCode);
 				break;
+			}
+			boolean choice=false;
+			//ask user if they want to load the video
+			if (errorCode==0){ //when finish correctly
+				//file exist ask if override
+				Object[] option= {"Load","Play preview", "Cancel"};
+				//check if the file exist locally
+				//note 0 is override ie first option chosen and 1 is new name
+				int overrideChoice=JOptionPane.showOptionDialog(null, "Do you wish to play or load " +outputName+".",
+						"Load or Play preview?",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE,null,option,option[0]);
+				if(overrideChoice==0){
+					
+				}else if(overrideChoice==1){
+					//play the preview using avplay
+				}
 			}
 			this._replaceAudioFrame.dispose();
 		}

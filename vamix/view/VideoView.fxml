@@ -181,8 +181,8 @@
                                        </font>
                                     </Label>
                                     <Label layoutX="21.0" layoutY="37.0" text="Destination" />
-                                    <TextField fx:id="outputFilePath" editable="false" layoutX="21.0" layoutY="52.0" prefHeight="25.0" prefWidth="246.0" text="..." />
-                                    <Button fx:id="saveToBtn" layoutX="278.0" layoutY="51.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="94.0" text="Save To" />
+                                    <TextField fx:id="outputFilePath" layoutX="21.0" layoutY="52.0" prefHeight="25.0" prefWidth="246.0" text="..." />
+                                    <Button fx:id="saveToBtn" layoutX="228.0" layoutY="20.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="140.0" text="Save File Chooser" />
                                     <Button fx:id="renderWithAudioBtn" layoutX="24.0" layoutY="144.0" mnemonicParsing="false" prefWidth="159.0" text="Render" />
                                     <Button fx:id="renderNoAudioBtn" layoutX="207.0" layoutY="144.0" mnemonicParsing="false" text="Render without Audio" />
                                     <Label layoutX="21.0" layoutY="88.0" text="Choose to include text" underline="true" />

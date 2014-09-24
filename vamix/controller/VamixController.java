@@ -514,7 +514,7 @@ public class VamixController {
 			public void handle(MouseEvent arg0) {
 				if ((arg0.getClickCount()>=2)&& !arg0.isConsumed()){
 					//get the address of file to be save
-					String temp=Helper.saveFileChooser();
+					String temp=Helper.saveFileChooser("MP3 file","mp3");
 					strip_add.setText(temp);
 				}
 			}
@@ -525,7 +525,7 @@ public class VamixController {
 		@Override
 		public void handle(MouseEvent arg0) {
 			//get the address of file to be save
-			String temp=Helper.saveFileChooser();
+			String temp=Helper.saveFileChooser("MP3 file","mp3");
 			strip_add.setText(temp);
 		}
 	});
@@ -627,7 +627,26 @@ public class VamixController {
 					}
 			}
 		});
+		
+		outputFilePath.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent arg0) {
+				if ((arg0.getClickCount()>=2)&& !arg0.isConsumed()){
+					//choose replace audio
+					String temp=Helper.saveFileChooser("MP4 files Only", "mp4");
+					outputFilePath.setText(temp);
+				}
+			}
+		});
 
+		saveToBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent arg0) {
+				//choose replace audio
+				String temp=Helper.saveFileChooser("MP4 files Only", "mp4");
+				outputFilePath.setText(temp);
+			}
+		});
 	}
 
 	private void renderTabCheck(){
@@ -753,7 +772,8 @@ public class VamixController {
 		fastForwardBtn.setOnMousePressed(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
-				sW=new SkipWorker(Constants.SKIP_RATE);
+				
+				sW=new SkipWorker((long)(vamix.view.Main.vid.getLength()*0.01));
 				sW.execute();
 				//cancel rewind when mouse leave the button even didnt release
 				fastForwardBtn.setOnMouseExited(new EventHandler<MouseEvent>() {
@@ -777,7 +797,7 @@ public class VamixController {
 		rewindBtn.setOnMousePressed(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
-				sW=new SkipWorker(-Constants.SKIP_RATE);
+				sW=new SkipWorker(-(long)(vamix.view.Main.vid.getLength()*0.01));
 				sW.execute();
 				//cancel rewind when mouse leave the button even didnt release
 				rewindBtn.setOnMouseExited(new EventHandler<MouseEvent>() {

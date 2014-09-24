@@ -10,7 +10,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CancellationException;
@@ -160,7 +159,7 @@ public class OverlayAudio {
 		private String _audioFileName;
 		private JFrame _overlayAudioFrame;
 		private JProgressBar _dlProgressBar;
-		private String infileType="";
+		private String outputName="";
 		//constructor to allow the input from user to be use in extractworker
 		OverlayAudioWorker(String inFileName,String audioFileName,JFrame overlayAudioFrame,JProgressBar dlProgressBar){
 			_inFileName=inFileName;
@@ -172,32 +171,14 @@ public class OverlayAudio {
 
 		@Override
 		protected Void doInBackground() throws Exception {
-			//make sure the correct process Builder is setup as it is weird
-			/*List<String> cmds=new ArrayList<String>();//jumbo all cmd into a list
-			cmds.add("avconv");//use avconv
-			cmds.add("-i");//set avconv to i input
-			cmds.add(_inFileName);//add file name
-			cmds.add("-i");//set inout
-			cmds.add(_audioFileName);
-			cmds.add("-map"); //map video of input stream 1 to ouput video
-			cmds.add("0:v"); 
-			cmds.add("-map"); //map audio of input stream 2 to output audio
-			cmds.add("1:a");
-			cmds.add("-c:v");//option of avconv of copying video
-			cmds.add("copy");//just copy video
-			cmds.add("-c:a");//option of avconv of copying audio
-			cmds.add("libmp3lame"); //format of output of audio extraction
-			cmds.add("-ss");//set start time of file
-			cmds.add(_startTime); //set time of extraction
-			cmds.add("-t");//set duration time of file
-			cmds.add(_endtime); //set time of extraction duration
-			infileType=_inFileName.substring(_inFileName.length()-4, _inFileName.length());
-			cmds.add(_inFileName.substring(0, _inFileName.length()-4)+"_trackReplace"+infileType); //the output file name*/
-			infileType=_inFileName.substring(_inFileName.length()-4, _inFileName.length());
+			outputName=Helper.fileNameGen(_inFileName, "overlay"); //generate output filename
+			String audio=Helper.fileNameGetter(_audioFileName);
+			String input=Helper.fileNameGetter(_inFileName);
+			
 			//get the required overlay audio section
 			//calculate duration from input
 			int duration=Helper.timeInSec(_endtime)-Helper.timeInSec(_startTime);
-			String[] cmdsArray=("avconv -i "+_audioFileName+" -vn -c:a libmp3lame -ss "+_startTime+" -t "+Helper.formatTime(duration)+" "+_audioFileName+"1.mp3").split(" ");
+			String[] cmdsArray=("avconv -i "+_audioFileName+" -vn -c:a libmp3lame -ss "+_startTime+" -t "+Helper.formatTime(duration)+" -y "+Constants.LOG_DIR+File.separator+audio+"1.mp3").split(" ");
 			List<String> cmds=Arrays.asList(cmdsArray);
 			ProcessBuilder builder;
 
@@ -220,25 +201,146 @@ public class OverlayAudio {
 						if(m.find()){
 							//weird problem sometimes avconv gives int 100000000 so dont read it
 							if (!(m.group(1).equals("10000000000"))){
+								publish((int)(Integer.parseInt(m.group(1))*100/(duration-Helper.timeInSec(_startTime))));
+							}
+						}
+					}
+				}
+				
+				//get part before overlay
+				cmdsArray=("avconv -i "+_inFileName+" -vn -c:a libmp3lame -ss 00:00:00 -t "+_startTimeOri+" -y "+Constants.LOG_DIR+File.separator+input+"1.mp3").split(" ");
+				cmds=Arrays.asList(cmdsArray);
+				builder=new ProcessBuilder(cmds);
+				builder.redirectErrorStream(true);
+				process = builder.start();
+				stdout = process.getInputStream();
+				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+				while((line=stdoutBuffered.readLine())!=null){
+					System.out.println(line); //==============================here
+					if (isCancelled()){
+						process.destroy();//force quit extract
+					}else {
+						//check time use this as indication for progress
+						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
+						if(m.find()){
+							//weird problem sometimes avconv gives int 100000000 so dont read it
+							if (!(m.group(1).equals("10000000000"))){
+								publish((int)(Integer.parseInt(m.group(1))*100/Helper.timeInSec(_startTimeOri)));
+							}
+						}
+					}
+				}
+				
+				//get part for overlay
+				duration=Helper.timeInSec(_endtimeOri)-Helper.timeInSec(_startTimeOri);
+				cmdsArray=("avconv -i "+_inFileName+" -vn -c:a libmp3lame -ss "+_startTimeOri+" -t "+Helper.formatTime(duration)+" -y "+Constants.LOG_DIR+File.separator+input+"2.mp3").split(" ");
+				cmds=Arrays.asList(cmdsArray);
+				builder=new ProcessBuilder(cmds);
+				builder.redirectErrorStream(true);
+				process = builder.start();
+				stdout = process.getInputStream();
+				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+				while((line=stdoutBuffered.readLine())!=null){
+					System.out.println(line); //==============================here
+					if (isCancelled()){
+						process.destroy();//force quit extract
+					}else {
+						//check time use this as indication for progress
+						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
+						if(m.find()){
+							//weird problem sometimes avconv gives int 100000000 so dont read it
+							if (!(m.group(1).equals("10000000000"))){
+								publish((int)(Integer.parseInt(m.group(1))*100/duration));
+							}
+						}
+					}
+				}
+
+				
+				//get part for after overlay
+				duration=duration+Helper.timeInSec(_startTimeOri);
+				cmdsArray=("avconv -i "+_inFileName+" -vn -c:a libmp3lame -ss "+Helper.formatTime(duration)+" -t "+Helper.formatTime(totalLength)+" -y "+Constants.LOG_DIR+File.separator+input+"3.mp3").split(" ");
+				cmds=Arrays.asList(cmdsArray);
+				builder=new ProcessBuilder(cmds);
+				builder.redirectErrorStream(true);
+				process = builder.start();
+				stdout = process.getInputStream();
+				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+				while((line=stdoutBuffered.readLine())!=null){
+					System.out.println(line); //==============================here
+					if (isCancelled()){
+						process.destroy();//force quit extract
+					}else {
+						//check time use this as indication for progress
+						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
+						if(m.find()){
+							//weird problem sometimes avconv gives int 100000000 so dont read it
+							if (!(m.group(1).equals("10000000000"))){
+								publish((int)(Integer.parseInt(m.group(1))*100/duration));
+							}
+						}
+					}
+				}
+				
+				//make overlay
+				duration=duration+Helper.timeInSec(_startTimeOri);
+				cmdsArray=("avconv -i "+Constants.LOG_DIR+File.separator+input+"2.mp3 -i "+Constants.LOG_DIR+File.separator+audio+"1.mp3 -vn -strict experimental -filter_complex amix=inputs=2:duration=first -y "+Constants.LOG_DIR+File.separator+input+"4.mp3").split(" ");
+				cmds=Arrays.asList(cmdsArray);
+				builder=new ProcessBuilder(cmds);
+				builder.redirectErrorStream(true);
+				process = builder.start();
+				stdout = process.getInputStream();
+				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+				while((line=stdoutBuffered.readLine())!=null){
+					System.out.println(line); //==============================here
+					if (isCancelled()){
+						process.destroy();//force quit extract
+					}else {
+						//check time use this as indication for progress
+						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
+						if(m.find()){
+							//weird problem sometimes avconv gives int 100000000 so dont read it
+							if (!(m.group(1).equals("10000000000"))){
+								publish((int)(Integer.parseInt(m.group(1))*100/duration));
+							}
+						}
+					}
+				}
+				
+				//merge the audios
+				cmdsArray=("avconv -i concat:"+Constants.LOG_DIR+File.separator+input+"1.mp3"+"|"+Constants.LOG_DIR+File.separator+input+"4.mp3"+"|"+Constants.LOG_DIR+File.separator+input+"3.mp3"+" -c copy -y "+Constants.LOG_DIR+File.separator+input+"5.mp3").split(" ");
+				cmds=Arrays.asList(cmdsArray);
+				builder=new ProcessBuilder(cmds);
+				builder.redirectErrorStream(true);
+				process = builder.start();
+				stdout = process.getInputStream();
+				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+
+				while((line=stdoutBuffered.readLine())!=null){
+					System.out.println(line); //==============================here
+					if (isCancelled()){
+						process.destroy();//force quit extract
+					}else {
+						//check time use this as indication for progress
+						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
+						if(m.find()){
+							//weird problem sometimes avconv gives int 100000000 so dont read it
+							if (!(m.group(1).equals("10000000000"))){
 								publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
 							}
 						}
 					}
 				}
 				
-			}catch(Exception er){
-				//exWork.cancel(true);//cancel the extract work when error encounterd
-			}
-			
-			//get part before overlay
-			cmdsArray=("avconv -i "+_inFileName+" -vn -c:a libmp3lame -ss 00:00:00 -t "+_startTimeOri+" "+_inFileName+"1.mp3").split(" ");
-			cmds=Arrays.asList(cmdsArray);
-			builder=new ProcessBuilder(cmds);
-			try{
+				//replace video's audio with transformed audio
+				cmdsArray=("avconv -i "+_inFileName+" -i "+Constants.LOG_DIR+File.separator+input+"5.mp3 -map 0:v -map 1:a -c:v copy -c:a libmp3lame "+outputName).split(" ");
+				cmds=Arrays.asList(cmdsArray);
+				builder=new ProcessBuilder(cmds);
+				builder.redirectErrorStream(true);
 				process = builder.start();
-				InputStream stdout = process.getInputStream();
-				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-				String line;
+				stdout = process.getInputStream();
+				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+
 				while((line=stdoutBuffered.readLine())!=null){
 					System.out.println(line); //==============================here
 					if (isCancelled()){
@@ -259,153 +361,7 @@ public class OverlayAudio {
 				//exWork.cancel(true);//cancel the extract work when error encounterd
 			}
 			
-			//get part for overlay
-			duration=Helper.timeInSec(_endtimeOri)-Helper.timeInSec(_startTimeOri);
-			cmdsArray=("avconv -i "+_inFileName+" -vn -c:a libmp3lame -ss "+_startTimeOri+" -t "+Helper.formatTime(duration)+" "+_inFileName+"2.mp3").split(" ");
-			cmds=Arrays.asList(cmdsArray);
-			builder=new ProcessBuilder(cmds);
-			try{
-				process = builder.start();
-				InputStream stdout = process.getInputStream();
-				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-				String line;
-				while((line=stdoutBuffered.readLine())!=null){
-					System.out.println(line); //==============================here
-					if (isCancelled()){
-						process.destroy();//force quit extract
-					}else {
-						//check time use this as indication for progress
-						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
-						if(m.find()){
-							//weird problem sometimes avconv gives int 100000000 so dont read it
-							if (!(m.group(1).equals("10000000000"))){
-								publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
-							}
-						}
-					}
-				}
-				
-			}catch(Exception er){
-				//exWork.cancel(true);//cancel the extract work when error encounterd
-			}
 			
-			//get part for after overlay
-			duration=duration+Helper.timeInSec(_startTimeOri);
-			cmdsArray=("avconv -i "+_inFileName+" -vn -c:a libmp3lame -ss "+Helper.formatTime(duration)+" -t "+Helper.formatTime(totalLength)+" "+_inFileName+"3.mp3").split(" ");
-			cmds=Arrays.asList(cmdsArray);
-			builder=new ProcessBuilder(cmds);
-			try{
-				process = builder.start();
-				InputStream stdout = process.getInputStream();
-				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-				String line;
-				while((line=stdoutBuffered.readLine())!=null){
-					System.out.println(line); //==============================here
-					if (isCancelled()){
-						process.destroy();//force quit extract
-					}else {
-						//check time use this as indication for progress
-						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
-						if(m.find()){
-							//weird problem sometimes avconv gives int 100000000 so dont read it
-							if (!(m.group(1).equals("10000000000"))){
-								publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
-							}
-						}
-					}
-				}
-				
-			}catch(Exception er){
-				//exWork.cancel(true);//cancel the extract work when error encounterd
-			}
-			
-			//make overlay
-			duration=duration+Helper.timeInSec(_startTimeOri);
-			cmdsArray=("avconv -i "+_inFileName+"2.mp3 -i "+_audioFileName+"1.mp3 -vn -strict experimental -filter_complex amix=inputs=2:duration=first "+_inFileName+"4.mp3").split(" ");
-			cmds=Arrays.asList(cmdsArray);
-			builder=new ProcessBuilder(cmds);
-			try{
-				process = builder.start();
-				InputStream stdout = process.getInputStream();
-				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-				String line;
-				while((line=stdoutBuffered.readLine())!=null){
-					System.out.println(line); //==============================here
-					if (isCancelled()){
-						process.destroy();//force quit extract
-					}else {
-						//check time use this as indication for progress
-						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
-						if(m.find()){
-							//weird problem sometimes avconv gives int 100000000 so dont read it
-							if (!(m.group(1).equals("10000000000"))){
-								publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
-							}
-						}
-					}
-				}
-				
-			}catch(Exception er){
-				//exWork.cancel(true);//cancel the extract work when error encounterd
-			}
-			
-			//merge the audios
-			cmdsArray=("avconv -i concat:"+_inFileName+"1.mp3"+"|"+_inFileName+"4.mp3"+"|"+_inFileName+"3.mp3"+" -c copy "+_inFileName+"5.mp3").split(" ");
-			cmds=Arrays.asList(cmdsArray);
-			builder=new ProcessBuilder(cmds);
-			try{
-				process = builder.start();
-				InputStream stdout = process.getInputStream();
-				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-				String line;
-				while((line=stdoutBuffered.readLine())!=null){
-					System.out.println(line); //==============================here
-					if (isCancelled()){
-						process.destroy();//force quit extract
-					}else {
-						//check time use this as indication for progress
-						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
-						if(m.find()){
-							//weird problem sometimes avconv gives int 100000000 so dont read it
-							if (!(m.group(1).equals("10000000000"))){
-								publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
-							}
-						}
-					}
-				}
-				
-			}catch(Exception er){
-				//exWork.cancel(true);//cancel the extract work when error encounterd
-			}
-			
-			//replace video's audio with transformed audio
-			cmdsArray=("avconv -i "+_inFileName+" -i "+_inFileName+"5.mp3 -map 0:v -map 1:a -c:v copy -c:a libmp3lame "+_inFileName+"1.mp4").split(" ");
-			cmds=Arrays.asList(cmdsArray);
-			builder=new ProcessBuilder(cmds);
-			try{
-				process = builder.start();
-				InputStream stdout = process.getInputStream();
-				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-				String line;
-				while((line=stdoutBuffered.readLine())!=null){
-					System.out.println(line); //==============================here
-					if (isCancelled()){
-						process.destroy();//force quit extract
-					}else {
-						//check time use this as indication for progress
-						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
-						if(m.find()){
-							//weird problem sometimes avconv gives int 100000000 so dont read it
-							if (!(m.group(1).equals("10000000000"))){
-								publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
-							}
-						}
-					}
-				}
-				
-			}catch(Exception er){
-				//exWork.cancel(true);//cancel the extract work when error encounterd
-			}
 			return null;
 		}
 
@@ -422,13 +378,12 @@ public class OverlayAudio {
 			} catch (CancellationException e){
 				errorCode=-1; //when cancel error code is -1 
 			}
-			
 			switch(errorCode){
 			case 0://nothing wrong so write to log
-				JOptionPane.showMessageDialog(null, "Overlay audio has finished. Note output is saved to "+_inFileName.substring(0, _inFileName.length()-4)+"_trackReplace"+infileType+".");
+				JOptionPane.showMessageDialog(null, "Overlay audio has finished. \nNote output is saved to "+outputName+".");
 				break;
 			case -1://extract cancelled
-				JOptionPane.showMessageDialog(null, "Overlay audio  has been cancelled. Note output is saved to "+_inFileName.substring(0, _inFileName.length()-4)+"_trackReplace"+infileType+".");
+				JOptionPane.showMessageDialog(null, "Overlay audio  has been cancelled.");
 				break;
 			default://error message of generic
 				JOptionPane.showMessageDialog(null, "An error have occured. Please try again. The error code is: "+errorCode);

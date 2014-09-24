@@ -25,9 +25,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * Class to provide function which help check file existence
  **/
 public class Helper {
-
-
-	/*
+	/**
 	 * Function to write to a file
 	 */
 	public static void fileRead() {
@@ -55,7 +53,7 @@ public class Helper {
 		}
 	}
 
-	/*
+	/**
 	 * Function to write to a file
 	 */
 	public static void fileWrite(String message) {
@@ -68,7 +66,7 @@ public class Helper {
 		}
 	}
 
-	/*
+	/**
 	 * Function to check if a file exist given its directory
 	 */
 	public static boolean fileExist(String pathname) {
@@ -76,7 +74,7 @@ public class Helper {
 		return f.exists();
 	}
 
-	/*
+	/**
 	 * Function to return timestamp in the correct format
 	 */
 	public static String timeStamper(){
@@ -85,7 +83,7 @@ public class Helper {
 		return temp.format(date);
 	}
 
-	/*
+	/**
 	 * Function to get line number from a file
 	 */
 	public static int lineNumberOfFile(String fileDir){
@@ -100,7 +98,7 @@ public class Helper {
 		return lines;
 	}
 	
-	/*
+	/**
 	 * Function which change time in milsec to the xx:xx:xx/xx:xx:xx format
 	 * @param input: double currentTime (current time of file) in sec
 	 * 				 double totalTime (total time of file) in sec
@@ -111,7 +109,7 @@ public class Helper {
 		return formatTime((int)currenttime)+"/"+formatTime((int)totalTime);
 	}
 	
-	/*
+	/**
 	 * Function which change time in sec to the xx:xx:xxformat
 	 * @param input: int time
 	 * 		  output: String formatted time as string xx:xx:xx
@@ -148,7 +146,7 @@ public class Helper {
 		return formatTime;
 	}
 	
-	/*
+	/**
 	 * Function which change time in  xx:xx:xx format to sec
 	 * @param input:String formatted time as string xx:xx:xx 
 	 * 		  output: int time
@@ -195,16 +193,17 @@ public class Helper {
 //		return length;
 //	}
 	
-	/*
-	 * Function to choose where to save file only allow mp3
-	 * @param input: none
+	/**
+	 * Function to choose where to save file only allow specified file type
+	 * @param input: String file_type_message: a message about type ie mp3 file, audio etc
+	 * 				String filterType: the actual type like .mp3
 	 * 		  output: String full path name of file
 	 */
-	public static String saveFileChooser(){
+	public static String saveFileChooser(String file_type_message,String filterType){
 		String tempName = null;
 		//setup chooser
 		JFileChooser chooser = new JFileChooser(Constants.CURRENT_DIR);
-	    FileNameExtensionFilter filter = new FileNameExtensionFilter("Mp3 File","mp3");
+	    FileNameExtensionFilter filter = new FileNameExtensionFilter(file_type_message,filterType);
 	    chooser.setFileFilter(filter); //set mp3 filter
 	    //get save path
 	    int choice =chooser.showSaveDialog(null);
@@ -212,15 +211,15 @@ public class Helper {
 			File file =chooser.getSelectedFile();
 			tempName=file.getAbsolutePath();//get path address
 			//check if it is mp3 if not add
-			if (!tempName.substring(tempName.length()-4, tempName.length()).equals(".mp3")){
-				tempName=tempName+".mp3"; //add the .png to end of file
+			if (!tempName.substring(tempName.length()-4, tempName.length()).equals("."+filterType)){
+				tempName=tempName+"."+filterType; //add the .png to end of file
 			}
 		}
 
 		return tempName;
 	}
 	
-	/*
+	/**
 	 * Function to check whether file is valid
 	 * @param input: String file name
 	 * 		  output: boolean if file is valid
@@ -277,7 +276,7 @@ public class Helper {
 		return isValid;
 	}
 
-	/*
+	/**
 	 * Function to choose audio file for replace
 	 * @param input: none
 	 * 		  output: String full path name of file
@@ -341,4 +340,60 @@ public class Helper {
 		return valid;
 	}
 	
+	/**
+	 * This function is to get the file name of a file full paht
+	 * @param
+	 * input: String - file path
+	 * output: String -file name
+	 */
+	public static String fileNameGetter(String _inputAddr){
+		String inFileName="";
+		Matcher m=Pattern.compile("(.*"+File.separator+")(\\S+).*$").matcher(_inputAddr);
+		if(m.find()){
+			inFileName=m.group(2); //get file name
+		}
+		return inFileName;
+	}
+	
+	/**
+	 * This function is to get the file path of a file full path
+	 * @param
+	 * input: String - file whole path
+	 * output: String -file path (without file name)
+	 */
+	public static String pathGetter(String _inputAddr){
+		String path="";
+		Matcher m=Pattern.compile("(.*"+File.separator+")(\\S+).*$").matcher(_inputAddr);
+		if(m.find()){
+			path=m.group(1); //get file path
+		}
+		return path;
+	}
+	
+	/**
+	 * This function is to generate fileName so overwritten wont occur
+	 * @param
+	 * input: String - file whole path
+	 * 		  String extraName -extra message want to add after file but before new number
+	 * output: String -new file name whole path with new non repeated file name
+	 */
+	public static String fileNameGen(String _inputAddr,String extraName){
+		String path="";//
+		String fileType="";//
+		String nameGen=""; //
+		int i=1; //addition to the name
+		boolean run =true;//for while loop logic set to true automatically
+		//split to path with fileName and file type
+		Matcher m=Pattern.compile("(.*)(\\p{Punct}.*)$").matcher(_inputAddr);
+		if(m.find()){
+			path=m.group(1); //get file path with name
+			fileType=m.group(2); //get type
+		}
+		while(run){
+			nameGen=path+"_"+extraName+"_"+i+fileType;
+			run=fileExist(nameGen);
+			i=i+1;//increse value by 1
+		}
+		return nameGen;
+	}
 }

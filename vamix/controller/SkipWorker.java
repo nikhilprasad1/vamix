@@ -4,9 +4,9 @@ import javax.swing.SwingWorker;
 
 public class SkipWorker extends SwingWorker<Void,Integer>{
 	
-	private int _skipRate;
+	private long _skipRate;
 	//constructor to allow the input from user to be use in extractworker
-	SkipWorker(int skipRate){
+	SkipWorker(long skipRate){
 		_skipRate=skipRate;
 	}
 
