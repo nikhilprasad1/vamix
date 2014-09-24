@@ -10,7 +10,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -452,4 +454,75 @@ public class Helper {
 		}
 		return isValid;
 	}
+
+	/**
+	 * This function is to .vamix folder for temporary files
+	 * @param
+	 * input: void
+	 * output: void 
+	 */
+	public static void genTempFolder(){
+		if (!(fileExist(Constants.LOG_PATH))){
+			//when directory doesnt exist create directory
+			File dir =new File(Constants.LOG_DIR);
+			dir.mkdir();
+		}
+	}
+	
+	/**
+	 * This function is to load and/or preview product
+	 * @param
+	 * input: String outputName: the output file full path
+	 * 		  String startTime: the start time for transform
+	 * 		  String endTime: the end time for transform
+	 * output: void 
+	 */
+	public static void loadAndPreview(String outputName,String startTime,String endTime){
+		//initialise booleans
+		boolean load=false;
+		boolean preview=false;
+		int previewTimeS=timeInSec(startTime);
+		if (previewTimeS>5){ //set preview start time to 5 sec before if its longer than 5
+			previewTimeS=previewTimeS-5;
+		}
+		int previewTimeE=timeInSec(endTime);
+		if (previewTimeE>5){ //set preview end time to 5 sec before if its longer than 5
+			previewTimeE=previewTimeE-5;
+		}
+		//create option for user to choose
+		Object[] option= {"Load","Play preview","Both", "None"};
+		int overrideChoice=JOptionPane.showOptionDialog(null, "Do you wish to play and/or load " +outputName+".",
+				"Load and/or Play preview?",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE,null,option,option[0]);
+		if(overrideChoice==0){
+			load=true;
+		}else if(overrideChoice==1){
+			//play the preview using avplay
+			preview=true;
+		}else if (overrideChoice==2){
+			load=true;
+			preview=true;
+		}
+		
+		if (load){
+			//prepare (load) vid and set the new address
+			VamixController.vidAddSetter(outputName);
+			vamix.view.Main.vid.prepareMedia(outputName);
+		}
+		if(preview){
+			String[] cmdsArray=("avplay -i "+outputName+" -ss "+formatTime(previewTimeS)+" -t "+formatTime(previewTimeE)).split(" ");
+			List<String> cmds=Arrays.asList(cmdsArray);
+			ProcessBuilder builder;
+			builder=new ProcessBuilder(cmds); 
+			builder.redirectErrorStream(true);
+			//run process to preview the video
+			try{
+				Process process = builder.start();
+				//InputStream stdout = process.getInputStream();
+				//BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+			}catch(Exception e){
+			}
+		}
+	}
+	
+
 }

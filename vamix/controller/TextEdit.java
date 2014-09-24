@@ -75,6 +75,7 @@ public class TextEdit {
 		
 		@Override
 		protected Void doInBackground() {
+			Helper.genTempFolder();//generate temp folder if doesnt exist
 			String bash = fileSep + "bin"+ fileSep + "bash";
 			String [] cmds = new String[2];
 			if (_titleOrCredits.equals("title")) {
@@ -150,6 +151,7 @@ public class TextEdit {
 		
 		@Override
 		protected Void doInBackground() {
+			Helper.genTempFolder();//generate temp folder if doesnt exist
 			String bash = fileSep + "bin"+ fileSep + "bash";
 			List<String> cmds = buildRenderCommandList();
 			for (String cmd : cmds) {

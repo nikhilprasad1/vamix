@@ -158,33 +158,23 @@ public class ReplaceAudio {
 		private JFrame _replaceAudioFrame;
 		private JProgressBar _dlProgressBar;
 		private String outputName="";
+		private int i=1;
 		//constructor to allow the input from user to be use in extractworker
 		ReplaceAudioWorker(String inFileName,String audioFileName,JFrame replaceAudioFrame,JProgressBar dlProgressBar){
 			_inFileName=inFileName;
 			_audioFileName=audioFileName;
 			_replaceAudioFrame=replaceAudioFrame;
 			_dlProgressBar=dlProgressBar;
+			_dlProgressBar.setStringPainted(true);
+			_dlProgressBar.setString(i+"/"+Constants.REPLACE_PROCESS_NUMBER);
 		}
 
 
 		@Override
 		protected Void doInBackground() throws Exception {
-			//make sure the correct process Builder is setup as it is weird
-			//extract replace audio into set size
-			/*List<String> cmdsplit=new ArrayList<String>();//jumbo all cmd into a list
-			cmdsplit.add("avconv");//use avconv
-			cmdsplit.add("-i");//set inout
-			cmdsplit.add(_audioFileName);
-			cmdsplit.add("-vn");//
-			cmdsplit.add("-c:a");//option of avconv of copying audio
-			cmdsplit.add("libmp3lame"); //format of output of audio extraction
-			cmdsplit.add("-ss");//set start time of file
-			cmdsplit.add(_startTime); //set time of extraction
-			cmdsplit.add("-t");//set duration time of file
-			cmdsplit.add(_endtime); //set time of extraction duration
-			cmdsplit.add(_audioFileName+"_replaceNeede.mp3"); //the output file name*/
-			
+			//make sure the correct process Builder is setup as it is weird	
 			String line;
+			Helper.genTempFolder();//generate temp folder if doesnt exist
 			outputName=Helper.fileNameGen(_inFileName, "replace"); //generate output filename
 			//get the audio file name and get the
 			String audio=Helper.fileNameGetter(_audioFileName);
@@ -231,6 +221,9 @@ public class ReplaceAudio {
 				process = builder.start();
 				stdout = process.getInputStream();
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+				i=i+1; //increase counter of process by 1
+				publish(0);//reset bar
+				_dlProgressBar.setString(i+"/"+Constants.REPLACE_PROCESS_NUMBER);
 				while((line=stdoutBuffered.readLine())!=null){
 					if (isCancelled()){
 						process.destroy();//force quit extract
@@ -260,6 +253,9 @@ public class ReplaceAudio {
 				process = builder.start();
 				stdout = process.getInputStream();
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+				i=i+1; //increase counter of process by 1
+				publish(0);//reset bar
+				_dlProgressBar.setString(i+"/"+Constants.REPLACE_PROCESS_NUMBER);
 				while((line=stdoutBuffered.readLine())!=null){
 					if (isCancelled()){
 						process.destroy();//force quit extract
@@ -283,6 +279,9 @@ public class ReplaceAudio {
 				process = builder.start();
 				stdout = process.getInputStream();
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+				i=i+1; //increase counter of process by 1
+				publish(0);//reset bar
+				_dlProgressBar.setString(i+"/"+Constants.REPLACE_PROCESS_NUMBER);
 				while((line=stdoutBuffered.readLine())!=null){
 					if (isCancelled()){
 						process.destroy();//force quit extract
@@ -306,6 +305,9 @@ public class ReplaceAudio {
 				process = builder.start();
 				stdout = process.getInputStream();
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+				i=i+1; //increase counter of process by 1
+				publish(0);//reset bar
+				_dlProgressBar.setString(i+"/"+Constants.REPLACE_PROCESS_NUMBER);
 				while((line=stdoutBuffered.readLine())!=null){
 					if (isCancelled()){
 						process.destroy();//force quit extract
@@ -354,20 +356,10 @@ public class ReplaceAudio {
 				JOptionPane.showMessageDialog(null, "An error have occured. Please try again. The error code is: "+errorCode);
 				break;
 			}
-			boolean choice=false;
-			//ask user if they want to load the video
+			this._replaceAudioFrame.dispose();
+			//ask user if they want to load or preview the video
 			if (errorCode==0){ //when finish correctly
-				//file exist ask if override
-				Object[] option= {"Load","Play preview", "Cancel"};
-				//check if the file exist locally
-				//note 0 is override ie first option chosen and 1 is new name
-				int overrideChoice=JOptionPane.showOptionDialog(null, "Do you wish to play or load " +outputName+".",
-						"Load or Play preview?",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE,null,option,option[0]);
-				if(overrideChoice==0){
-					
-				}else if(overrideChoice==1){
-					//play the preview using avplay
-				}
+				Helper.loadAndPreview(outputName,_startTime2,_endtime2);
 			}
 			this._replaceAudioFrame.dispose();
 		}

@@ -270,7 +270,7 @@ public class VamixController {
 	@FXML
 	private ProgressBar videoProgress;
 
-	private String videoFileAdd="";
+	private static String videoFileAdd="";
 	
 	private SkipWorker sW;
 	
@@ -739,6 +739,9 @@ public class VamixController {
 				        		if (vamix.view.Main.vid.isMute()){
 				        			vamix.view.Main.vid.mute();
 				        		}
+				        		if (!(videoFileAdd.equals(videoPath.getText()))){
+				        			videoPath.setText(videoFileAdd);
+				        		}
 				        		vamix.view.Main.vid.setVolume(100);
 				        		volumeSlider.setValue(50);
 				        		//set video to unmute
@@ -1161,4 +1164,10 @@ public class VamixController {
 			e.printStackTrace();
 		}
 	}
+	
+	//set video address
+	public static void vidAddSetter(String toSet){
+		videoFileAdd=toSet;
+	}
+	
 }
