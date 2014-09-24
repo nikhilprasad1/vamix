@@ -1,6 +1,6 @@
 package vamix.controller;
 
-import java.awt.Color;
+import javafx.scene.paint.Color;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -441,7 +441,7 @@ public class VamixController {
 				if (checkTitleInputs()) {
 					TextEdit textEditor = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
 							startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), null, null,
-							null, null, null, null, null, null, videoFileAdd, null, "title", null, null);
+							null, null, null, null, null, null, videoFileAdd, null, "title");
 					textEditor.showScenePreviewAsync();
 				}
 			}
@@ -456,7 +456,7 @@ public class VamixController {
 					TextEdit textEditor = new TextEdit(null, null, null, null, null, null, null, null,
 							creditText.getText(), creditsFont.getValue(), creditsSize.getValue(), creditsColour.getValue().toString(), 
 							startCredits.getText(), endCredits.getText(), creditsXPos.getText(), creditsYPos.getText(), 
-							videoFileAdd, null, "credits", null, null);
+							videoFileAdd, null, "credits");
 					textEditor.showScenePreviewAsync();
 				}
 			}
@@ -615,15 +615,9 @@ public class VamixController {
 							String[] endTimeSplit = endTitle.getText().split(":");
 							//calculate the length of the start and end times and make sure they are
 							//less than length of the video and end time is greater than start time
-							long startLength = Long.parseLong(startTimeSplit[0])*3600000 + Long.parseLong(startTimeSplit[1])*60000
-									+ Long.parseLong(startTimeSplit[2])*1000;
-							long endLength = Long.parseLong(endTimeSplit[0])*3600000 + Long.parseLong(endTimeSplit[1])*60000
-									+ Long.parseLong(endTimeSplit[2])*1000;
-							long videoLength = vamix.view.Main.vid.getLength();
-							String durationTitle = Helper.formatTime((int)(endLength - startLength));
 							textRenderer = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
 									startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), null, null, null, null, null, null,
-									null, null, videoFileAdd, "/home/nikhil/Documents/se206/VamixA3/output.mp4", null, durationTitle, null);
+									null, null, videoFileAdd, Constants.CURRENT_DIR+"o.mp4", null);
 							textRenderer.renderWithTextAsync(RenderType.OPENING);
 						}
 					} else if (includeCredits.isSelected()) {
@@ -1099,7 +1093,7 @@ public class VamixController {
 		    titleText.setText(values.get(2));
 		    titleFont.setValue(values.get(3));
 		    titleSize.setValue(values.get(4));
-		    //titleColour.setValue(Color.getColor(values.get(5)));
+		    titleColour.setValue(Color.valueOf(values.get(5)));
 		    titleXPos.setText(values.get(6));
 		    titleYPos.setText(values.get(7));
 		    startTitle.setText(values.get(8));
@@ -1107,7 +1101,7 @@ public class VamixController {
 		    creditText.setText(values.get(10));
 		    creditsFont.setValue(values.get(11));
 		    creditsSize.setValue(values.get(12));
-		    //creditsColour.setValue(Color.getColor(values.get(13)));
+		    creditsColour.setValue(Color.valueOf(values.get(13)));
 		    creditsXPos.setText(values.get(14));
 		    creditsYPos.setText(values.get(15));
 		    startCredits.setText(values.get(16));

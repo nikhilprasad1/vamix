@@ -224,7 +224,7 @@ public class ReplaceAudio {
 				cmdsArray=("avconv -i "+_inFileName+" -vn -c:a libmp3lame -ss 00:00:00 -t "+_startTime2+" "+_inFileName+"1.mp3").split(" ");
 				cmds=Arrays.asList(cmdsArray);
 				builder=new ProcessBuilder(cmds);
-				
+				builder.redirectErrorStream(true);
 				process = builder.start();
 				stdout = process.getInputStream();
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
@@ -254,7 +254,7 @@ public class ReplaceAudio {
 				cmdsArray=("avconv -i "+_inFileName+" -vn -c:a libmp3lame -ss "+Helper.formatTime(duration)+" -t "+Helper.formatTime(totalLength)+" "+_inFileName+"2.mp3").split(" ");
 				cmds=Arrays.asList(cmdsArray);
 				builder=new ProcessBuilder(cmds);
-
+				builder.redirectErrorStream(true);
 				process = builder.start();
 				stdout = process.getInputStream();
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
@@ -278,7 +278,7 @@ public class ReplaceAudio {
 				cmdsArray=("avconv -i concat:"+_inFileName+"1.mp3"+"|"+_audioFileName+"1.mp3"+"|"+_inFileName+"2.mp3"+" -c copy "+_inFileName+"3.mp3").split(" ");
 				cmds=Arrays.asList(cmdsArray);
 				builder=new ProcessBuilder(cmds);
-
+				builder.redirectErrorStream(true);
 				process = builder.start();
 				stdout = process.getInputStream();
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
@@ -302,7 +302,7 @@ public class ReplaceAudio {
 				cmdsArray=("avconv -i "+_inFileName+" -i "+_inFileName+"3.mp3 -map 0:v -map 1:a -c:v copy -c:a libmp3lame "+_inFileName+"1.mp4").split(" ");
 				cmds=Arrays.asList(cmdsArray);
 				builder=new ProcessBuilder(cmds);
-
+				builder.redirectErrorStream(true);
 				process = builder.start();
 				stdout = process.getInputStream();
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));

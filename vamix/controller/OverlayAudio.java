@@ -193,7 +193,7 @@ public class OverlayAudio {
 			cmds.add(_endtime); //set time of extraction duration
 			infileType=_inFileName.substring(_inFileName.length()-4, _inFileName.length());
 			cmds.add(_inFileName.substring(0, _inFileName.length()-4)+"_trackReplace"+infileType); //the output file name*/
-			
+			infileType=_inFileName.substring(_inFileName.length()-4, _inFileName.length());
 			//get the required overlay audio section
 			//calculate duration from input
 			int duration=Helper.timeInSec(_endtime)-Helper.timeInSec(_startTime);

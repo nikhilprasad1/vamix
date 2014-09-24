@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,7 +24,6 @@ import javax.swing.SwingWorker;
 public class TextEdit {
 	
 	private String _titleText, _titleFont, _titleSize, _titleColor, _startTitle, _endTitle, _titleXPos, _titleYPos;
-	private String _durationTitle, _durationCredits;
 	private String _creditsText, _creditsFont, _creditsSize, _creditsColor, _startCredits, _endCredits, _creditsXPos, _creditsYPos;
 	private String _titleOrCredits, _inputAddr, _outputAddr;
 	
@@ -39,7 +39,7 @@ public class TextEdit {
 	
 	public TextEdit(String titleText, String titleFont, String titleSize, String titleColor, String startTitle, String endTitle, String titleXPos, String titleYPos,
 			String creditsText, String creditsFont, String creditsSize, String creditsColor, String startCredits, String endCredits, String creditsXPos, String creditsYPos,
-			String inputAddr, String outputAddr, String titleOrCredits, String durationTitle, String durationCredits) {
+			String inputAddr, String outputAddr, String titleOrCredits) {
 		_titleText = titleText;
 		_titleFont = titleFont;
 		_titleSize = titleSize;
@@ -59,8 +59,6 @@ public class TextEdit {
 		_titleOrCredits = titleOrCredits;
 		_inputAddr = inputAddr;
 		_outputAddr = outputAddr;
-		_durationTitle = durationTitle;
-		_durationCredits = durationCredits;
 	}
 	
 	/*
@@ -153,7 +151,7 @@ public class TextEdit {
 			List<String> cmds = buildRenderCommandList();
 			for (String cmd : cmds) {
 				System.out.println(cmd);
-				ProcessBuilder builder = new ProcessBuilder(bash, "-c", cmd);
+				ProcessBuilder builder = new ProcessBuilder("/bin/bash","-c",cmd);
 				builder.redirectErrorStream(true);
 				try {
 					Process process = builder.start();
@@ -189,24 +187,26 @@ public class TextEdit {
 				String timeAtEnd = Helper.formatTime(totalLength - endLength);
 				//create the bash command strings that will split the input video into 2 or 3 parts depending on start time and
 				//finish time specified by user
-				String cmd = "avconv -ss 00:00:00 -i " + _inputAddr + " -t " + _startTitle + " -vcodec libx264 -acodec aac "
-						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " + inFileName + "1.ts";
+				String cmd = "avconv -i " + _inputAddr + " -ss 00:00:00 -t " + _startTitle + " -vcodec libx264 -acodec aac "
+						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " +_inputAddr + "1.ts";
 				cmds.add(cmd);
-				cmd = "avconv -ss " + _startTitle + " -i " + _inputAddr + " -t " + _durationTitle + " -vcodec libx264 -acodec aac "
-						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " + inFileName + "2.ts";
+				int duration = Helper.timeInSec(_endTitle)-Helper.timeInSec(_startTitle);
+				cmd = "avconv -i " + _inputAddr +" -ss " + _startTitle +" -t " + Helper.formatTime(duration) + " -vcodec libx264 -acodec aac "
+						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " +_inputAddr + "2.ts";
 				cmds.add(cmd);
-				cmd = "avconv -ss " + _endTitle + " -i " + _inputAddr + " -t " + timeAtEnd + " -vcodec libx264 -acodec aac "
-						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " + inFileName + "3.ts";
+				cmd = "avconv -i " + _inputAddr +" -ss " + _endTitle +" -t " + timeAtEnd + " -vcodec libx264 -acodec aac "
+						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " +_inputAddr + "3.ts";
 				cmds.add(cmd);
 				//now create the bash command that draws the text on the bit of video specified by the user
-				cmd = "avconv -i " + path + inFileName + "2.ts"  + " -vcodec libx264 -acodec aac" + " -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
+				cmd = "avconv -i " + _inputAddr + "2.ts"  + " -vcodec libx264 -acodec aac -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
 						+ "truetype" + fileSep + "freefont" + fileSep + _titleFont + ".ttf':text='" + _titleText
 						+ "':x=" + _titleXPos + ":y=" + _titleYPos + ":fontsize=" + _titleSize +":fontcolor=" + _titleColor + "\" -strict experimental -y "
-						+ inFileName + "2.ts";
+						+_inputAddr + "4.ts";
+				//cmd="avconv -i /afs/ec.auckland.ac.nz/users/y/f/yfu959/unixhome/Desktop/206a3/a.mp42.ts -vcodec libx264 -acodec aac -vf \"drawtext=fontfile='/usr/share/fonts/truetype/freefont/FreeSans.ttf':text='hello':x=100:y=100:fontsize=24:fontcolor=white\" -strict experimental -y /afs/ec.auckland.ac.nz/users/y/f/yfu959/unixhome/Desktop/206a3/a.mp44.ts";
 				cmds.add(cmd);
 				//now create the bash command that will combine all the split videos together
-				//cmd = "avconv -i concat:\"" + inFileName + "1.ts|" + inFileName + "2.ts|" + inFileName + "3.ts\"" + " -c copy -bsf:a aac_adtstoasc -y " + _outputAddr;
-				cmd = "avconv -i video.mp42.ts -vcodec libx264 -acodec acc -strict experimental test.mp4";
+				cmd = "avconv -i concat:\"" + _inputAddr + "1.ts|" + _inputAddr + "4.ts|" + _inputAddr + "3.ts\"" + " -c copy -bsf:a aac_adtstoasc -y " + _outputAddr;
+				//cmd = "avconv -i video.mp42.ts -vcodec libx264 -acodec acc -strict experimental test.mp4";
 				cmds.add(cmd);
 			} else if (_renderType == RenderType.CLOSING) {
 				
