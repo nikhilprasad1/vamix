@@ -1,6 +1,7 @@
 package vamix.controller;
 
 import javafx.scene.paint.Color;
+
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -602,19 +603,28 @@ public class VamixController {
 			@Override
 			public void handle(ActionEvent evt) {
 				TextEdit textRenderer = null;
-				//check if an output file has been chosen
-				
+				//check if the input video file is a valid video file (is either mp4, avi or flv)
+				if(Helper.validVideoFile(videoFileAdd,"(MPEG v4)|Video")){
 					//check which text scenes the user wants to render with the video
 					if (includeTitle.isSelected() && includeCredits.isSelected()) {
 						if (checkTitleInputs() && checkCreditsInputs()) {
-							
+							//if the user wants to render both text scenes make sure the credits scene comes after the title scene and 
+							//no overlap occurs
+							int endOfTitle = Helper.timeInSec(endTitle.getText());
+							int startOfCredits = Helper.timeInSec(startCredits.getText());
+							if (endOfTitle < startOfCredits) {
+								textRenderer = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
+										startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), creditText.getText(), 
+										creditsFont.getValue(), creditsSize.getValue(), creditsColour.getValue().toString(), startCredits.getText(), endCredits.getText(),
+										creditsXPos.getText(), creditsYPos.getText(), videoFileAdd, Constants.CURRENT_DIR+"o.mp4", null);
+								textRenderer.renderWithTextAsync(RenderType.BOTH);
+							} else {
+								JOptionPane.showMessageDialog(null, "The credits scene must start after the title scene has finished", "Overlapping scenes",
+										JOptionPane.ERROR_MESSAGE);
+							}
 						}
 					} else if (includeTitle.isSelected()) {
 						if (checkTitleInputs()) {
-							String[] startTimeSplit = startTitle.getText().split(":");
-							String[] endTimeSplit = endTitle.getText().split(":");
-							//calculate the length of the start and end times and make sure they are
-							//less than length of the video and end time is greater than start time
 							textRenderer = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
 									startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), null, null, null, null, null, null,
 									null, null, videoFileAdd, Constants.CURRENT_DIR+"o.mp4", null);
@@ -622,9 +632,16 @@ public class VamixController {
 						}
 					} else if (includeCredits.isSelected()) {
 						if (checkCreditsInputs()) {
-							
+							textRenderer = new TextEdit(null, null, null, null, null, null, null, null, creditText.getText(), 
+									creditsFont.getValue(), creditsSize.getValue(), creditsColour.getValue().toString(), startCredits.getText(), endCredits.getText(),
+									creditsXPos.getText(), creditsYPos.getText(), videoFileAdd, Constants.CURRENT_DIR+"o.mp4", null);
+							textRenderer.renderWithTextAsync(RenderType.CLOSING);
 						}
+					} else {
+						JOptionPane.showMessageDialog(null, "Please select a text scene(s) to render with the video", "Select Text Scene",
+								JOptionPane.ERROR_MESSAGE);
 					}
+				}
 			}
 		});
 		

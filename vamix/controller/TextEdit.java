@@ -33,6 +33,9 @@ public class TextEdit {
 	public enum RenderType {OPENING, CLOSING, BOTH};
 	private RenderType _renderType = null; 
 	
+	//int to display to user which tells them which process of rendering Vamix is currently at
+	private int processNumber = 1, totalProcesses;
+	
 	//workers which are executed depending on if a preview is required or full text-on-video render
 	private PreviewWorker previewWorker = new PreviewWorker();
 	private RenderWorker renderWorker = new RenderWorker();
@@ -170,14 +173,12 @@ public class TextEdit {
 		
 		protected List<String> buildRenderCommandList() {
 			List<String> cmds = new ArrayList<String>();
-			//first get the filename and path of the input file (not the full address)
+			//first get the filename of the input file (not the full address)
 			String inFileName = "";
-			String path = "";
 			//now get length of video being edited
 			int totalLength = (int)(vamix.view.Main.vid.getLength()/1000);	
 			Matcher m=Pattern.compile("(.*"+File.separator+")(\\S+).*$").matcher(_inputAddr);
 			if(m.find()){
-				path = m.group(1); //get path
 				inFileName=m.group(2); //get file name
 			}
 			//if user only wants to add a title OR a credits scene
@@ -185,7 +186,7 @@ public class TextEdit {
 				int endLength = Helper.timeInSec(_endTitle);
 				//get duration left (if any) after finish time specified by user
 				String timeAtEnd = Helper.formatTime(totalLength - endLength);
-				//create the bash command strings that will split the input video into 2 or 3 parts depending on start time and
+				//create the bash command strings that will split the input video into 3 parts depending on start time and
 				//finish time specified by user
 				String cmd = "avconv -i " + _inputAddr + " -ss 00:00:00 -t " + _startTitle + " -vcodec libx264 -acodec aac "
 						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " +_inputAddr + "1.ts";
@@ -209,10 +210,75 @@ public class TextEdit {
 				//cmd = "avconv -i video.mp42.ts -vcodec libx264 -acodec acc -strict experimental test.mp4";
 				cmds.add(cmd);
 			} else if (_renderType == RenderType.CLOSING) {
-				
+				int endLength = Helper.timeInSec(_endCredits);
+				//get duration left (if any) after finish time specified by user
+				String timeAtEnd = Helper.formatTime(totalLength - endLength);
+				//create the bash command strings that will split the input video into 3 parts depending on start time and
+				//finish time specified by user
+				String cmd = "avconv -i " + _inputAddr + " -ss 00:00:00 -t " + _startCredits + " -vcodec libx264 -acodec aac "
+						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " +_inputAddr + "1.ts";
+				cmds.add(cmd);
+				int duration = Helper.timeInSec(_endCredits)-Helper.timeInSec(_startCredits);
+				cmd = "avconv -i " + _inputAddr +" -ss " + _startCredits +" -t " + Helper.formatTime(duration) + " -vcodec libx264 -acodec aac "
+						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " +_inputAddr + "2.ts";
+				cmds.add(cmd);
+				cmd = "avconv -i " + _inputAddr +" -ss " + _endCredits +" -t " + timeAtEnd + " -vcodec libx264 -acodec aac "
+						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " +_inputAddr + "3.ts";
+				cmds.add(cmd);
+				//now create the bash command that draws the text on the bit of video specified by the user
+				cmd = "avconv -i " + _inputAddr + "2.ts"  + " -vcodec libx264 -acodec aac -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
+						+ "truetype" + fileSep + "freefont" + fileSep + _creditsFont + ".ttf':text='" + _creditsText
+						+ "':x=" + _creditsXPos + ":y=" + _creditsYPos + ":fontsize=" + _creditsSize +":fontcolor=" + _creditsColor + "\" -strict experimental -y "
+						+_inputAddr + "4.ts";
+				//cmd="avconv -i /afs/ec.auckland.ac.nz/users/y/f/yfu959/unixhome/Desktop/206a3/a.mp42.ts -vcodec libx264 -acodec aac -vf \"drawtext=fontfile='/usr/share/fonts/truetype/freefont/FreeSans.ttf':text='hello':x=100:y=100:fontsize=24:fontcolor=white\" -strict experimental -y /afs/ec.auckland.ac.nz/users/y/f/yfu959/unixhome/Desktop/206a3/a.mp44.ts";
+				cmds.add(cmd);
+				//now create the bash command that will combine all the split videos together
+				cmd = "avconv -i concat:\"" + _inputAddr + "1.ts|" + _inputAddr + "4.ts|" + _inputAddr + "3.ts\"" + " -c copy -bsf:a aac_adtstoasc -y " + _outputAddr;
+				//cmd = "avconv -i video.mp42.ts -vcodec libx264 -acodec acc -strict experimental test.mp4";
+				cmds.add(cmd);
 			//otherwise if the user wants both title and credits scenes
 			} else {
-				
+				int endLength = Helper.timeInSec(_endCredits);
+				//get duration left (if any) after finish time specified by user
+				String timeAtEnd = Helper.formatTime(totalLength - endLength);
+				//create the bash command strings that will split the input video into 5 parts depending on start time and
+				//finish time specified by user
+				String cmd = "avconv -i " + _inputAddr + " -ss 00:00:00 -t " + _startTitle + " -vcodec libx264 -acodec aac "
+						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " +_inputAddr + "1.ts";
+				cmds.add(cmd);
+				int duration = Helper.timeInSec(_endTitle)-Helper.timeInSec(_startTitle);
+				cmd = "avconv -i " + _inputAddr +" -ss " + _startTitle +" -t " + Helper.formatTime(duration) + " -vcodec libx264 -acodec aac "
+						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " +_inputAddr + "2.ts";
+				cmds.add(cmd);
+				duration = Helper.timeInSec(_startCredits) - Helper.timeInSec(_endTitle);
+				cmd = "avconv -i " + _inputAddr +" -ss " + _endTitle +" -t " + Helper.formatTime(duration) + " -vcodec libx264 -acodec aac "
+						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " +_inputAddr + "3.ts";
+				cmds.add(cmd);
+				duration = Helper.timeInSec(_endCredits) - Helper.timeInSec(_startCredits);
+				cmd = "avconv -i " + _inputAddr +" -ss " + _startCredits +" -t " + Helper.formatTime(duration) + " -vcodec libx264 -acodec aac "
+						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " +_inputAddr + "4.ts";
+				cmds.add(cmd);
+				cmd = "avconv -i " + _inputAddr +" -ss " + _endCredits +" -t " + timeAtEnd + " -vcodec libx264 -acodec aac "
+						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " +_inputAddr + "5.ts";
+				cmds.add(cmd);
+				//now create the bash command that draws the text on the title section of video specified by the user
+				cmd = "avconv -i " + _inputAddr + "2.ts"  + " -vcodec libx264 -acodec aac -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
+						+ "truetype" + fileSep + "freefont" + fileSep + _titleFont + ".ttf':text='" + _titleText
+						+ "':x=" + _titleXPos + ":y=" + _titleYPos + ":fontsize=" + _titleSize +":fontcolor=" + _titleColor + "\" -strict experimental -y "
+						+_inputAddr + "6.ts";
+				cmds.add(cmd);
+				//now create the bash command that draws the text on the credits section of video specified by the user
+				cmd = "avconv -i " + _inputAddr + "4.ts"  + " -vcodec libx264 -acodec aac -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
+						+ "truetype" + fileSep + "freefont" + fileSep + _creditsFont + ".ttf':text='" + _creditsText
+						+ "':x=" + _creditsXPos + ":y=" + _creditsYPos + ":fontsize=" + _creditsSize +":fontcolor=" + _creditsColor + "\" -strict experimental -y "
+						+_inputAddr + "7.ts";
+				//cmd="avconv -i /afs/ec.auckland.ac.nz/users/y/f/yfu959/unixhome/Desktop/206a3/a.mp42.ts -vcodec libx264 -acodec aac -vf \"drawtext=fontfile='/usr/share/fonts/truetype/freefont/FreeSans.ttf':text='hello':x=100:y=100:fontsize=24:fontcolor=white\" -strict experimental -y /afs/ec.auckland.ac.nz/users/y/f/yfu959/unixhome/Desktop/206a3/a.mp44.ts";
+				cmds.add(cmd);
+				//now create the bash command that will combine all the split videos together
+				cmd = "avconv -i concat:\"" + _inputAddr + "1.ts|" + _inputAddr + "6.ts|" + _inputAddr + "3.ts|" + _inputAddr + "7.ts|" + _inputAddr + "5.ts\"" 
+						+ " -c copy -bsf:a aac_adtstoasc -y " + _outputAddr;
+				//cmd = "avconv -i video.mp42.ts -vcodec libx264 -acodec acc -strict experimental test.mp4";
+				cmds.add(cmd);
 			}
 			return cmds;
 		}

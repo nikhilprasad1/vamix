@@ -26,7 +26,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  **/
 public class Helper {
 	/**
-	 * Function to write to a file
+	 * Function to read from a file
 	 */
 	public static void fileRead() {
 		try{
@@ -212,7 +212,7 @@ public class Helper {
 			tempName=file.getAbsolutePath();//get path address
 			//check if it is mp3 if not add
 			if (!tempName.substring(tempName.length()-4, tempName.length()).equals("."+filterType)){
-				tempName=tempName+"."+filterType; //add the .png to end of file
+				tempName=tempName+"."+filterType; //add the filter type to end of file
 			}
 		}
 
@@ -395,5 +395,61 @@ public class Helper {
 			i=i+1;//increse value by 1
 		}
 		return nameGen;
+	}
+	
+	/**
+	 * Function that determines if the given input file is a valid video file
+	 * Only meant to accept .mp4, .avi and .flv
+	 */
+	public static boolean validVideoFile(String fileName,String pattern){
+		String inFileName="";
+		String path="";
+		boolean isValid=false;
+		boolean isVideo=false;
+		//now get the path of file and just file name
+		Matcher m=Pattern.compile("(.*"+File.separator+")(.*)$").matcher(fileName);
+		if(m.find()){
+			path = m.group(1); //get path
+			inFileName=m.group(2); //get file name
+		}
+		
+		if(fileName.equals("")){
+			//error message of empty file name
+			JOptionPane.showMessageDialog(null, "You have entered a empty file name. Please input a valid file name.");
+		}else{
+			//check if the file exist locally
+			if (Helper.fileExist(path+inFileName)){
+				String bash =File.separator+"bin"+File.separator+"bash";
+				String cmd ="echo $(file "+path+inFileName+")";
+				ProcessBuilder builder=new ProcessBuilder(bash,"-c",cmd); 
+				builder.redirectErrorStream(true);
+
+				try{
+					Process process = builder.start();
+					InputStream stdout = process.getInputStream();
+					BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+					String line;
+					while((line=stdoutBuffered.readLine())!=null){
+						Matcher match =Pattern.compile(pattern,Pattern.CASE_INSENSITIVE).matcher(line);
+						if(match.find()){
+							isVideo=true;
+						}
+					}
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+				//check if video audio using bash commands
+				if (isVideo){
+					isValid=true;
+				}else{
+					//file is not audio/mpeg type
+					JOptionPane.showMessageDialog(null, "You have entered a non-video file, please enter a valid file.");
+				}
+			}else{
+				//file does not exist so give error
+				JOptionPane.showMessageDialog(null, "You have entered a non-existing file. Please input a valid file type.");
+			}
+		}
+		return isValid;
 	}
 }
