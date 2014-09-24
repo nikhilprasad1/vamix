@@ -160,12 +160,15 @@ public class OverlayAudio {
 		private JFrame _overlayAudioFrame;
 		private JProgressBar _dlProgressBar;
 		private String outputName="";
+		private int i=1;
 		//constructor to allow the input from user to be use in extractworker
 		OverlayAudioWorker(String inFileName,String audioFileName,JFrame overlayAudioFrame,JProgressBar dlProgressBar){
 			_inFileName=inFileName;
 			_audioFileName=audioFileName;
 			_overlayAudioFrame=overlayAudioFrame;
 			_dlProgressBar=dlProgressBar;
+			_dlProgressBar.setStringPainted(true);
+			_dlProgressBar.setString(i+"/"+Constants.OVERLAY_PROCESS_NUMBER);
 		}
 
 
@@ -174,7 +177,7 @@ public class OverlayAudio {
 			outputName=Helper.fileNameGen(_inFileName, "overlay"); //generate output filename
 			String audio=Helper.fileNameGetter(_audioFileName);
 			String input=Helper.fileNameGetter(_inFileName);
-			
+			Helper.genTempFolder();//generate temp folder if doesnt exist
 			//get the required overlay audio section
 			//calculate duration from input
 			int duration=Helper.timeInSec(_endtime)-Helper.timeInSec(_startTime);
@@ -191,8 +194,7 @@ public class OverlayAudio {
 				InputStream stdout = process.getInputStream();
 				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				String line;
-				while((line=stdoutBuffered.readLine())!=null){
-					System.out.println(line); //==============================here
+				while((line=stdoutBuffered.readLine())!=null){				
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -215,8 +217,10 @@ public class OverlayAudio {
 				process = builder.start();
 				stdout = process.getInputStream();
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-				while((line=stdoutBuffered.readLine())!=null){
-					System.out.println(line); //==============================here
+				i=i+1; //increase counter of process by 1
+				publish(0);//reset bar
+				_dlProgressBar.setString(i+"/"+Constants.OVERLAY_PROCESS_NUMBER);
+				while((line=stdoutBuffered.readLine())!=null){					
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -240,8 +244,10 @@ public class OverlayAudio {
 				process = builder.start();
 				stdout = process.getInputStream();
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-				while((line=stdoutBuffered.readLine())!=null){
-					System.out.println(line); //==============================here
+				i=i+1; //increase counter of process by 1
+				publish(0);//reset bar
+				_dlProgressBar.setString(i+"/"+Constants.OVERLAY_PROCESS_NUMBER);
+				while((line=stdoutBuffered.readLine())!=null){					
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -266,8 +272,10 @@ public class OverlayAudio {
 				process = builder.start();
 				stdout = process.getInputStream();
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-				while((line=stdoutBuffered.readLine())!=null){
-					System.out.println(line); //==============================here
+				i=i+1; //increase counter of process by 1
+				publish(0);//reset bar
+				_dlProgressBar.setString(i+"/"+Constants.OVERLAY_PROCESS_NUMBER);
+				while((line=stdoutBuffered.readLine())!=null){					
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -291,8 +299,10 @@ public class OverlayAudio {
 				process = builder.start();
 				stdout = process.getInputStream();
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-				while((line=stdoutBuffered.readLine())!=null){
-					System.out.println(line); //==============================here
+				i=i+1; //increase counter of process by 1
+				publish(0);//reset bar
+				_dlProgressBar.setString(i+"/"+Constants.OVERLAY_PROCESS_NUMBER);
+				while((line=stdoutBuffered.readLine())!=null){					
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -315,9 +325,10 @@ public class OverlayAudio {
 				process = builder.start();
 				stdout = process.getInputStream();
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-
+				i=i+1; //increase counter of process by 1
+				publish(0);//reset bar
+				_dlProgressBar.setString(i+"/"+Constants.OVERLAY_PROCESS_NUMBER);
 				while((line=stdoutBuffered.readLine())!=null){
-					System.out.println(line); //==============================here
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -340,9 +351,10 @@ public class OverlayAudio {
 				process = builder.start();
 				stdout = process.getInputStream();
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-
+				i=i+1; //increase counter of process by 1
+				publish(0);//reset bar
+				_dlProgressBar.setString(i+"/"+Constants.OVERLAY_PROCESS_NUMBER);
 				while((line=stdoutBuffered.readLine())!=null){
-					System.out.println(line); //==============================here
 					if (isCancelled()){
 						process.destroy();//force quit extract
 					}else {
@@ -390,6 +402,10 @@ public class OverlayAudio {
 				break;
 			}
 			this._overlayAudioFrame.dispose();
+			//ask user if they want to load or preview the video
+			if (errorCode==0){ //when finish correctly
+				Helper.loadAndPreview(outputName,_startTimeOri,_endtimeOri);
+			}
 		}
 		
 		@Override
