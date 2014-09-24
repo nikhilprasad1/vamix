@@ -124,7 +124,8 @@ public class Strip {
 		private String _outFileName;
 		private JFrame _stripAudioFrame;
 		private JProgressBar _dlProgressBar;
-		
+		private String stripVideo="";
+		private int errorCode=0;
 		//constructor to allow the input from user to be use in extractworker
 		StripAudioWorker(String inFileName,String outFileName,JFrame stripAudioFrame,JProgressBar dlProgressBar){
 			_inFileName=inFileName;
@@ -138,7 +139,7 @@ public class Strip {
 		protected Void doInBackground() throws Exception {
 			//make sure the correct process Builder is setup as it is weird
 			//the bash command avconv -i $inputFile -vn -c:a libmp3lame -ss $startTime -t $duration $outputFile
-			
+			String path="";
 			List<String> cmds=new ArrayList<String>();//jumbo all cmd into a list
 			cmds.add("avconv");//use avconv
 			cmds.add("-i");//set avconv to i
@@ -151,7 +152,13 @@ public class Strip {
 			cmds.add("-an");
 			cmds.add("-c:v");
 			cmds.add("copy");
-			cmds.add(_outFileName+".mp4");
+			//generate output name for striped video need to get original first
+			Matcher vName=Pattern.compile("(.*)(\\p{Punct}.*)$").matcher(_outFileName);
+			if(vName.find()){
+				path=vName.group(1); //get file path with name
+			}
+			stripVideo=Helper.fileNameGen(path+".mp4","striped");
+			cmds.add(stripVideo);
 			ProcessBuilder builder;
 
 			builder=new ProcessBuilder(cmds); 
@@ -169,11 +176,16 @@ public class Strip {
 					}else {
 						//check time use this as indication for progress
 						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
+						Matcher mError =Pattern.compile("(does not contain any stream)").matcher(line);
 						if(m.find()){
 							//weird problem sometimes avconv gives int 100000000 so dont read it
 							if (!(m.group(1).equals("10000000000"))){
 								publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
 							}
+						}else if (mError.find()){
+							errorCode=143; //custom error code
+							process.destroy();//force quit extract
+							break;
 						}
 					}
 				}
@@ -189,7 +201,6 @@ public class Strip {
 		@Override
 		protected void done() {
 			//when it have finish Extracting
-			int errorCode=0;
 			try {
 				errorCode=process.waitFor();
 				get();
@@ -202,16 +213,26 @@ public class Strip {
 			
 			switch(errorCode){
 			case 0://nothing wrong so write to log
-				JOptionPane.showMessageDialog(null, "Strip audio has finished. Note output is saved to "+_outFileName+".");
+				JOptionPane.showMessageDialog(_stripAudioFrame, "Strip audio has finished. Note output is saved to "+_outFileName+"and\n"+stripVideo+".");
 				break;
 			case -1://extract cancelled
-				JOptionPane.showMessageDialog(null, "Strip audio  has been cancelled. Note output is saved to "+_outFileName+".");
+				JOptionPane.showMessageDialog(_stripAudioFrame, "Strip audio  has been cancelled. Note output is saved to "+_outFileName+"and\n"+stripVideo+".");
+				break;
+			case 143://when no audio or video stream
+				JOptionPane.showMessageDialog(_stripAudioFrame, "The input file doesnt have an audio/video stream. Please use a file with valid streams.");
+				break;
+			case 1://when no audio or video stream
+				JOptionPane.showMessageDialog(_stripAudioFrame, "The input file doesnt have an audio/video stream. Please use a file with valid streams.");
 				break;
 			default://error message of generic
-				JOptionPane.showMessageDialog(null, "An error have occured. Please try again. The error code is: "+errorCode);
+				JOptionPane.showMessageDialog(_stripAudioFrame, "An error have occured. Please try again. The error code is: "+errorCode);
 				break;
 			}
 			this._stripAudioFrame.dispose();
+			if (errorCode==0){
+				Helper.loadAndPreview(_outFileName, null, null);
+				Helper.loadAndPreview(stripVideo, null, null);
+			}
 		}
 		
 		@Override

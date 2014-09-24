@@ -481,45 +481,52 @@ public class Helper {
 		//initialise booleans
 		boolean load=false;
 		boolean preview=false;
-		int previewTimeS=timeInSec(startTime);
-		if (previewTimeS>5){ //set preview start time to 5 sec before if its longer than 5
-			previewTimeS=previewTimeS-5;
-		}
-		int previewTimeE=timeInSec(endTime);
-		if (previewTimeE>5){ //set preview end time to 5 sec before if its longer than 5
-			previewTimeE=previewTimeE-5;
-		}
-		//create option for user to choose
-		Object[] option= {"Load","Play preview","Both", "None"};
-		int overrideChoice=JOptionPane.showOptionDialog(null, "Do you wish to play and/or load " +outputName+".",
-				"Load and/or Play preview?",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE,null,option,option[0]);
-		if(overrideChoice==0){
-			load=true;
-		}else if(overrideChoice==1){
-			//play the preview using avplay
-			preview=true;
-		}else if (overrideChoice==2){
-			load=true;
-			preview=true;
-		}
-		
-		if (load){
-			//prepare (load) vid and set the new address
-			VamixController.vidAddSetter(outputName);
-			vamix.view.Main.vid.prepareMedia(outputName);
-		}
-		if(preview){
-			String[] cmdsArray=("avplay -i "+outputName+" -ss "+formatTime(previewTimeS)+" -t "+formatTime(previewTimeE)).split(" ");
-			List<String> cmds=Arrays.asList(cmdsArray);
-			ProcessBuilder builder;
-			builder=new ProcessBuilder(cmds); 
-			builder.redirectErrorStream(true);
-			//run process to preview the video
-			try{
-				Process process = builder.start();
-				//InputStream stdout = process.getInputStream();
-				//BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-			}catch(Exception e){
+		if (Helper.validVideoFile(outputName, "(audio)|MPEG|video")){
+			String[] cmdsArray=("avplay -i "+outputName).split(" ");
+			if (startTime!=null&&endTime!=null){ //only do this when start and endtime not null
+				int previewTimeS=timeInSec(startTime);
+				if (previewTimeS>5){ //set preview start time to 5 sec before if its longer than 5
+					previewTimeS=previewTimeS-5;
+				}
+				int previewTimeE=timeInSec(endTime);
+				if (previewTimeE>5){ //set preview end time to 5 sec before if its longer than 5
+					previewTimeE=previewTimeE-5;
+				}
+				cmdsArray=("avplay -i "+outputName+" -ss "+formatTime(previewTimeS)+" -t "+formatTime(previewTimeE)).split(" ");
+			}
+			
+			
+			//create option for user to choose
+			Object[] option= {"Load","Play preview","Both", "None"};
+			int overrideChoice=JOptionPane.showOptionDialog(null, "Do you wish to play and/or load " +outputName+".",
+					"Load and/or Play preview?",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE,null,option,option[0]);
+			if(overrideChoice==0){
+				load=true;
+			}else if(overrideChoice==1){
+				//play the preview using avplay
+				preview=true;
+			}else if (overrideChoice==2){
+				load=true;
+				preview=true;
+			}
+			
+			if (load){
+				//prepare (load) vid and set the new address
+				VamixController.vidAddSetter(outputName);
+				vamix.view.Main.vid.prepareMedia(outputName);
+			}
+			if(preview){
+				List<String> cmds=Arrays.asList(cmdsArray);
+				ProcessBuilder builder;
+				builder=new ProcessBuilder(cmds); 
+				builder.redirectErrorStream(true);
+				//run process to preview the video
+				try{
+					Process process = builder.start();
+					//InputStream stdout = process.getInputStream();
+					//BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+				}catch(Exception e){
+				}
 			}
 		}
 	}

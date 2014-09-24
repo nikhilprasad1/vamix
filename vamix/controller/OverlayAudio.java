@@ -392,13 +392,13 @@ public class OverlayAudio {
 			}
 			switch(errorCode){
 			case 0://nothing wrong so write to log
-				JOptionPane.showMessageDialog(null, "Overlay audio has finished. \nNote output is saved to "+outputName+".");
+				JOptionPane.showMessageDialog(_overlayAudioFrame, "Overlay audio has finished. \nNote output is saved to "+outputName+".");
 				break;
 			case -1://extract cancelled
-				JOptionPane.showMessageDialog(null, "Overlay audio  has been cancelled.");
+				JOptionPane.showMessageDialog(_overlayAudioFrame, "Overlay audio  has been cancelled.");
 				break;
 			default://error message of generic
-				JOptionPane.showMessageDialog(null, "An error have occured. Please try again. The error code is: "+errorCode);
+				JOptionPane.showMessageDialog(_overlayAudioFrame, "An error have occured. Please try again. The error code is: "+errorCode);
 				break;
 			}
 			this._overlayAudioFrame.dispose();

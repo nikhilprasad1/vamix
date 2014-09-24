@@ -347,13 +347,13 @@ public class ReplaceAudio {
 
 			switch(errorCode){
 			case 0://nothing wrong so write to log
-				JOptionPane.showMessageDialog(null, "Replace audio has finished. \nNote output is saved to "+outputName+".");
+				JOptionPane.showMessageDialog(_replaceAudioFrame, "Replace audio has finished. \nNote output is saved to "+outputName+".");
 				break;
 			case -1://extract cancelled
-				JOptionPane.showMessageDialog(null, "Replace audio  has been cancelled.");
+				JOptionPane.showMessageDialog(_replaceAudioFrame, "Replace audio  has been cancelled.");
 				break;
 			default://error message of generic
-				JOptionPane.showMessageDialog(null, "An error have occured. Please try again. The error code is: "+errorCode);
+				JOptionPane.showMessageDialog(_replaceAudioFrame, "An error have occured. Please try again. The error code is: "+errorCode);
 				break;
 			}
 			this._replaceAudioFrame.dispose();
@@ -361,7 +361,6 @@ public class ReplaceAudio {
 			if (errorCode==0){ //when finish correctly
 				Helper.loadAndPreview(outputName,_startTime2,_endtime2);
 			}
-			this._replaceAudioFrame.dispose();
 		}
 		
 		@Override
