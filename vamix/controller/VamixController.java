@@ -898,7 +898,7 @@ public class VamixController {
 			//setup file chooser
 			JFileChooser chooser = new JFileChooser(Constants.CURRENT_DIR);
 			FileNameExtensionFilter filter = new FileNameExtensionFilter("Video/audio file","avi","mov","mp4"
-					,"mp3","wav","wmv","mov","ogg");
+					,"mp3","wav","wmv","mov","ogg","ogv");
 			chooser.setFileFilter(filter); //set mp3 filter
 			//get save path
 			int choice=chooser.showOpenDialog(null);
@@ -936,7 +936,7 @@ public class VamixController {
 						String line;
 						while((line=stdoutBuffered.readLine())!=null){
 							//System.out.println(line);//debug file type
-							Matcher macth =Pattern.compile("(video)|Media|Audio|MPEG|mov|ogg").matcher(line);
+							Matcher macth =Pattern.compile("(video)|Media|Audio|MPEG|mov|ogg|ogv",Pattern.CASE_INSENSITIVE).matcher(line);
 							if(macth.find()){
 								isAudio=true;
 							}
