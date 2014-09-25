@@ -45,7 +45,7 @@ public class Strip {
 		String path=""; //variable for path
 
 		//get output file
-		if(Helper.validInFile(inFileName,"video|(MPEG)")){
+		if(Helper.validInFile(inFileName,Constants.VIDEO_AUDIO_TYPE)){
 			valid=false; //set corretness of outfile to false
 			if (outFileName==null){
 				JOptionPane.showMessageDialog(null, "You have not entered a save file name. Please input a valid file name.");
@@ -213,10 +213,10 @@ public class Strip {
 			
 			switch(errorCode){
 			case 0://nothing wrong so write to log
-				JOptionPane.showMessageDialog(_stripAudioFrame, "Strip audio has finished. Note output is saved to "+_outFileName+"and\n"+stripVideo+".");
+				JOptionPane.showMessageDialog(_stripAudioFrame, "Strip audio has finished. Note output is saved to "+_outFileName+" and \n"+stripVideo+".");
 				break;
 			case -1://extract cancelled
-				JOptionPane.showMessageDialog(_stripAudioFrame, "Strip audio  has been cancelled. Note output is saved to "+_outFileName+"and\n"+stripVideo+".");
+				JOptionPane.showMessageDialog(_stripAudioFrame, "Strip audio  has been cancelled. Note output is saved to "+_outFileName+" and \n"+stripVideo+".");
 				break;
 			case 143://when no audio or video stream
 				JOptionPane.showMessageDialog(_stripAudioFrame, "The input file doesnt have an audio/video stream. Please use a file with valid streams.");

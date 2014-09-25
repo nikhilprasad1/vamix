@@ -78,7 +78,8 @@ public class Main extends Application {
 									temp.delete();
 								}
 							}
-						}						
+						}
+						file.delete();
 					}
 				}
 			});

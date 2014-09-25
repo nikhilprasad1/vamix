@@ -947,7 +947,7 @@ public class VamixController {
 			//setup file chooser
 			JFileChooser chooser = new JFileChooser(Constants.CURRENT_DIR);
 			FileNameExtensionFilter filter = new FileNameExtensionFilter("Video/audio file","avi","mov","mp4"
-					,"mp3","wav","wmv","mov","ogg","ogv");
+					,"mp3","wav","wmv","mov");
 			chooser.setFileFilter(filter); //set mp3 filter
 			//get save path
 			int choice=chooser.showOpenDialog(null);
@@ -985,7 +985,7 @@ public class VamixController {
 						String line;
 						while((line=stdoutBuffered.readLine())!=null){
 							//System.out.println(line);//debug file type
-							Matcher macth =Pattern.compile("(video)|Media|Audio|MPEG|ISO Media|ogg|ogv",Pattern.CASE_INSENSITIVE).matcher(line);
+							Matcher macth =Pattern.compile(Constants.VIDEO_AUDIO_TYPE,Pattern.CASE_INSENSITIVE).matcher(line);
 							if(macth.find()){
 								isAudio=true;
 							}
@@ -1000,7 +1000,7 @@ public class VamixController {
 						valid=true;
 					}else{
 						//file is not audio/mpeg type
-						JOptionPane.showMessageDialog(null, "You have entered a non-video file please enter a valid file.");
+						JOptionPane.showMessageDialog(null, "You have entered a non-video file or the file type is not supported.\n Please enter a valid file.");
 					}
 				}else{
 					//file does not exist so give error

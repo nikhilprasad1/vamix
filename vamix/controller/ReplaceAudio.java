@@ -53,7 +53,7 @@ public class ReplaceAudio {
 		String audioFile=_inAudio; //input audio filename full path
 		
 		//get output file
-		if(Helper.validInFile(inFileName,"(MPEG)|Video")){
+		if(Helper.validInFile(inFileName,Constants.VIDEO_AUDIO_TYPE)){
 			valid=false; //set corretness of outfile to false
 			if (audioFile==null){
 				JOptionPane.showMessageDialog(null, "You have not entered an audio file name. Please input a valid file name.");
