@@ -72,7 +72,9 @@ public class VamixController {
 	
 	@FXML
 	private MenuItem loadStateBtn;
-
+	
+	@FXML
+	private MenuItem loadFiles;
 	/*
 	 * Varaible for the video tab
 	 */
@@ -274,7 +276,7 @@ public class VamixController {
 	@FXML
 	private ProgressBar videoProgress;
 
-	private static String videoFileAdd="";
+	private String videoFileAdd="";
 	
 	private SkipWorker sW;
 	
@@ -896,6 +898,7 @@ public class VamixController {
 	private void menuCheck() {
 		assert saveStateBtn != null : "fx:id=\"saveStateBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert loadStateBtn != null : "fx:id=\"loadStateBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert loadFiles != null : "fx:id=\"loadFiles\" was not injected: check your FXML file 'VideoView.fxml'.";
 	}
 	private void menuActions() {
 		//action for the save menu item, will save the state of vamix to file
@@ -911,6 +914,23 @@ public class VamixController {
 			@Override
 			public void handle(ActionEvent evt) {
 				loadState();
+			}
+		});
+		
+		//when load file menu item clicked
+		loadFiles.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evt) {
+				//load video function button when click browse
+				//load media
+				String previousFile =videoFileAdd;//get current file
+				loadMedia();
+				if (!(previousFile.equals(videoPath.getText()))&Helper.validInFile(videoPath.getText(),"(video)|Media|Audio|MPEG|ISO Media|ogg|ogv")){
+					vamix.view.Main.vid.prepareMedia(videoPath.getText());
+					videoFileAdd=videoPath.getText();
+				}else if (previousFile.equals(videoPath.getText())){
+					JOptionPane.showMessageDialog(null,"You have entered the file thats already been play.");
+				}
 			}
 		});
 	}
@@ -1199,11 +1219,6 @@ public class VamixController {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	//set video address
-	public static void vidAddSetter(String toSet){
-		videoFileAdd=toSet;
 	}
 	
 }

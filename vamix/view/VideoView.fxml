@@ -216,9 +216,15 @@
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
+				<MenuItem fx:id="loadFiles" mnemonicParsing="false" text="Load Video/Audio files" />
+            </items>
+          </Menu>
+        </menus>
+        <menus>
+          <Menu mnemonicParsing="false" text="State">
+            <items>
               <MenuItem fx:id="saveStateBtn" mnemonicParsing="false" text="Save state" />
                   <MenuItem fx:id="loadStateBtn" mnemonicParsing="false" text="Load state" />
-                  <MenuItem fx:id="loadFiles" mnemonicParsing="false" text="Load Video/Audio files" />
             </items>
           </Menu>
         </menus>

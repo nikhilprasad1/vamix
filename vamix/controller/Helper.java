@@ -512,7 +512,6 @@ public class Helper {
 			
 			if (load){
 				//prepare (load) vid and set the new address
-				VamixController.vidAddSetter(outputName);
 				vamix.view.Main.vid.prepareMedia(outputName);
 			}
 			if(preview){
