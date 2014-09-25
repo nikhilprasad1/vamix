@@ -202,7 +202,7 @@ public class Helper {
 	 * 		  output: String full path name of file
 	 */
 	public static String saveFileChooser(String file_type_message,String filterType){
-		String tempName = null;
+		String tempName = "";
 		//setup chooser
 		JFileChooser chooser = new JFileChooser(Constants.CURRENT_DIR);
 	    FileNameExtensionFilter filter = new FileNameExtensionFilter(file_type_message,filterType);
@@ -284,7 +284,7 @@ public class Helper {
 	 * 		  output: String full path name of file
 	 */
 	public static String audioFileChooser(){
-		String tempName = null;
+		String tempName = "";
 		//setup chooser
 		JFileChooser chooser = new JFileChooser(Constants.CURRENT_DIR);
 	    FileNameExtensionFilter filter = new FileNameExtensionFilter("Mp3 File","mp3");

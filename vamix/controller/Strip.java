@@ -176,7 +176,7 @@ public class Strip {
 					}else {
 						//check time use this as indication for progress
 						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
-						Matcher mError =Pattern.compile("(does not contain any stream)").matcher(line);
+						Matcher mError =Pattern.compile("(Output file #0 does not contain any stream)",Pattern.CASE_INSENSITIVE).matcher(line);
 						if(m.find()){
 							//weird problem sometimes avconv gives int 100000000 so dont read it
 							if (!(m.group(1).equals("10000000000"))){
