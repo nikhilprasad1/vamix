@@ -217,12 +217,12 @@ public class TextEdit {
 			//when it have finish Extracting
 			int errorCode=0;
 			try {
-//				errorCode=process.waitFor();
-//				get();
+				errorCode=process.waitFor();
+				get();
 				//set the progress bar to full in case the last process' updating was too slow
 				publish(100);
-//			} catch (InterruptedException e) {
-//			} catch (ExecutionException e) {
+			} catch (InterruptedException e) {
+			} catch (ExecutionException e) {
 			} catch (CancellationException e){
 				errorCode=-1; //when cancel error code is -1 
 			}
