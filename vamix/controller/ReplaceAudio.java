@@ -81,7 +81,7 @@ public class ReplaceAudio {
 						}
 					}
 				}catch(Exception e){
-					e.printStackTrace();
+					//e.printStackTrace();
 				}
 				if (isAudio==true){
 					valid=true;//audio file valid

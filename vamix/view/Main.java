@@ -91,7 +91,7 @@ public class Main extends Application {
 			//System.out.println(com.sun.javafx.runtime.VersionInfo.getRuntimeVersion());
 			//initStage.show();	
 		} catch (IOException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 
