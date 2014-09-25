@@ -34,6 +34,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
@@ -609,42 +610,67 @@ public class VamixController {
 			@Override
 			public void handle(ActionEvent evt) {
 				TextEdit textRenderer = null;
+				String overwrite = "";
+				int choice = -1;
+				boolean cancelled = false;
 				//check if the input video file is a valid video file (is either mp4, avi or flv)
 				if(Helper.validVideoFile(videoFileAdd,"(MPEG v4)|Video")){
-					//check which text scenes the user wants to render with the video
-					if (includeTitle.isSelected() && includeCredits.isSelected()) {
-						if (checkTitleInputs() && checkCreditsInputs()) {
-							//if the user wants to render both text scenes make sure the credits scene comes after the title scene and 
-							//no overlap occurs
-							int endOfTitle = Helper.timeInSec(endTitle.getText());
-							int startOfCredits = Helper.timeInSec(startCredits.getText());
-							if (endOfTitle < startOfCredits) {
-								textRenderer = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
-										startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), creditText.getText(), 
-										creditsFont.getValue(), creditsSize.getValue(), creditsColour.getValue().toString(), startCredits.getText(), endCredits.getText(),
-										creditsXPos.getText(), creditsYPos.getText(), videoFileAdd, Constants.CURRENT_DIR+"o.mp4", null);
-								textRenderer.renderWithTextAsync(RenderType.BOTH);
+					//check the output file DIRECTORY exists
+					String outDir = Helper.pathGetter(outputFilePath.getText());
+					String outFileName = Helper.fileNameGetter(outputFilePath.getText());
+					if (Helper.fileExist(outDir)) {
+						//if the directory does exist, check if output file exists, if it does ask user if they want to overwrite
+						if (Helper.fileExist(outputFilePath.getText())) {
+							Object[] options = {"Overwrite", "Cancel"};
+							choice = JOptionPane.showOptionDialog(null, "File " + outFileName +" already exist. Do you wish to overwrite it or cancel and choose another destination?",
+									"Override?",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE,null,options, options[0]);
+							if (choice == 0) {
+								//space MUST come after 'y' or concat bash command in rendering will fail
+								overwrite = "-y ";
 							} else {
-								JOptionPane.showMessageDialog(null, "The credits scene must start after the title scene has finished", "Overlapping scenes",
+								cancelled = true;
+							}
+						}
+						if (!cancelled) {
+							//check which text scenes the user wants to render with the video
+							if (includeTitle.isSelected() && includeCredits.isSelected()) {
+								if (checkTitleInputs() && checkCreditsInputs()) {
+									//if the user wants to render both text scenes make sure the credits scene comes after the title scene and 
+									//no overlap occurs
+									int endOfTitle = Helper.timeInSec(endTitle.getText());
+									int startOfCredits = Helper.timeInSec(startCredits.getText());
+									if (endOfTitle < startOfCredits) {
+										textRenderer = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
+												startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), creditText.getText(), 
+												creditsFont.getValue(), creditsSize.getValue(), creditsColour.getValue().toString(), startCredits.getText(), endCredits.getText(),
+												creditsXPos.getText(), creditsYPos.getText(), videoFileAdd, outputFilePath.getText(), null);
+										textRenderer.renderWithTextAsync(RenderType.BOTH, overwrite);
+									} else {
+										JOptionPane.showMessageDialog(null, "The credits scene must start after the title scene has finished", "Overlapping scenes",
+												JOptionPane.ERROR_MESSAGE);
+									}
+								}
+							} else if (includeTitle.isSelected()) {
+								if (checkTitleInputs()) {
+									textRenderer = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
+											startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), null, null, null, null, null, null,
+											null, null, videoFileAdd, outputFilePath.getText(), null);
+									textRenderer.renderWithTextAsync(RenderType.OPENING, overwrite);
+								}
+							} else if (includeCredits.isSelected()) {
+								if (checkCreditsInputs()) {
+									textRenderer = new TextEdit(null, null, null, null, null, null, null, null, creditText.getText(), 
+											creditsFont.getValue(), creditsSize.getValue(), creditsColour.getValue().toString(), startCredits.getText(), endCredits.getText(),
+											creditsXPos.getText(), creditsYPos.getText(), videoFileAdd, outputFilePath.getText(), null);
+									textRenderer.renderWithTextAsync(RenderType.CLOSING, overwrite);
+								}
+							} else {
+								JOptionPane.showMessageDialog(null, "Please select a text scene(s) to render with the video", "Select Text Scene",
 										JOptionPane.ERROR_MESSAGE);
 							}
 						}
-					} else if (includeTitle.isSelected()) {
-						if (checkTitleInputs()) {
-							textRenderer = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
-									startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), null, null, null, null, null, null,
-									null, null, videoFileAdd, Constants.CURRENT_DIR+"o.mp4", null);
-							textRenderer.renderWithTextAsync(RenderType.OPENING);
-						}
-					} else if (includeCredits.isSelected()) {
-						if (checkCreditsInputs()) {
-							textRenderer = new TextEdit(null, null, null, null, null, null, null, null, creditText.getText(), 
-									creditsFont.getValue(), creditsSize.getValue(), creditsColour.getValue().toString(), startCredits.getText(), endCredits.getText(),
-									creditsXPos.getText(), creditsYPos.getText(), videoFileAdd, Constants.CURRENT_DIR+"o.mp4", null);
-							textRenderer.renderWithTextAsync(RenderType.CLOSING);
-						}
 					} else {
-						JOptionPane.showMessageDialog(null, "Please select a text scene(s) to render with the video", "Select Text Scene",
+						JOptionPane.showMessageDialog(null, "The output directory specified does not exist", "Invalid output location",
 								JOptionPane.ERROR_MESSAGE);
 					}
 				}
