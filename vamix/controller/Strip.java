@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -126,6 +127,8 @@ public class Strip {
 		private JProgressBar _dlProgressBar;
 		private String stripVideo="";
 		private int errorCode=0;
+		boolean containAudio=false;
+		boolean containVideo=false;
 		//constructor to allow the input from user to be use in extractworker
 		StripAudioWorker(String inFileName,String outFileName,JFrame stripAudioFrame,JProgressBar dlProgressBar){
 			_inFileName=inFileName;
@@ -140,31 +143,15 @@ public class Strip {
 			//make sure the correct process Builder is setup as it is weird
 			//the bash command avconv -i $inputFile -vn -c:a libmp3lame -ss $startTime -t $duration $outputFile
 			String path="";
-			List<String> cmds=new ArrayList<String>();//jumbo all cmd into a list
-			cmds.add("avconv");//use avconv
-			cmds.add("-i");//set avconv to i
-			cmds.add(_inFileName);//add file name
-			cmds.add("-vn");//more avconv functions
-			cmds.add("-c:a");//option of avconv of copying audio only
-			cmds.add("libmp3lame"); //format of output of audio extraction
-			cmds.add(_outFileName); //the output file name
-			//for stripping off the audio to a video
-			cmds.add("-an");
-			cmds.add("-c:v");
-			cmds.add("copy");
-			//generate output name for striped video need to get original first
-			Matcher vName=Pattern.compile("(.*)(\\p{Punct}.*)$").matcher(_outFileName);
-			if(vName.find()){
-				path=vName.group(1); //get file path with name
-			}
-			stripVideo=Helper.fileNameGen(path+".mp4","striped");
-			cmds.add(stripVideo);
 			ProcessBuilder builder;
-
+			String[] checkCmd=("avconv -i " +_inFileName).split(" ");
+			List<String> cmds=Arrays.asList(checkCmd);
 			builder=new ProcessBuilder(cmds); 
 			builder.redirectErrorStream(true);
 			// workout the length of the extracted file tho work out progress bar
 			int totalLength=(int)(vamix.view.Main.vid.getLength()/1000.0);
+			//Audio check if file have audio
+			
 			try{
 				process = builder.start();
 				InputStream stdout = process.getInputStream();
@@ -175,21 +162,66 @@ public class Strip {
 						process.destroy();//force quit extract
 					}else {
 						//check time use this as indication for progress
-						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
-						Matcher mError =Pattern.compile("(Output file #0 does not contain any stream)",Pattern.CASE_INSENSITIVE).matcher(line);
-						if(m.find()){
-							//weird problem sometimes avconv gives int 100000000 so dont read it
-							if (!(m.group(1).equals("10000000000"))){
-								publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
-							}
-						}else if (mError.find()){
-							errorCode=143; //custom error code
-							process.destroy();//force quit extract
-							break;
+						Matcher mAudio =Pattern.compile("(Audio)",Pattern.CASE_INSENSITIVE).matcher(line);
+						Matcher mVideo =Pattern.compile("(Video)",Pattern.CASE_INSENSITIVE).matcher(line);
+						if (mAudio.find()){
+							containAudio=true; 
+						}else if (mVideo.find()){
+							containVideo=true;
 						}
 					}
 				}
-
+				
+				if (containAudio){
+					cmds=new ArrayList<String>();//jumbo all cmd into a list
+					cmds.add("avconv");//use avconv
+					cmds.add("-i");//set avconv to i
+					cmds.add(_inFileName);//add file name
+					cmds.add("-vn");//more avconv functions
+					cmds.add("-c:a");//option of avconv of copying audio only
+					cmds.add("libmp3lame"); //format of output of audio extraction
+					cmds.add(_outFileName); //the output file name
+					if (containVideo){
+						//for stripping off the audio to a video
+						cmds.add("-an");
+						cmds.add("-c:v");
+						cmds.add("copy");
+						//generate output name for striped video need to get original first
+						Matcher vName=Pattern.compile("(.*)(\\p{Punct}.*)$").matcher(_outFileName);
+						if(vName.find()){
+							path=vName.group(1); //get file path with name
+						}
+						stripVideo=Helper.fileNameGen(path+".mp4","striped");
+						cmds.add(stripVideo);
+					}
+					//setup process cmd for striping audio
+					builder=new ProcessBuilder(cmds); 
+					builder.redirectErrorStream(true);
+					process = builder.start();
+					stdout = process.getInputStream();
+					stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+					while((line=stdoutBuffered.readLine())!=null){
+						if (isCancelled()){
+							process.destroy();//force quit extract
+						}else {
+							//check time use this as indication for progress
+							Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
+							Matcher mError =Pattern.compile("(Output file #0 does not contain any stream)",Pattern.CASE_INSENSITIVE).matcher(line);
+							if(m.find()){
+								//weird problem sometimes avconv gives int 100000000 so dont read it
+								if (!(m.group(1).equals("10000000000"))){
+									publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
+								}
+							}else if (mError.find()){
+								errorCode=143; //custom error code
+								process.destroy();//force quit extract
+								break;
+							}
+						}
+					}
+				}else{
+					errorCode=143;
+				}
 
 
 			}catch(Exception er){
@@ -213,10 +245,18 @@ public class Strip {
 			
 			switch(errorCode){
 			case 0://nothing wrong so write to log
-				JOptionPane.showMessageDialog(_stripAudioFrame, "Strip audio has finished. Note output is saved to "+_outFileName+" and \n"+stripVideo+".");
+				if (containVideo){
+					JOptionPane.showMessageDialog(_stripAudioFrame, "Strip audio has finished. Note output is saved to "+_outFileName+" and \n"+stripVideo+".");
+				}else{
+					JOptionPane.showMessageDialog(_stripAudioFrame, "Strip audio has finished. Note output is saved to "+_outFileName+".");
+				}
 				break;
 			case -1://extract cancelled
-				JOptionPane.showMessageDialog(_stripAudioFrame, "Strip audio  has been cancelled. Note output is saved to "+_outFileName+" and \n"+stripVideo+".");
+				if (containVideo){
+					JOptionPane.showMessageDialog(_stripAudioFrame, "Strip audio  has been cancelled. Note output is saved to "+_outFileName+" and \n"+stripVideo+".");
+				}else{
+					JOptionPane.showMessageDialog(_stripAudioFrame, "Strip audio  has been cancelled. Note output is saved to "+_outFileName+".");
+				}
 				break;
 			case 143://when no audio or video stream
 				JOptionPane.showMessageDialog(_stripAudioFrame, "The input file doesn't have an audio/video stream. Please use a file with valid streams.");
@@ -231,7 +271,9 @@ public class Strip {
 			this._stripAudioFrame.dispose();
 			if (errorCode==0){
 				Helper.loadAndPreview(_outFileName, null, null);
-				Helper.loadAndPreview(stripVideo, null, null);
+				if (containVideo){
+					Helper.loadAndPreview(stripVideo, null, null);
+				}
 			}
 		}
 		

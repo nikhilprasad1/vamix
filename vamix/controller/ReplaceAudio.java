@@ -181,8 +181,12 @@ public class ReplaceAudio {
 			String input=Helper.fileNameGetter(_inFileName);
 			//get the required replace audio section
 			//calculate duration from input
+			//if specify outside file
+			if(Helper.timeInSec(_endtime2)>(int)(vamix.view.Main.vid.getLength()/1000)){
+				_endtime2=Helper.formatTime((int)(vamix.view.Main.vid.getLength()/1000));
+			}
 			int duration=Helper.timeInSec(_endtime2)-Helper.timeInSec(_startTime2);
-			//get part for after replace
+			//get part for before replace
 			if ((Helper.timeInSec(_endtime)-Helper.timeInSec(_startTime))<(Helper.timeInSec(_endtime2)-Helper.timeInSec(_startTime2))){
 				duration=Helper.timeInSec(_endtime)-Helper.timeInSec(_startTime);
 			}
