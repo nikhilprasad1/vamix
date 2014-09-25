@@ -2,6 +2,7 @@ package vamix.view;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JFrame;
@@ -9,6 +10,8 @@ import javax.swing.JLayeredPane;
 
 import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
+import vamix.controller.Constants;
+import vamix.controller.Helper;
 import javafx.application.Application;
 import javafx.embed.swing.JFXPanel;
 import javafx.fxml.FXMLLoader;
@@ -62,6 +65,19 @@ public class Main extends Application {
 				public void windowClosing(WindowEvent e){
 					//remove mediaplayer when close}
 					mediaPlayerComponent.release();
+					//delete to be override file
+					if(Helper.fileExist(Constants.LOG_DIR)){
+						File file=new File(Constants.LOG_DIR);
+						//get all files in it
+						String[] fileList=file.list();
+						if (fileList!=null){//delete file in dir first
+							for (String toDeletefile:fileList){
+								File temp=new File(file.getPath(),toDeletefile);
+								temp.delete();
+							}
+						}
+						file.delete();//delete dir
+					}
 				}
 			});
 			frame.setSize(1001, 627);
