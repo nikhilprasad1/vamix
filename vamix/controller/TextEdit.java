@@ -182,6 +182,7 @@ public class TextEdit {
 				builder = new ProcessBuilder("/bin/bash","-c",cmd);
 				builder.redirectErrorStream(true);
 				try {
+					//run the bash command as a process
 					process = builder.start();
 					InputStream stdout = process.getInputStream();
 					BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));

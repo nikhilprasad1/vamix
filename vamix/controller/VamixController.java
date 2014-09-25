@@ -232,9 +232,6 @@ public class VamixController {
 	private Tab renderTab;
 
 	@FXML
-	private Button renderNoAudioBtn;
-
-	@FXML
 	private Button renderWithAudioBtn;
 
 	@FXML
@@ -659,7 +656,7 @@ public class VamixController {
 			@Override
 			public void handle(MouseEvent arg0) {
 				if ((arg0.getClickCount()>=2)&& !arg0.isConsumed()){
-					//choose replace audio
+					//choose the output file 
 					String temp=Helper.saveFileChooser("MP4 files Only", "mp4");
 					outputFilePath.setText(temp);
 				}
@@ -669,7 +666,7 @@ public class VamixController {
 		saveToBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
-				//choose replace audio
+				//choose the output file
 				String temp=Helper.saveFileChooser("MP4 files Only", "mp4");
 				outputFilePath.setText(temp);
 			}
@@ -683,7 +680,6 @@ public class VamixController {
 		assert outputFilePath != null : "fx:id=\"outputFilePath\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert saveToBtn != null : "fx:id=\"saveToBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert renderWithAudioBtn != null : "fx:id=\"renderWithAudioBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
-		assert renderNoAudioBtn != null : "fx:id=\"renderNoAudioBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert includeTitle != null : "fx:id=\"includeTitle\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert includeCredits != null : "fx:id=\"includeCredits\" was not injected: check your FXML file 'VideoView.fxml'.";
 
@@ -1143,6 +1139,8 @@ public class VamixController {
 		    writer.write(overlayToEnd.getText() + "\n");
 		    //now write the render tab values into state file (don't include the check boxes as they affect rendering)
 		    writer.write(outputFilePath.getText() + "\n");
+		    //notify user that the state has been saved
+		    JOptionPane.showMessageDialog(null, "The current session has been saved", "State saved", JOptionPane.INFORMATION_MESSAGE);
 		} catch (IOException ex) {
 		  //do nothing
 		} finally {
