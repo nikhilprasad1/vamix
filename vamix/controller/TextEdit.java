@@ -112,7 +112,7 @@ public class TextEdit {
 				stdout = process.getInputStream();
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				while((line=stdoutBuffered.readLine())!=null){
-					System.out.println(line);
+					//System.out.println(line);
 				}
 				
 				BufferedImage image = ImageIO.read(new File(Constants.LOG_DIR + fileSep + _titleOrCredits + ".jpg"));
@@ -163,21 +163,20 @@ public class TextEdit {
 	class RenderWorker extends SwingWorker<Void, Integer> {
 		
 		//int to display to user which tells them which process of rendering Vamix is currently at
-		private int processNumber = 0, totalProcesses;
+		private int processNumber =1, totalProcesses;
 		private Process process;
 		private ProcessBuilder builder;
 		//helps to calculate a proportionate value for the progress bar (changes for each process)
-		List<Integer> processDurations = null;
+		List<Integer> processDurations = new  ArrayList<Integer>();
 		
 		@Override
 		protected Void doInBackground() {			
 			Helper.genTempFolder();	//generate folder to hold temporary files (if it doesn't exist already)
-			System.out.println("AM I IN HERE?!");
 			//the list of processes
 			List<String> cmds = buildRenderCommandList();
 			//the number of processes that need to be run
 			totalProcesses = cmds.size();
-			for (String cmd : cmds) {
+			for (String cmd : cmds) { //debug
 				System.out.println(cmd);
 			}
 			for (String cmd : cmds) {
@@ -194,7 +193,6 @@ public class TextEdit {
 					publish(0);
 					processNumber = processNumber + 1;
 					while((line = stdoutBuffered.readLine()) != null){
-						System.out.println(line);
 						if (isCancelled()){
 							process.destroy();//force quit extract
 						}else {
@@ -208,6 +206,7 @@ public class TextEdit {
 							}
 						}
 					}
+					System.out.println("terminate");
 				} catch(Exception e) {
 					e.printStackTrace();
 				}
@@ -271,13 +270,14 @@ public class TextEdit {
 			//now get length of video being edited
 			int totalLength = (int)(vamix.view.Main.vid.getLength()/1000);
 			//if user only wants to add a title OR a credits scene
+			String cmd="";
 			if (_renderType == RenderType.OPENING) {
 				int endLength = Helper.timeInSec(_endTitle);
 				//get duration left (if any) after finish time specified by user
 				String timeAtEnd = Helper.formatTime(totalLength - endLength);
 				//create the bash command strings that will split the input video into 3 parts depending on start time and
 				//finish time specified by user
-				String cmd = "avconv -i " + _inputAddr + " -ss 00:00:00 -t " + _startTitle + " -vcodec libx264 -acodec aac "
+				cmd = "avconv -i " + _inputAddr + " -ss 00:00:00 -t " + _startTitle + " -vcodec libx264 -acodec aac "
 						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " + tempOutput + "1.ts";
 				cmds.add(cmd);
 				//set the progress duration for each command
@@ -292,7 +292,7 @@ public class TextEdit {
 				cmds.add(cmd);
 				processDurations.add(Helper.timeInSec(timeAtEnd));
 				//now create the bash command that draws the text on the bit of video specified by the user
-				cmd = "avconv -i " + _inputAddr + "2.ts"  + " -vcodec libx264 -acodec aac -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
+				cmd = "avconv -i " + tempOutput + "2.ts"  + " -vcodec libx264 -acodec aac -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
 						+ "truetype" + fileSep + "freefont" + fileSep + _titleFont + ".ttf':text='" + _titleText
 						+ "':x=" + _titleXPos + ":y=" + _titleYPos + ":fontsize=" + _titleSize +":fontcolor=" + _titleColor + "\" -strict experimental -y "
 						+ tempOutput + "4.ts";				
@@ -305,13 +305,15 @@ public class TextEdit {
 				cmds.add(cmd);
 				//the concatenation process is really quick
 				processDurations.add(4);
+				System.out.println("AM I sdasENDe");
 			} else if (_renderType == RenderType.CLOSING) {
+				System.out.println("AM I IN HERE?!close");
 				int endLength = Helper.timeInSec(_endCredits);
 				//get duration left (if any) after finish time specified by user
 				String timeAtEnd = Helper.formatTime(totalLength - endLength);
 				//create the bash command strings that will split the input video into 3 parts depending on start time and
 				//finish time specified by user
-				String cmd = "avconv -i " + _inputAddr + " -ss 00:00:00 -t " + _startCredits + " -vcodec libx264 -acodec aac "
+				cmd = "avconv -i " + _inputAddr + " -ss 00:00:00 -t " + _startCredits + " -vcodec libx264 -acodec aac "
 						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " +tempOutput + "1.ts";
 				cmds.add(cmd);
 				processDurations.add(Helper.timeInSec(_startCredits));
@@ -325,7 +327,7 @@ public class TextEdit {
 				cmds.add(cmd);
 				processDurations.add(Helper.timeInSec(timeAtEnd));
 				//now create the bash command that draws the text on the bit of video specified by the user
-				cmd = "avconv -i " + _inputAddr + "2.ts"  + " -vcodec libx264 -acodec aac -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
+				cmd = "avconv -i " + tempOutput + "2.ts"  + " -vcodec libx264 -acodec aac -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
 						+ "truetype" + fileSep + "freefont" + fileSep + _creditsFont + ".ttf':text='" + _creditsText
 						+ "':x=" + _creditsXPos + ":y=" + _creditsYPos + ":fontsize=" + _creditsSize +":fontcolor=" + _creditsColor + "\" -strict experimental -y "
 						+tempOutput + "4.ts";
@@ -339,12 +341,13 @@ public class TextEdit {
 				processDurations.add(4);
 			//otherwise if the user wants both title and credits scenes
 			} else {
+				System.out.println("AM I IN HERE?!both");
 				int endLength = Helper.timeInSec(_endCredits);
 				//get duration left (if any) after finish time specified by user
 				String timeAtEnd = Helper.formatTime(totalLength - endLength);
 				//create the bash command strings that will split the input video into 5 parts depending on start time and
 				//finish time specified by user
-				String cmd = "avconv -i " + _inputAddr + " -ss 00:00:00 -t " + _startTitle + " -vcodec libx264 -acodec aac "
+				cmd = "avconv -i " + _inputAddr + " -ss 00:00:00 -t " + _startTitle + " -vcodec libx264 -acodec aac "
 						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " +tempOutput + "1.ts";
 				cmds.add(cmd);
 				processDurations.add(Helper.timeInSec(_startTitle));
@@ -368,14 +371,14 @@ public class TextEdit {
 				cmds.add(cmd);
 				processDurations.add(Helper.timeInSec(timeAtEnd));
 				//now create the bash command that draws the text on the title section of video specified by the user
-				cmd = "avconv -i " + _inputAddr + "2.ts"  + " -vcodec libx264 -acodec aac -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
+				cmd = "avconv -i " + tempOutput + "2.ts"  + " -vcodec libx264 -acodec aac -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
 						+ "truetype" + fileSep + "freefont" + fileSep + _titleFont + ".ttf':text='" + _titleText
 						+ "':x=" + _titleXPos + ":y=" + _titleYPos + ":fontsize=" + _titleSize +":fontcolor=" + _titleColor + "\" -strict experimental -y "
 						+tempOutput + "6.ts";
 				cmds.add(cmd);
 				processDurations.add(Helper.timeInSec(_endTitle) - Helper.timeInSec(_startTitle));
 				//now create the bash command that draws the text on the credits section of video specified by the user
-				cmd = "avconv -i " + _inputAddr + "4.ts"  + " -vcodec libx264 -acodec aac -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
+				cmd = "avconv -i " + tempOutput + "4.ts"  + " -vcodec libx264 -acodec aac -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
 						+ "truetype" + fileSep + "freefont" + fileSep + _creditsFont + ".ttf':text='" + _creditsText
 						+ "':x=" + _creditsXPos + ":y=" + _creditsYPos + ":fontsize=" + _creditsSize +":fontcolor=" + _creditsColor + "\" -strict experimental -y "
 						+tempOutput + "7.ts";

@@ -287,6 +287,7 @@ public class VamixController {
 		audioTabCheck();
 		renderTabCheck();
 		playerCheck();
+		menuCheck();
 		menuActions();
 		videoTab();
 		audioTab();
@@ -398,7 +399,7 @@ public class VamixController {
 				//load media
 				String previousFile =videoFileAdd;//get current file
 				loadMedia();
-				if (!(previousFile.equals(videoPath.getText()))&Helper.validInFile(videoPath.getText(),"(Audio)|Video|MPEG")){
+				if (!(previousFile.equals(videoPath.getText()))&Helper.validInFile(videoPath.getText(),"(video)|Media|Audio|MPEG|ISO Media|ogg|ogv")){
 					vamix.view.Main.vid.prepareMedia(videoPath.getText());
 					videoFileAdd=videoPath.getText();
 				}else if (previousFile.equals(videoPath.getText())){
@@ -413,7 +414,7 @@ public class VamixController {
 			public void handle(ActionEvent evt) {
 				//play media if its different from the current one
 				String previousFile =videoFileAdd;//get current file
-				if (!(previousFile.equals(videoPath.getText()))&Helper.validInFile(videoPath.getText(),"(Audio)|Video|MPEG")){
+				if (!(previousFile.equals(videoPath.getText()))&Helper.validInFile(videoPath.getText(),"(video)|Media|Audio|MPEG|ISO Media|ogg|ogv")){
 					vamix.view.Main.vid.prepareMedia(videoPath.getText());
 					videoFileAdd=videoPath.getText();
 				}else if (previousFile.equals(videoPath.getText())){
@@ -892,6 +893,10 @@ public class VamixController {
 		assert audioTab != null : "fx:id=\"audioTab\" was not injected: check your FXML file 'VideoView.fxml'.";
 	}
 	
+	private void menuCheck() {
+		assert saveStateBtn != null : "fx:id=\"saveStateBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert loadStateBtn != null : "fx:id=\"loadStateBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+	}
 	private void menuActions() {
 		//action for the save menu item, will save the state of vamix to file
 		saveStateBtn.setOnAction(new EventHandler<ActionEvent>() {
@@ -960,7 +965,7 @@ public class VamixController {
 						String line;
 						while((line=stdoutBuffered.readLine())!=null){
 							//System.out.println(line);//debug file type
-							Matcher macth =Pattern.compile("(video)|Media|Audio|MPEG|mov|ogg|ogv",Pattern.CASE_INSENSITIVE).matcher(line);
+							Matcher macth =Pattern.compile("(video)|Media|Audio|MPEG|ISO Media|ogg|ogv",Pattern.CASE_INSENSITIVE).matcher(line);
 							if(macth.find()){
 								isAudio=true;
 							}

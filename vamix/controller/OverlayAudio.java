@@ -219,7 +219,6 @@ public class OverlayAudio {
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				i=i+1; //increase counter of process by 1
 				publish(0);//reset bar
-				_dlProgressBar.setString(i+"/"+Constants.OVERLAY_PROCESS_NUMBER);
 				while((line=stdoutBuffered.readLine())!=null){					
 					if (isCancelled()){
 						process.destroy();//force quit extract
@@ -246,7 +245,6 @@ public class OverlayAudio {
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				i=i+1; //increase counter of process by 1
 				publish(0);//reset bar
-				_dlProgressBar.setString(i+"/"+Constants.OVERLAY_PROCESS_NUMBER);
 				while((line=stdoutBuffered.readLine())!=null){					
 					if (isCancelled()){
 						process.destroy();//force quit extract
@@ -274,7 +272,6 @@ public class OverlayAudio {
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				i=i+1; //increase counter of process by 1
 				publish(0);//reset bar
-				_dlProgressBar.setString(i+"/"+Constants.OVERLAY_PROCESS_NUMBER);
 				while((line=stdoutBuffered.readLine())!=null){					
 					if (isCancelled()){
 						process.destroy();//force quit extract
@@ -301,7 +298,6 @@ public class OverlayAudio {
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				i=i+1; //increase counter of process by 1
 				publish(0);//reset bar
-				_dlProgressBar.setString(i+"/"+Constants.OVERLAY_PROCESS_NUMBER);
 				while((line=stdoutBuffered.readLine())!=null){					
 					if (isCancelled()){
 						process.destroy();//force quit extract
@@ -327,7 +323,6 @@ public class OverlayAudio {
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				i=i+1; //increase counter of process by 1
 				publish(0);//reset bar
-				_dlProgressBar.setString(i+"/"+Constants.OVERLAY_PROCESS_NUMBER);
 				while((line=stdoutBuffered.readLine())!=null){
 					if (isCancelled()){
 						process.destroy();//force quit extract
@@ -353,7 +348,7 @@ public class OverlayAudio {
 				stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				i=i+1; //increase counter of process by 1
 				publish(0);//reset bar
-				_dlProgressBar.setString(i+"/"+Constants.OVERLAY_PROCESS_NUMBER);
+
 				while((line=stdoutBuffered.readLine())!=null){
 					if (isCancelled()){
 						process.destroy();//force quit extract
@@ -414,6 +409,7 @@ public class OverlayAudio {
 				//publish to progress bar
 				for(int pro : chunks){
 					_dlProgressBar.setValue(pro);
+					_dlProgressBar.setString(i+"/"+Constants.OVERLAY_PROCESS_NUMBER);
 				}
 			}
 		}

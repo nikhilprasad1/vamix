@@ -58,7 +58,7 @@ public class Main extends Application {
 			Scene scene = new Scene(TabPane);
 			fxP.setScene(scene);
 
-			mediaPlayerComponent.setBounds(405, 10, 595, 500);
+			mediaPlayerComponent.setBounds(405, 30, 595, 500);
 			frame.getLayeredPane().add(mediaPlayerComponent, JLayeredPane.PALETTE_LAYER);
 			frame.addWindowListener(new WindowAdapter() {
 				@Override
