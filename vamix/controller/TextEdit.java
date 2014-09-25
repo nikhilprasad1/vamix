@@ -120,7 +120,7 @@ public class TextEdit {
 				BufferedImage image = ImageIO.read(new File(Constants.LOG_DIR + fileSep + _titleOrCredits + ".jpg"));
 				picLabel = new JLabel(new ImageIcon(image));
 			} catch (Exception e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 			return null;
 		}
@@ -210,7 +210,7 @@ public class TextEdit {
 					processNumber = processNumber + 1;
 					stdoutBuffered.close();
 				} catch(Exception e) {
-					e.printStackTrace();
+					//e.printStackTrace();
 				}
 			}
 			return null;

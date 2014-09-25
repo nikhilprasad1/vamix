@@ -261,7 +261,7 @@ public class Helper {
 						}
 					}
 				}catch(Exception e){
-					e.printStackTrace();
+					//e.printStackTrace();
 				}
 				//check if video audio using bash commands
 				if (isVideoAudio){
@@ -438,7 +438,7 @@ public class Helper {
 						}
 					}
 				}catch(Exception e){
-					e.printStackTrace();
+					//e.printStackTrace();
 				}
 				//check if video audio using bash commands
 				if (isVideo){

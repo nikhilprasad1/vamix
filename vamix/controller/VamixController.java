@@ -447,24 +447,28 @@ public class VamixController {
 		setTitle.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {
-				//first check if the inputs entered by user for this function are valid, if they are then continue
-				if (checkTitleInputs()) {
-					//difficult to show progress for this process so instead notify user with a pop-up message
-					JOptionPane pane = new JOptionPane("Please wait while VAMIX loads your preview");
-					final JDialog dialog = pane.createDialog("Please wait");
-					Timer timer = new Timer(3000, new ActionListener() {
-						@Override
-						public void actionPerformed(java.awt.event.ActionEvent e) {
-							dialog.dispose();							
-						}
-					});
-					timer.setRepeats(false);
-					timer.start();
-					dialog.setVisible(true);
-					TextEdit textEditor = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
-							startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), null, null,
-							null, null, null, null, null, null, videoFileAdd, null, "title");
-					textEditor.showScenePreviewAsync();
+				if (!(videoFileAdd.equals(""))) {
+					//first check if the inputs entered by user for this function are valid, if they are then continue
+					if (checkTitleInputs()) {
+						//difficult to show progress for this process so instead notify user with a pop-up message
+						JOptionPane pane = new JOptionPane("Please wait while VAMIX loads your preview");
+						final JDialog dialog = pane.createDialog("Please wait");
+						Timer timer = new Timer(3000, new ActionListener() {
+							@Override
+							public void actionPerformed(java.awt.event.ActionEvent e) {
+								dialog.dispose();							
+							}
+						});
+						timer.setRepeats(false);
+						timer.start();
+						dialog.setVisible(true);
+						TextEdit textEditor = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
+								startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), null, null,
+								null, null, null, null, null, null, videoFileAdd, null, "title");
+						textEditor.showScenePreviewAsync();
+					}
+				} else {
+					JOptionPane.showMessageDialog(null, "Please load a video into VAMIX first", "Missing input", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		});
@@ -473,25 +477,29 @@ public class VamixController {
 		setCredits.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {
-				//first check if the inputs entered by user for this function are valid, if they are then continue
-				if (checkCreditsInputs()) {
-					//difficult to show progress for this process so instead notify user with a pop-up message
-					JOptionPane pane = new JOptionPane("Please wait while VAMIX loads your preview");
-					final JDialog dialog = pane.createDialog("Please wait");
-					Timer timer = new Timer(3000, new ActionListener() {
-						@Override
-						public void actionPerformed(java.awt.event.ActionEvent e) {
-							dialog.dispose();							
-						}
-					});
-					timer.setRepeats(false);
-					timer.start();
-					dialog.setVisible(true);
-					TextEdit textEditor = new TextEdit(null, null, null, null, null, null, null, null,
-							creditText.getText(), creditsFont.getValue(), creditsSize.getValue(), creditsColour.getValue().toString(), 
-							startCredits.getText(), endCredits.getText(), creditsXPos.getText(), creditsYPos.getText(), 
-							videoFileAdd, null, "credits");
-					textEditor.showScenePreviewAsync();
+				if (!(videoFileAdd.equals(""))) {
+					//first check if the inputs entered by user for this function are valid, if they are then continue
+					if (checkCreditsInputs()) {
+						//difficult to show progress for this process so instead notify user with a pop-up message
+						JOptionPane pane = new JOptionPane("Please wait while VAMIX loads your preview");
+						final JDialog dialog = pane.createDialog("Please wait");
+						Timer timer = new Timer(3000, new ActionListener() {
+							@Override
+							public void actionPerformed(java.awt.event.ActionEvent e) {
+								dialog.dispose();							
+							}
+						});
+						timer.setRepeats(false);
+						timer.start();
+						dialog.setVisible(true);
+						TextEdit textEditor = new TextEdit(null, null, null, null, null, null, null, null,
+								creditText.getText(), creditsFont.getValue(), creditsSize.getValue(), creditsColour.getValue().toString(), 
+								startCredits.getText(), endCredits.getText(), creditsXPos.getText(), creditsYPos.getText(), 
+								videoFileAdd, null, "credits");
+						textEditor.showScenePreviewAsync();
+					}
+				} else {
+					JOptionPane.showMessageDialog(null, "Please load a video into VAMIX first", "Missing input", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		});
@@ -639,66 +647,70 @@ public class VamixController {
 				String overwrite = "";
 				int choice = -1;
 				boolean cancelled = false;
-				//check if the input video file is a valid video file (is either mp4, avi or flv)
-				if(Helper.validVideoFile(videoFileAdd,"(MPEG v4)|Video")){
-					//check the output file DIRECTORY exists
-					String outDir = Helper.pathGetter(outputFilePath.getText());
-					String outFileName = Helper.fileNameGetter(outputFilePath.getText());
-					if (Helper.fileExist(outDir)) {
-						//if the directory does exist, check if output file exists, if it does ask user if they want to overwrite
-						if (Helper.fileExist(outputFilePath.getText())) {
-							Object[] options = {"Overwrite", "Cancel"};
-							choice = JOptionPane.showOptionDialog(null, "File " + outFileName +" already exist. Do you wish to overwrite it or cancel and choose another destination?",
-									"Override?",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE,null,options, options[0]);
-							if (choice == 0) {
-								//space MUST come after 'y' or concat bash command in rendering will fail
-								overwrite = "-y ";
-							} else {
-								cancelled = true;
+				if (!(videoFileAdd.equals(""))) {
+					//check if the input video file is a valid video file (is either mp4, avi or flv)
+					if(Helper.validVideoFile(videoFileAdd,"(MPEG v4)|Video")){
+						//check the output file DIRECTORY exists
+						String outDir = Helper.pathGetter(outputFilePath.getText());
+						String outFileName = Helper.fileNameGetter(outputFilePath.getText());
+						if (Helper.fileExist(outDir)) {
+							//if the directory does exist, check if output file exists, if it does ask user if they want to overwrite
+							if (Helper.fileExist(outputFilePath.getText())) {
+								Object[] options = {"Overwrite", "Cancel"};
+								choice = JOptionPane.showOptionDialog(null, "File " + outFileName +" already exist. Do you wish to overwrite it or cancel and choose another destination?",
+										"Override?",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE,null,options, options[0]);
+								if (choice == 0) {
+									//space MUST come after 'y' or concat bash command in rendering will fail
+									overwrite = "-y ";
+								} else {
+									cancelled = true;
+								}
 							}
-						}
-						if (!cancelled) {
-							//check which text scenes the user wants to render with the video
-							if (includeTitle.isSelected() && includeCredits.isSelected()) {
-								if (checkTitleInputs() && checkCreditsInputs()) {
-									//if the user wants to render both text scenes make sure the credits scene comes after the title scene and 
-									//no overlap occurs
-									int endOfTitle = Helper.timeInSec(endTitle.getText());
-									int startOfCredits = Helper.timeInSec(startCredits.getText());
-									if (endOfTitle < startOfCredits) {
+							if (!cancelled) {
+								//check which text scenes the user wants to render with the video
+								if (includeTitle.isSelected() && includeCredits.isSelected()) {
+									if (checkTitleInputs() && checkCreditsInputs()) {
+										//if the user wants to render both text scenes make sure the credits scene comes after the title scene and 
+										//no overlap occurs
+										int endOfTitle = Helper.timeInSec(endTitle.getText());
+										int startOfCredits = Helper.timeInSec(startCredits.getText());
+										if (endOfTitle < startOfCredits) {
+											textRenderer = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
+													startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), creditText.getText(), 
+													creditsFont.getValue(), creditsSize.getValue(), creditsColour.getValue().toString(), startCredits.getText(), endCredits.getText(),
+													creditsXPos.getText(), creditsYPos.getText(), videoFileAdd, outputFilePath.getText(), null);
+											textRenderer.renderWithTextAsync(RenderType.BOTH, overwrite);
+										} else {
+											JOptionPane.showMessageDialog(null, "The credits scene must start after the title scene has finished", "Overlapping scenes",
+													JOptionPane.ERROR_MESSAGE);
+										}
+									}
+								} else if (includeTitle.isSelected()) {
+									if (checkTitleInputs()) {
 										textRenderer = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
-												startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), creditText.getText(), 
+												startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), null, null, null, null, null, null,
+												null, null, videoFileAdd, outputFilePath.getText(), null);
+										textRenderer.renderWithTextAsync(RenderType.OPENING, overwrite);
+									}
+								} else if (includeCredits.isSelected()) {
+									if (checkCreditsInputs()) {
+										textRenderer = new TextEdit(null, null, null, null, null, null, null, null, creditText.getText(), 
 												creditsFont.getValue(), creditsSize.getValue(), creditsColour.getValue().toString(), startCredits.getText(), endCredits.getText(),
 												creditsXPos.getText(), creditsYPos.getText(), videoFileAdd, outputFilePath.getText(), null);
-										textRenderer.renderWithTextAsync(RenderType.BOTH, overwrite);
-									} else {
-										JOptionPane.showMessageDialog(null, "The credits scene must start after the title scene has finished", "Overlapping scenes",
-												JOptionPane.ERROR_MESSAGE);
+										textRenderer.renderWithTextAsync(RenderType.CLOSING, overwrite);
 									}
+								} else {
+									JOptionPane.showMessageDialog(null, "Please select a text scene(s) to render with the video", "Select Text Scene",
+											JOptionPane.ERROR_MESSAGE);
 								}
-							} else if (includeTitle.isSelected()) {
-								if (checkTitleInputs()) {
-									textRenderer = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
-											startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), null, null, null, null, null, null,
-											null, null, videoFileAdd, outputFilePath.getText(), null);
-									textRenderer.renderWithTextAsync(RenderType.OPENING, overwrite);
-								}
-							} else if (includeCredits.isSelected()) {
-								if (checkCreditsInputs()) {
-									textRenderer = new TextEdit(null, null, null, null, null, null, null, null, creditText.getText(), 
-											creditsFont.getValue(), creditsSize.getValue(), creditsColour.getValue().toString(), startCredits.getText(), endCredits.getText(),
-											creditsXPos.getText(), creditsYPos.getText(), videoFileAdd, outputFilePath.getText(), null);
-									textRenderer.renderWithTextAsync(RenderType.CLOSING, overwrite);
-								}
-							} else {
-								JOptionPane.showMessageDialog(null, "Please select a text scene(s) to render with the video", "Select Text Scene",
-										JOptionPane.ERROR_MESSAGE);
 							}
+						} else {
+							JOptionPane.showMessageDialog(null, "The output directory specified does not exist", "Invalid output location",
+									JOptionPane.ERROR_MESSAGE);
 						}
-					} else {
-						JOptionPane.showMessageDialog(null, "The output directory specified does not exist", "Invalid output location",
-								JOptionPane.ERROR_MESSAGE);
 					}
+				} else {
+					JOptionPane.showMessageDialog(null, "Please load a video into VAMIX first", "Missing input", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		});
@@ -1042,7 +1054,7 @@ public class VamixController {
 							}
 						}
 					}catch(Exception e){
-						e.printStackTrace();
+						//e.printStackTrace();
 					}
 					//check if audio using bash commands
 					if (isAudio){
@@ -1253,6 +1265,16 @@ public class VamixController {
 				List<String> values = Files.readAllLines(Paths.get(Constants.LOG_DIR + File.separator + "state.txt"), Charset.forName("UTF-8"));
 				//read the video tab values from the state file
 				videoPath.setText(values.get(0));
+				//check if the video from the last session still exists, if not tell user and if it does, load it into the media player
+				if (Helper.fileExist(videoPath.getText())) {
+					vamix.view.Main.vid.prepareMedia(videoPath.getText());
+					videoFileAdd = videoPath.getText();
+				} else {
+					JOptionPane.showMessageDialog(null , "The previous video file that was being edited used to be located at " + videoPath.getText() + "\nIt is no longer there and will not be loaded.",
+							"Missing Video", JOptionPane.ERROR_MESSAGE);
+					//clear the video path gui field
+					videoPath.setText("");
+				}
 				videoURL.setText(values.get(1));
 			    titleText.setText(values.get(2));
 			    titleFont.setValue(values.get(3));
@@ -1288,7 +1310,7 @@ public class VamixController {
 				JOptionPane.showMessageDialog(null, "No previous state exists.", "Load unavailable", JOptionPane.INFORMATION_MESSAGE);
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 	

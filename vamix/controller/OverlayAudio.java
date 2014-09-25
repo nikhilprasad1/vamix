@@ -64,7 +64,7 @@ public class OverlayAudio {
 				JOptionPane.showMessageDialog(null, "You have entered a replace file name that is same with input audio file. Please input a valid audio file name that isnt the same.");
 			}else if (!(Helper.fileExist(_inAudio))){
 				//not an audio file
-				JOptionPane.showMessageDialog(null, "You have not enter audio file that exists for ovrelay.");
+				JOptionPane.showMessageDialog(null, "You have not enter audio file that exists for overlay.");
 			}else {
 				String bash =File.separator+"bin"+File.separator+"bash";
 				String cmd ="echo $(file "+audioFile+")";
@@ -83,7 +83,7 @@ public class OverlayAudio {
 						}
 					}
 				}catch(Exception e){
-					e.printStackTrace();
+					//e.printStackTrace();
 				}
 				if (isAudio==true){
 					valid=true;//audio file valid
