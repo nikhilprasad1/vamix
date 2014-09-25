@@ -393,7 +393,7 @@ public class OverlayAudio {
 				JOptionPane.showMessageDialog(_overlayAudioFrame, "Overlay audio  has been cancelled.");
 				break;
 			default://error message of generic
-				JOptionPane.showMessageDialog(_overlayAudioFrame, "An error have occured. Please try again. The error code is: "+errorCode);
+				JOptionPane.showMessageDialog(_overlayAudioFrame, "An error has occurred. Please try again. The error code is: "+errorCode);
 				break;
 			}
 			this._overlayAudioFrame.dispose();

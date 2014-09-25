@@ -21,6 +21,7 @@ import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
@@ -34,7 +35,6 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
@@ -73,7 +73,9 @@ public class VamixController {
 	
 	@FXML
 	private MenuItem loadStateBtn;
-
+	
+	@FXML
+	private MenuItem loadFiles;
 	/*
 	 * Varaible for the video tab
 	 */
@@ -275,7 +277,7 @@ public class VamixController {
 	@FXML
 	private ProgressBar videoProgress;
 
-	private static String videoFileAdd="";
+	private String videoFileAdd="";
 	
 	private SkipWorker sW;
 	
@@ -404,7 +406,7 @@ public class VamixController {
 					vamix.view.Main.vid.prepareMedia(videoPath.getText());
 					videoFileAdd=videoPath.getText();
 				}else if (previousFile.equals(videoPath.getText())){
-					JOptionPane.showMessageDialog(null,"You have entered the file thats already been play.");
+					JOptionPane.showMessageDialog(null,"You have selected the file that is currently loaded.");
 				}
 			}
 		});
@@ -419,7 +421,7 @@ public class VamixController {
 					vamix.view.Main.vid.prepareMedia(videoPath.getText());
 					videoFileAdd=videoPath.getText();
 				}else if (previousFile.equals(videoPath.getText())){
-					JOptionPane.showMessageDialog(null,"You have selected the file thats is currently playing.");
+					JOptionPane.showMessageDialog(null,"You have selected the file that is currently loaded.");
 				}
 			}
 		});
@@ -435,7 +437,7 @@ public class VamixController {
 						vamix.view.Main.vid.prepareMedia(videoPath.getText());
 						videoFileAdd=videoPath.getText();
 					}else if (previousFile.equals(videoPath.getText())){
-						JOptionPane.showMessageDialog(null,"You have selected the file thats is currently playing.");
+						JOptionPane.showMessageDialog(null,"You have selected the file that is currently loaded.");
 					}
 				}
 			}
@@ -447,6 +449,18 @@ public class VamixController {
 			public void handle(ActionEvent evt) {
 				//first check if the inputs entered by user for this function are valid, if they are then continue
 				if (checkTitleInputs()) {
+					//difficult to show progress for this process so instead notify user with a pop-up message
+					JOptionPane pane = new JOptionPane("Please wait while VAMIX loads your preview");
+					final JDialog dialog = pane.createDialog("Please wait");
+					Timer timer = new Timer(3000, new ActionListener() {
+						@Override
+						public void actionPerformed(java.awt.event.ActionEvent e) {
+							dialog.dispose();							
+						}
+					});
+					timer.setRepeats(false);
+					timer.start();
+					dialog.setVisible(true);
 					TextEdit textEditor = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
 							startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), null, null,
 							null, null, null, null, null, null, videoFileAdd, null, "title");
@@ -461,6 +475,18 @@ public class VamixController {
 			public void handle(ActionEvent evt) {
 				//first check if the inputs entered by user for this function are valid, if they are then continue
 				if (checkCreditsInputs()) {
+					//difficult to show progress for this process so instead notify user with a pop-up message
+					JOptionPane pane = new JOptionPane("Please wait while VAMIX loads your preview");
+					final JDialog dialog = pane.createDialog("Please wait");
+					Timer timer = new Timer(3000, new ActionListener() {
+						@Override
+						public void actionPerformed(java.awt.event.ActionEvent e) {
+							dialog.dispose();							
+						}
+					});
+					timer.setRepeats(false);
+					timer.start();
+					dialog.setVisible(true);
 					TextEdit textEditor = new TextEdit(null, null, null, null, null, null, null, null,
 							creditText.getText(), creditsFont.getValue(), creditsSize.getValue(), creditsColour.getValue().toString(), 
 							startCredits.getText(), endCredits.getText(), creditsXPos.getText(), creditsYPos.getText(), 
@@ -677,7 +703,7 @@ public class VamixController {
 			}
 		});
 		
-		outputFilePath.setText(Constants.CURRENT_DIR + "output.mp4");
+		//outputFilePath.setText(Constants.CURRENT_DIR + "output.mp4");
 		
 		outputFilePath.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
@@ -922,7 +948,9 @@ public class VamixController {
 	private void menuCheck() {
 		assert saveStateBtn != null : "fx:id=\"saveStateBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert loadStateBtn != null : "fx:id=\"loadStateBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert loadFiles != null : "fx:id=\"loadFiles\" was not injected: check your FXML file 'VideoView.fxml'.";
 	}
+	
 	private void menuActions() {
 		//action for the save menu item, will save the state of vamix to file
 		saveStateBtn.setOnAction(new EventHandler<ActionEvent>() {
@@ -937,6 +965,23 @@ public class VamixController {
 			@Override
 			public void handle(ActionEvent evt) {
 				loadState();
+			}
+		});
+		
+		//when load file menu item clicked
+		loadFiles.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evt) {
+				//load video function button when click browse
+				//load media
+				String previousFile =videoFileAdd;//get current file
+				loadMedia();
+				if (!(previousFile.equals(videoPath.getText()))&Helper.validInFile(videoPath.getText(),"(video)|Media|Audio|MPEG|ISO Media|ogg|ogv")){
+					vamix.view.Main.vid.prepareMedia(videoPath.getText());
+					videoFileAdd=videoPath.getText();
+				}else if (previousFile.equals(videoPath.getText())){
+					JOptionPane.showMessageDialog(null,"You have entered the file that is already loaded.");
+				}
 			}
 		});
 	}
@@ -1025,48 +1070,58 @@ public class VamixController {
 					JOptionPane.WARNING_MESSAGE);
 		//otherwise if text has been entered, continue with function
 		} else {
-			//check if the duration entered by user is in format required
-			String timeFormat = "^\\d{2}:\\d{2}:\\d{2}$";
-			boolean startMatched = false;
-			//boolean to show if both times entered by user are valid (within length of video)
-			boolean bothValid = true;
-			//first check the start time and if it matches check the finish time
-			Matcher matcher = Pattern.compile(timeFormat).matcher(startTitle.getText());
-			if (matcher.find()) {
-				startMatched = true;
-			}
-			if (startMatched) {
-				matcher = Pattern.compile(timeFormat).matcher(endTitle.getText());
-				//if the finish time also matches now go on to check if the times entered are
-				//less than or equal to the length of the video
+			//check if the text entered has not exceeded the word limit of 30 words
+			String[] words = titleText.getText().split(" ");
+			if (words.length <= 30) { 
+				//check if the duration entered by user is in format required
+				String timeFormat = "^\\d{2}:\\d{2}:\\d{2}$";
+				boolean startMatched = false;
+				//boolean to show if both times entered by user are valid (within length of video)
+				boolean bothValid = true;
+				//first check the start time and if it matches check the finish time
+				Matcher matcher = Pattern.compile(timeFormat).matcher(startTitle.getText());
 				if (matcher.find()) {
-					String[] startTimeSplit = startTitle.getText().split(":");
-					String[] endTimeSplit = endTitle.getText().split(":");
-					//calculate the length of the start and end times and make sure they are
-					//less than length of the video and end time is greater than start time
-					long startLength = Long.parseLong(startTimeSplit[0])*3600000 + Long.parseLong(startTimeSplit[1])*60000
-							+ Long.parseLong(startTimeSplit[2])*1000;
-					long endLength = Long.parseLong(endTimeSplit[0])*3600000 + Long.parseLong(endTimeSplit[1])*60000
-							+ Long.parseLong(endTimeSplit[2])*1000;
-					long videoLength = vamix.view.Main.vid.getLength();
-					if ((startLength > videoLength) || (endLength > videoLength) || (endLength < startLength)) {
-						bothValid = false;
-					}
-					//if both times are valid continue with drawing text on video
-					if (bothValid) {
-						return true;
-						//otherwise display an error message to the user telling them times entered are invalid
+					startMatched = true;
+				}
+				if (startMatched) {
+					matcher = Pattern.compile(timeFormat).matcher(endTitle.getText());
+					//if the finish time also matches now go on to check if the times entered are
+					//less than or equal to the length of the video
+					if (matcher.find()) {
+						String[] startTimeSplit = startTitle.getText().split(":");
+						String[] endTimeSplit = endTitle.getText().split(":");
+						//calculate the length of the start and end times and make sure they are
+						//less than length of the video and end time is greater than start time
+						long startLength = Long.parseLong(startTimeSplit[0])*3600000 + Long.parseLong(startTimeSplit[1])*60000
+								+ Long.parseLong(startTimeSplit[2])*1000;
+						long endLength = Long.parseLong(endTimeSplit[0])*3600000 + Long.parseLong(endTimeSplit[1])*60000
+								+ Long.parseLong(endTimeSplit[2])*1000;
+						long videoLength = vamix.view.Main.vid.getLength();
+						if ((startLength > videoLength) || (endLength > videoLength) || (endLength < startLength)) {
+							bothValid = false;
+						}
+						//if both times are valid continue with drawing text on video
+						if (bothValid) {
+							return true;
+							//otherwise display an error message to the user telling them times entered are invalid
+						} else {
+							JOptionPane.showMessageDialog(null, "Please enter a valid start time and end time for displaying the title text",
+									"Invalid time entered", JOptionPane.ERROR_MESSAGE);
+						}	
 					} else {
-						JOptionPane.showMessageDialog(null, "Please enter a valid start time and end time for displaying the title text",
-						"Invalid time entered", JOptionPane.ERROR_MESSAGE);
-					}	
+						JOptionPane.showMessageDialog(null, "Please enter the end time in the format hh:mm:ss",
+								"Invalid time format", JOptionPane.ERROR_MESSAGE);
+					}
 				} else {
-					JOptionPane.showMessageDialog(null, "Please enter the end time in the format hh:mm:ss",
-					"Invalid time format", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, "Please enter the start time in the format hh:mm:ss",
+							"Invalid time format", JOptionPane.ERROR_MESSAGE);
 				}
 			} else {
-				JOptionPane.showMessageDialog(null, "Please enter the start time in the format hh:mm:ss",
-				"Invalid time format", JOptionPane.ERROR_MESSAGE);
+				//The word limit of 30 was used because when using the max allowed font size (24), if more than 30 words were entered then the text
+				//on the screen starts to wrap if it is too close to the edge of the video frame. Since this started to get quite messy, a word
+				//limit of 30 words was used.
+				JOptionPane.showMessageDialog(null, "The number of words to print on title screen is too large, you cannot have more than 30.",
+						"Exceeded word limit", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 		return false;
@@ -1080,48 +1135,58 @@ public class VamixController {
 					JOptionPane.WARNING_MESSAGE);
 		//otherwise if text has been entered, continue with function
 		} else {
-			//check if the duration entered by user is in format required
-			String timeFormat = "^\\d{2}:\\d{2}:\\d{2}$";
-			boolean startMatched = false;
-			//boolean to show if both times entered by user are valid (within length of video)
-			boolean bothValid = true;
-			//first check the start time and if it matches check the finish time
-			Matcher matcher = Pattern.compile(timeFormat).matcher(startCredits.getText());
-			if (matcher.find()) {
-				startMatched = true;
-			}
-			if (startMatched) {
-				matcher = Pattern.compile(timeFormat).matcher(endCredits.getText());
-				//if the finish time also matches now go on to check if the times entered are
-				//less than or equal to the length of the video
+			//check if the text entered has not exceeded the word limit of 30 words
+			String[] words = titleText.getText().split(" ");
+			if (words.length <= 30) { 
+				//check if the duration entered by user is in format required
+				String timeFormat = "^\\d{2}:\\d{2}:\\d{2}$";
+				boolean startMatched = false;
+				//boolean to show if both times entered by user are valid (within length of video)
+				boolean bothValid = true;
+				//first check the start time and if it matches check the finish time
+				Matcher matcher = Pattern.compile(timeFormat).matcher(startCredits.getText());
 				if (matcher.find()) {
-					String[] startTimeSplit = startCredits.getText().split(":");
-					String[] endTimeSplit = endCredits.getText().split(":");
-					//calculate the length of the start and end times and make sure they are
-					//less than length of the video and end time is greater than start time
-					long startLength = Long.parseLong(startTimeSplit[0])*3600000 + Long.parseLong(startTimeSplit[1])*60000
-							+ Long.parseLong(startTimeSplit[2])*1000;
-					long endLength = Long.parseLong(endTimeSplit[0])*3600000 + Long.parseLong(endTimeSplit[1])*60000
-							+ Long.parseLong(endTimeSplit[2])*1000;
-					long videoLength = vamix.view.Main.vid.getLength();
-					if ((startLength > videoLength) || (endLength > videoLength) || (endLength < startLength)) {
-						bothValid = false;
-					}
-					//if both times are valid continue with drawing text on video
-					if (bothValid) {
-						return true;
-					//otherwise display an error message to the user telling them times entered are invalid
+					startMatched = true;
+				}
+				if (startMatched) {
+					matcher = Pattern.compile(timeFormat).matcher(endCredits.getText());
+					//if the finish time also matches now go on to check if the times entered are
+					//less than or equal to the length of the video
+					if (matcher.find()) {
+						String[] startTimeSplit = startCredits.getText().split(":");
+						String[] endTimeSplit = endCredits.getText().split(":");
+						//calculate the length of the start and end times and make sure they are
+						//less than length of the video and end time is greater than start time
+						long startLength = Long.parseLong(startTimeSplit[0])*3600000 + Long.parseLong(startTimeSplit[1])*60000
+								+ Long.parseLong(startTimeSplit[2])*1000;
+						long endLength = Long.parseLong(endTimeSplit[0])*3600000 + Long.parseLong(endTimeSplit[1])*60000
+								+ Long.parseLong(endTimeSplit[2])*1000;
+						long videoLength = vamix.view.Main.vid.getLength();
+						if ((startLength > videoLength) || (endLength > videoLength) || (endLength < startLength)) {
+							bothValid = false;
+						}
+						//if both times are valid continue with drawing text on video
+						if (bothValid) {
+							return true;
+						//otherwise display an error message to the user telling them times entered are invalid
+						} else {
+							JOptionPane.showMessageDialog(null, "Please enter a valid start time and end time for displaying the credits text",
+							"Invalid time entered", JOptionPane.ERROR_MESSAGE);
+						}	
 					} else {
-						JOptionPane.showMessageDialog(null, "Please enter a valid start time and end time for displaying the credits text",
-						"Invalid time entered", JOptionPane.ERROR_MESSAGE);
-					}	
+						JOptionPane.showMessageDialog(null, "Please enter the end time in the format hh:mm:ss",
+						"Invalid time format", JOptionPane.ERROR_MESSAGE);
+					}
 				} else {
-					JOptionPane.showMessageDialog(null, "Please enter the end time in the format hh:mm:ss",
+					JOptionPane.showMessageDialog(null, "Please enter the start time in the format hh:mm:ss",
 					"Invalid time format", JOptionPane.ERROR_MESSAGE);
 				}
 			} else {
-				JOptionPane.showMessageDialog(null, "Please enter the start time in the format hh:mm:ss",
-				"Invalid time format", JOptionPane.ERROR_MESSAGE);
+				//The word limit of 30 was used because when using the max allowed font size (24), if more than 30 words were entered then the text
+				//on the screen starts to wrap if it is too close to the edge of the video frame. Since this started to get quite messy, a word
+				//limit of 30 words was used.
+				JOptionPane.showMessageDialog(null, "The number of words to print on credits screen is too large, you cannot have more than 30.",
+						"Exceeded word limit", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 		return false;
@@ -1225,11 +1290,6 @@ public class VamixController {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	//set video address
-	public static void vidAddSetter(String toSet){
-		videoFileAdd=toSet;
 	}
 	
 }

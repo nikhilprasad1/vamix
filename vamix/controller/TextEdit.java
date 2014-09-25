@@ -9,7 +9,6 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -88,6 +87,7 @@ public class TextEdit {
 		
 		JLabel picLabel;
 		
+		@SuppressWarnings("unused")
 		@Override
 		protected Void doInBackground() {
 			Helper.genTempFolder();	//generate folder to hold temporary files (if it doesn't exist already)
@@ -106,7 +106,7 @@ public class TextEdit {
 				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				String line;
 				while((line = stdoutBuffered.readLine()) != null){
-					System.out.println(line);
+					//System.out.println(line);
 				}
 				builder = new ProcessBuilder(bash, "-c", cmds[1]);
 				builder.redirectErrorStream(true);
@@ -116,7 +116,7 @@ public class TextEdit {
 				while((line=stdoutBuffered.readLine())!=null){
 					//System.out.println(line);
 				}
-				
+				//create the label with the image generated
 				BufferedImage image = ImageIO.read(new File(Constants.LOG_DIR + fileSep + _titleOrCredits + ".jpg"));
 				picLabel = new JLabel(new ImageIcon(image));
 			} catch (Exception e) {
@@ -136,9 +136,11 @@ public class TextEdit {
 		protected String[] buildPreviewCommands(String text, String font, String size, String color, String start, String xPos, String yPos) {
 			String [] cmds = new String[2];
 			
+			//command to create the snapshot at the start time
 			String cmd1 = "avconv -i " + _inputAddr + " -ss " + start + " -vsync 1 -t 0.01 "
 			+ Constants.LOG_DIR + fileSep + _titleOrCredits + ".jpg";
 			
+			//command that draws the text on to the image
 			String cmd2 = "avconv -i " + Constants.LOG_DIR + fileSep + _titleOrCredits + ".jpg"
 				+ " -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
 				+ "truetype" + fileSep + "freefont" + fileSep + font + ".ttf':text='" + text
@@ -179,11 +181,7 @@ public class TextEdit {
 			List<String> cmds = buildRenderCommandList();
 			//the number of processes that need to be run
 			totalProcesses = cmds.size();
-			for (String cmd : cmds) { //debug
-				System.out.println(cmd);
-			}
 			for (String cmd : cmds) {
-				System.out.println(cmd);
 				builder = new ProcessBuilder("/bin/bash","-c",cmd);
 				builder.redirectErrorStream(true);
 				try {
@@ -193,8 +191,7 @@ public class TextEdit {
 					stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 					String line;
 					//reset progress bar
-					publish(0);					
-					System.out.println(processDurations.get(processNumber - 1));
+					publish(0);	
 					while((line = stdoutBuffered.readLine()) != null){
 						if (isCancelled()){
 							process.destroy();//force quit extract
@@ -209,8 +206,8 @@ public class TextEdit {
 							}
 						}
 					}
+					//update the process number for the user (looked at in process())
 					processNumber = processNumber + 1;
-					System.out.println("terminate");
 					stdoutBuffered.close();
 				} catch(Exception e) {
 					e.printStackTrace();
@@ -315,9 +312,7 @@ public class TextEdit {
 				cmds.add(cmd);
 				//the concatenation process is really quick
 				processDurations.add(4);
-				System.out.println("AM I sdasENDe");
 			} else if (_renderType == RenderType.CLOSING) {
-				System.out.println("AM I IN HERE?!close");
 				int endLength = Helper.timeInSec(_endCredits);
 				//get duration left (if any) after finish time specified by user
 				String timeAtEnd = Helper.formatTime(totalLength - endLength);
@@ -351,7 +346,6 @@ public class TextEdit {
 				processDurations.add(4);
 			//otherwise if the user wants both title and credits scenes
 			} else {
-				System.out.println("AM I IN HERE?!both");
 				int endLength = Helper.timeInSec(_endCredits);
 				//get duration left (if any) after finish time specified by user
 				String timeAtEnd = Helper.formatTime(totalLength - endLength);
