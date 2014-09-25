@@ -53,7 +53,7 @@ public class Main extends Application {
 			//p.add(fxP);
 			//p.add(mediaPlayerComponent);
 
-			fxP.setBounds(0, 0, 1000, 615);
+			fxP.setBounds(0, 0, 1000, 635);
 			frame.getLayeredPane().add(fxP, JLayeredPane.DEFAULT_LAYER);
 			Scene scene = new Scene(TabPane);
 			fxP.setScene(scene);
@@ -73,14 +73,16 @@ public class Main extends Application {
 						if (fileList!=null){//delete file in dir first
 							for (String toDeletefile:fileList){
 								File temp=new File(file.getPath(),toDeletefile);
-								temp.delete();
+								//check that the file to be deleted is not the saved state file
+								if (!(temp.getName().contains("state"))) {
+									temp.delete();
+								}
 							}
-						}
-						file.delete();//delete dir
+						}						
 					}
 				}
 			});
-			frame.setSize(1001, 627);
+			frame.setSize(1001, 652);
 			frame.setResizable(false);
 			frame.setVisible(true);
 
