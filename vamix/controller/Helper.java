@@ -316,7 +316,7 @@ public class Helper {
 				valid=true;
 			}else{
 				//error message of empty file name
-				JOptionPane.showMessageDialog(null, "You have entered a invalid format for "+timeType +". Please input a valid format for start time.");
+				JOptionPane.showMessageDialog(null, "You have entered an invalid format for "+timeType +". Please input a valid format for start time.");
 			}
 		}
 		return valid;
@@ -477,6 +477,7 @@ public class Helper {
 	 * 		  String endTime: the end time for transform
 	 * output: void 
 	 */
+	@SuppressWarnings("unused")
 	public static void loadAndPreview(String outputName,String startTime,String endTime){
 		//initialise booleans
 		boolean load=false;

@@ -219,13 +219,13 @@ public class Strip {
 				JOptionPane.showMessageDialog(_stripAudioFrame, "Strip audio  has been cancelled. Note output is saved to "+_outFileName+" and \n"+stripVideo+".");
 				break;
 			case 143://when no audio or video stream
-				JOptionPane.showMessageDialog(_stripAudioFrame, "The input file doesnt have an audio/video stream. Please use a file with valid streams.");
+				JOptionPane.showMessageDialog(_stripAudioFrame, "The input file doesn't have an audio/video stream. Please use a file with valid streams.");
 				break;
 			case 1://when no audio or video stream
-				JOptionPane.showMessageDialog(_stripAudioFrame, "The input file doesnt have an audio/video stream. Please use a file with valid streams.");
+				JOptionPane.showMessageDialog(_stripAudioFrame, "The input file doesn't have an audio/video stream. Please use a file with valid streams.");
 				break;
 			default://error message of generic
-				JOptionPane.showMessageDialog(_stripAudioFrame, "An error have occured. Please try again. The error code is: "+errorCode);
+				JOptionPane.showMessageDialog(_stripAudioFrame, "An error has occurred. Please try again. The error code is: "+errorCode);
 				break;
 			}
 			this._stripAudioFrame.dispose();

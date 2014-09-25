@@ -48,7 +48,7 @@
                                              <content>
                                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: e1e4e8;">
                                                    <children>
-                                                      <Label layoutX="7.0" layoutY="9.0" text="Text to Add:" />
+                                                      <Label layoutX="7.0" layoutY="9.0" text="Text to Add (30 words max):" />
                                                       <TextArea fx:id="titleText" layoutX="8.0" layoutY="24.0" prefHeight="103.0" prefWidth="332.0" text="Title text" />
                                                       <Label layoutX="7.0" layoutY="136.0" text="Font:" />
                                                       <Label layoutX="7.0" layoutY="164.0" text="Font Size:" />
@@ -75,7 +75,7 @@
                                              <content>
                                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: e1e4e8;">
                                                    <children>
-                                                      <Label layoutX="7.0" layoutY="9.0" text="Text to Add:" />
+                                                      <Label layoutX="7.0" layoutY="9.0" text="Text to Add (30 words max):" />
                                                       <TextArea fx:id="creditText" layoutX="8.0" layoutY="24.0" prefHeight="103.0" prefWidth="332.0" text="Credits text" />
                                                       <Label layoutX="7.0" layoutY="136.0" text="Font:" />
                                                       <Label layoutX="7.0" layoutY="164.0" text="Font Size:" />

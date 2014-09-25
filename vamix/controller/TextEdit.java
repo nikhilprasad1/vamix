@@ -38,7 +38,8 @@ public class TextEdit {
 	private String _titleOrCredits, _inputAddr, _outputAddr;
 	
 	private String fileSep = File.separator;
-	
+	//tells RenderWorker if the user wants to overwrite the output file
+	private String _overwrite = "";
 	//renderType tells RenderWorker if both or only one (of opening/closing scenes) need to be rendered
 	public enum RenderType {OPENING, CLOSING, BOTH};
 	private RenderType _renderType = null; 
@@ -86,6 +87,7 @@ public class TextEdit {
 		
 		JLabel picLabel;
 		
+		@SuppressWarnings("unused")
 		@Override
 		protected Void doInBackground() {
 			Helper.genTempFolder();	//generate folder to hold temporary files (if it doesn't exist already)
@@ -114,7 +116,7 @@ public class TextEdit {
 				while((line=stdoutBuffered.readLine())!=null){
 					//System.out.println(line);
 				}
-				
+				//create the label with the image generated
 				BufferedImage image = ImageIO.read(new File(Constants.LOG_DIR + fileSep + _titleOrCredits + ".jpg"));
 				picLabel = new JLabel(new ImageIcon(image));
 			} catch (Exception e) {
@@ -134,9 +136,11 @@ public class TextEdit {
 		protected String[] buildPreviewCommands(String text, String font, String size, String color, String start, String xPos, String yPos) {
 			String [] cmds = new String[2];
 			
+			//command to create the snapshot at the start time
 			String cmd1 = "avconv -i " + _inputAddr + " -ss " + start + " -vsync 1 -t 0.01 "
 			+ Constants.LOG_DIR + fileSep + _titleOrCredits + ".jpg";
 			
+			//command that draws the text on to the image
 			String cmd2 = "avconv -i " + Constants.LOG_DIR + fileSep + _titleOrCredits + ".jpg"
 				+ " -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
 				+ "truetype" + fileSep + "freefont" + fileSep + font + ".ttf':text='" + text
@@ -163,9 +167,10 @@ public class TextEdit {
 	class RenderWorker extends SwingWorker<Void, Integer> {
 		
 		//int to display to user which tells them which process of rendering Vamix is currently at
-		private int processNumber =0, totalProcesses;
+		private int processNumber = 1, totalProcesses;
 		private Process process;
 		private ProcessBuilder builder;
+		private BufferedReader stdoutBuffered;
 		//helps to calculate a proportionate value for the progress bar (changes for each process)
 		List<Integer> processDurations = new  ArrayList<Integer>();
 		
@@ -183,10 +188,10 @@ public class TextEdit {
 					//run the bash command as a process
 					process = builder.start();
 					InputStream stdout = process.getInputStream();
-					BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+					stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 					String line;
 					//reset progress bar
-					publish(0);
+					publish(0);	
 					while((line = stdoutBuffered.readLine()) != null){
 						if (isCancelled()){
 							process.destroy();//force quit extract
@@ -196,12 +201,14 @@ public class TextEdit {
 							if(m.find()) {
 								//weird problem sometimes avconv gives int 100000000 so dont read it
 								if (!(m.group(1).equals("10000000000"))) {
-									publish((int)(Integer.parseInt(m.group(1))*100/processDurations.get(processNumber)));
+									publish((int)(Integer.parseInt(m.group(1))*100/processDurations.get(processNumber - 1)));
 								}
 							}
 						}
 					}
+					//update the process number for the user (looked at in process())
 					processNumber = processNumber + 1;
+					stdoutBuffered.close();
 				} catch(Exception e) {
 					e.printStackTrace();
 				}
@@ -214,12 +221,12 @@ public class TextEdit {
 			//when it have finish Extracting
 			int errorCode=0;
 			try {
-//				errorCode=process.waitFor();
-//				get();
+				errorCode=process.waitFor();
+				get();
 				//set the progress bar to full in case the last process' updating was too slow
-				publish(100);
-//			} catch (InterruptedException e) {
-//			} catch (ExecutionException e) {
+				publish(100);				
+			} catch (InterruptedException e) {
+			} catch (ExecutionException e) {
 			} catch (CancellationException e){
 				errorCode=-1; //when cancel error code is -1 
 			}
@@ -240,8 +247,13 @@ public class TextEdit {
 			renderFrame.dispose();
 			//ask user if they want to load or preview the video
 			if (errorCode==0){ //when finish correctly
-				String previewDuration = Helper.formatTime(Helper.timeInSec(_endTitle) - Helper.timeInSec(_startTitle));
-				Helper.loadAndPreview(_outputAddr, _startTitle, previewDuration);
+				if ((_renderType == RenderType.OPENING) || (_renderType == RenderType.BOTH)) {
+					String previewDuration = Helper.formatTime(Helper.timeInSec(_endTitle) - Helper.timeInSec(_startTitle));
+					Helper.loadAndPreview(_outputAddr, _startTitle, previewDuration);
+				} else {
+					String previewDuration = Helper.formatTime(Helper.timeInSec(_endCredits) - Helper.timeInSec(_startCredits));
+					Helper.loadAndPreview(_outputAddr, _startCredits, previewDuration);
+				}
 			}
 		}
 		
@@ -295,7 +307,7 @@ public class TextEdit {
 				cmds.add(cmd);
 				processDurations.add(duration);
 				//now create the bash command that will combine all the split videos together
-				cmd = "avconv -i concat:\"" + tempOutput + "1.ts|" + tempOutput + "4.ts|" + tempOutput + "3.ts\"" + " -c copy -bsf:a aac_adtstoasc -y " + _outputAddr;
+				cmd = "avconv -i concat:\"" + tempOutput + "1.ts|" + tempOutput + "4.ts|" + tempOutput + "3.ts\"" + " -c copy -bsf:a aac_adtstoasc " + _overwrite + _outputAddr;
 				//cmd = "avconv -i video.mp42.ts -vcodec libx264 -acodec acc -strict experimental test.mp4";
 				cmds.add(cmd);
 				//the concatenation process is really quick
@@ -328,7 +340,7 @@ public class TextEdit {
 				cmds.add(cmd);
 				processDurations.add(duration);
 				//now create the bash command that will combine all the split videos together
-				cmd = "avconv -i concat:\"" + tempOutput + "1.ts|" + tempOutput + "4.ts|" + tempOutput + "3.ts\"" + " -c copy -bsf:a aac_adtstoasc -y " + _outputAddr;
+				cmd = "avconv -i concat:\"" + tempOutput + "1.ts|" + tempOutput + "4.ts|" + tempOutput + "3.ts\"" + " -c copy -bsf:a aac_adtstoasc " + _overwrite + _outputAddr;
 				//cmd = "avconv -i video.mp42.ts -vcodec libx264 -acodec acc -strict experimental test.mp4";
 				cmds.add(cmd);
 				processDurations.add(4);
@@ -379,7 +391,7 @@ public class TextEdit {
 				processDurations.add(Helper.timeInSec(_endCredits) - Helper.timeInSec(_startCredits));
 				//now create the bash command that will combine all the split videos together
 				cmd = "avconv -i concat:\"" + tempOutput + "1.ts|" + tempOutput + "6.ts|" + tempOutput + "3.ts|" + tempOutput + "7.ts|" + tempOutput + "5.ts\"" 
-						+ " -c copy -bsf:a aac_adtstoasc -y " + _outputAddr;
+						+ " -c copy -bsf:a aac_adtstoasc " + _overwrite + _outputAddr;
 				//cmd = "avconv -i video.mp42.ts -vcodec libx264 -acodec acc -strict experimental test.mp4";
 				cmds.add(cmd);
 				processDurations.add(4);
@@ -392,8 +404,9 @@ public class TextEdit {
 	 * Method that executes the RenderWorker which in turn performs the commands to 
 	 * render the input video with text.
 	 */
-	public void renderWithTextAsync(RenderType renderType) {
+	public void renderWithTextAsync(RenderType renderType, String overwrite) {
 		_renderType = renderType;
+		_overwrite = overwrite;
 		showProgressGUI();
 		renderWorker.execute();
 	}
