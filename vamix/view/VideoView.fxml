@@ -10,9 +10,9 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane fx:id="tabPane" maxHeight="600.0" maxWidth="1000.0" minHeight="600.0" minWidth="1000.0" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vamix.controller.VamixController">
+<AnchorPane fx:id="tabPane" maxHeight="628.0" maxWidth="1000.0" minHeight="600.0" minWidth="1000.0" prefHeight="640.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vamix.controller.VamixController">
    <children>
-      <SplitPane dividerPositions="0.4" layoutY="2.0" maxHeight="600.0" maxWidth="1000.0" minHeight="600.0" minWidth="1000.0" prefHeight="600.0" prefWidth="1000.0">
+      <SplitPane dividerPositions="0.4" layoutY="28.0" maxHeight="600.0" maxWidth="1000.0" minHeight="600.0" minWidth="1000.0" prefHeight="600.0" prefWidth="1000.0">
          <items>
             <TabPane fx:id="tabMenu" prefHeight="600.0" prefWidth="1000.0" tabClosingPolicy="UNAVAILABLE">
               <tabs>
@@ -213,5 +213,19 @@
             </AnchorPane>
          </items>
       </SplitPane>
+      <MenuBar prefWidth="1000.0">
+        <menus>
+          <Menu mnemonicParsing="false" text="Save">
+            <items>
+              <MenuItem mnemonicParsing="false" text="Close" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Load">
+            <items>
+              <MenuItem mnemonicParsing="false" text="Delete" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
    </children>
 </AnchorPane>

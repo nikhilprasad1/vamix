@@ -39,6 +39,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Tab;
@@ -65,6 +66,12 @@ public class VamixController {
 
 	@FXML
 	private TabPane tabMenu;
+	
+	@FXML
+	private MenuItem saveStateBtn;
+	
+	@FXML
+	private MenuItem loadStateBtn;
 
 	/*
 	 * Varaible for the video tab
@@ -283,6 +290,7 @@ public class VamixController {
 		audioTabCheck();
 		renderTabCheck();
 		playerCheck();
+		menuActions();
 		videoTab();
 		audioTab();
 		renderTab();
@@ -329,7 +337,7 @@ public class VamixController {
 //		assert creditsBGAddr != null : "fx:id=\"creditsBGAddr\" was not injected: check your FXML file 'VideoView.fxml'.";
 //		assert creditsBGBtn != null : "fx:id=\"creditsBGBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 	}
-
+	
 	private void videoTab(){
 		/*
 		 * Section for the video tab functionality
@@ -645,6 +653,8 @@ public class VamixController {
 			}
 		});
 		
+		outputFilePath.setText(Constants.CURRENT_DIR + "output.mp4");
+		
 		outputFilePath.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
@@ -885,7 +895,25 @@ public class VamixController {
 		assert renderTab != null : "fx:id=\"renderTab\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert audioTab != null : "fx:id=\"audioTab\" was not injected: check your FXML file 'VideoView.fxml'.";
 	}
-
+	
+	private void menuActions() {
+		//action for the save menu item, will save the state of vamix to file
+		saveStateBtn.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evt) {
+				saveState();
+			}
+		});
+		
+		//action for the load menu item, will load the state of vamix from file
+		loadStateBtn.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evt) {
+				loadState();
+			}
+		});
+	}
+	
 	private void loadMedia(){
 		//intiliase validness varaible code reuse from a2
 		boolean valid=false; //if file is valid
@@ -1079,6 +1107,7 @@ public class VamixController {
 		Writer writer = null;
 
 		try {
+			Helper.genTempFolder();
 		    writer = new BufferedWriter(new OutputStreamWriter(
 		          new FileOutputStream(Constants.LOG_DIR + File.separator + "state.txt"), "UTF-8"));
 		    //write the values currently in the video tab gui objects into state file
@@ -1125,41 +1154,45 @@ public class VamixController {
 	//NEEDS TO BE UPDATED IF NEW GUI COMPONENTS ARE ADDED
 	private void loadState() {
 		try {
-			//read all the GUI object values from the previous session with VAMIX and assign to objects
-			List<String> values = Files.readAllLines(Paths.get(Constants.LOG_DIR + File.separator + "state.txt"), Charset.forName("UTF-8"));
-			//read the video tab values from the state file
-			videoPath.setText(values.get(0));
-			videoURL.setText(values.get(1));
-		    titleText.setText(values.get(2));
-		    titleFont.setValue(values.get(3));
-		    titleSize.setValue(values.get(4));
-		    titleColour.setValue(Color.valueOf(values.get(5)));
-		    titleXPos.setText(values.get(6));
-		    titleYPos.setText(values.get(7));
-		    startTitle.setText(values.get(8));
-		    endTitle.setText(values.get(9));
-		    creditText.setText(values.get(10));
-		    creditsFont.setValue(values.get(11));
-		    creditsSize.setValue(values.get(12));
-		    creditsColour.setValue(Color.valueOf(values.get(13)));
-		    creditsXPos.setText(values.get(14));
-		    creditsYPos.setText(values.get(15));
-		    startCredits.setText(values.get(16));
-		    endCredits.setText(values.get(17));
-		    //now read the audio tab values from the state file
-		    strip_add.setText(values.get(18));
-		    replaceAdd.setText(values.get(19));
-		    startReplace.setText(values.get(20));
-		    endReplace.setText(values.get(21));
-		    startReplace2.setText(values.get(22));
-		    endReplace2.setText(values.get(23));
-		    overlayAdd.setText(values.get(24));
-		    overlayUseStart.setText(values.get(25));
-		    overlayUseEnd.setText(values.get(26));
-		    overlayToStart.setText(values.get(27));
-		    overlayToEnd.setText(values.get(28));
-		    //now read the render tab values from the state file
-		    outputFilePath.setText(values.get(29));
+			if (Helper.fileExist(Constants.LOG_DIR + File.separator + "state.txt")) {
+				//read all the GUI object values from the previous session with VAMIX and assign to objects
+				List<String> values = Files.readAllLines(Paths.get(Constants.LOG_DIR + File.separator + "state.txt"), Charset.forName("UTF-8"));
+				//read the video tab values from the state file
+				videoPath.setText(values.get(0));
+				videoURL.setText(values.get(1));
+			    titleText.setText(values.get(2));
+			    titleFont.setValue(values.get(3));
+			    titleSize.setValue(values.get(4));
+			    titleColour.setValue(Color.valueOf(values.get(5)));
+			    titleXPos.setText(values.get(6));
+			    titleYPos.setText(values.get(7));
+			    startTitle.setText(values.get(8));
+			    endTitle.setText(values.get(9));
+			    creditText.setText(values.get(10));
+			    creditsFont.setValue(values.get(11));
+			    creditsSize.setValue(values.get(12));
+			    creditsColour.setValue(Color.valueOf(values.get(13)));
+			    creditsXPos.setText(values.get(14));
+			    creditsYPos.setText(values.get(15));
+			    startCredits.setText(values.get(16));
+			    endCredits.setText(values.get(17));
+			    //now read the audio tab values from the state file
+			    strip_add.setText(values.get(18));
+			    replaceAdd.setText(values.get(19));
+			    startReplace.setText(values.get(20));
+			    endReplace.setText(values.get(21));
+			    startReplace2.setText(values.get(22));
+			    endReplace2.setText(values.get(23));
+			    overlayAdd.setText(values.get(24));
+			    overlayUseStart.setText(values.get(25));
+			    overlayUseEnd.setText(values.get(26));
+			    overlayToStart.setText(values.get(27));
+			    overlayToEnd.setText(values.get(28));
+			    //now read the render tab values from the state file
+			    outputFilePath.setText(values.get(29));
+			} else {
+				JOptionPane.showMessageDialog(null, "No previous state exists.", "Load unavailable", JOptionPane.INFORMATION_MESSAGE);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
