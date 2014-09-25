@@ -104,7 +104,7 @@ public class TextEdit {
 				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				String line;
 				while((line = stdoutBuffered.readLine()) != null){
-					System.out.println(line);
+					//System.out.println(line);
 				}
 				builder = new ProcessBuilder(bash, "-c", cmds[1]);
 				builder.redirectErrorStream(true);
@@ -163,7 +163,7 @@ public class TextEdit {
 	class RenderWorker extends SwingWorker<Void, Integer> {
 		
 		//int to display to user which tells them which process of rendering Vamix is currently at
-		private int processNumber =1, totalProcesses;
+		private int processNumber =0, totalProcesses;
 		private Process process;
 		private ProcessBuilder builder;
 		//helps to calculate a proportionate value for the progress bar (changes for each process)
@@ -176,11 +176,7 @@ public class TextEdit {
 			List<String> cmds = buildRenderCommandList();
 			//the number of processes that need to be run
 			totalProcesses = cmds.size();
-			for (String cmd : cmds) { //debug
-				System.out.println(cmd);
-			}
 			for (String cmd : cmds) {
-				System.out.println(cmd);
 				builder = new ProcessBuilder("/bin/bash","-c",cmd);
 				builder.redirectErrorStream(true);
 				try {
@@ -191,7 +187,6 @@ public class TextEdit {
 					String line;
 					//reset progress bar
 					publish(0);
-					processNumber = processNumber + 1;
 					while((line = stdoutBuffered.readLine()) != null){
 						if (isCancelled()){
 							process.destroy();//force quit extract
@@ -206,7 +201,7 @@ public class TextEdit {
 							}
 						}
 					}
-					System.out.println("terminate");
+					processNumber = processNumber + 1;
 				} catch(Exception e) {
 					e.printStackTrace();
 				}
@@ -305,9 +300,7 @@ public class TextEdit {
 				cmds.add(cmd);
 				//the concatenation process is really quick
 				processDurations.add(4);
-				System.out.println("AM I sdasENDe");
 			} else if (_renderType == RenderType.CLOSING) {
-				System.out.println("AM I IN HERE?!close");
 				int endLength = Helper.timeInSec(_endCredits);
 				//get duration left (if any) after finish time specified by user
 				String timeAtEnd = Helper.formatTime(totalLength - endLength);
@@ -341,7 +334,6 @@ public class TextEdit {
 				processDurations.add(4);
 			//otherwise if the user wants both title and credits scenes
 			} else {
-				System.out.println("AM I IN HERE?!both");
 				int endLength = Helper.timeInSec(_endCredits);
 				//get duration left (if any) after finish time specified by user
 				String timeAtEnd = Helper.formatTime(totalLength - endLength);

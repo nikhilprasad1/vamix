@@ -622,7 +622,7 @@ public class VamixController {
 								textRenderer = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
 										startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), creditText.getText(), 
 										creditsFont.getValue(), creditsSize.getValue(), creditsColour.getValue().toString(), startCredits.getText(), endCredits.getText(),
-										creditsXPos.getText(), creditsYPos.getText(), videoFileAdd, Constants.CURRENT_DIR+"o.mp4", null);
+										creditsXPos.getText(), creditsYPos.getText(), videoFileAdd, outputFilePath.getText(), null);
 								textRenderer.renderWithTextAsync(RenderType.BOTH);
 							} else {
 								JOptionPane.showMessageDialog(null, "The credits scene must start after the title scene has finished", "Overlapping scenes",
@@ -633,14 +633,14 @@ public class VamixController {
 						if (checkTitleInputs()) {
 							textRenderer = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
 									startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), null, null, null, null, null, null,
-									null, null, videoFileAdd, Constants.CURRENT_DIR+"o.mp4", null);
+									null, null, videoFileAdd, outputFilePath.getText(), null);
 							textRenderer.renderWithTextAsync(RenderType.OPENING);
 						}
 					} else if (includeCredits.isSelected()) {
 						if (checkCreditsInputs()) {
 							textRenderer = new TextEdit(null, null, null, null, null, null, null, null, creditText.getText(), 
 									creditsFont.getValue(), creditsSize.getValue(), creditsColour.getValue().toString(), startCredits.getText(), endCredits.getText(),
-									creditsXPos.getText(), creditsYPos.getText(), videoFileAdd, Constants.CURRENT_DIR+"o.mp4", null);
+									creditsXPos.getText(), creditsYPos.getText(), videoFileAdd, outputFilePath.getText(), null);
 							textRenderer.renderWithTextAsync(RenderType.CLOSING);
 						}
 					} else {
@@ -651,7 +651,7 @@ public class VamixController {
 			}
 		});
 		
-		outputFilePath.setText(Constants.CURRENT_DIR + "output.mp4");
+		//outputFilePath.setText(Constants.CURRENT_DIR + "output.mp4");
 		
 		outputFilePath.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
