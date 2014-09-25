@@ -514,6 +514,10 @@ public class Helper {
 			if (load){
 				//prepare (load) vid and set the new address
 				vamix.view.Main.vid.prepareMedia(outputName);
+				try {
+					Thread.sleep((long) 50.0);
+				} catch (InterruptedException e) {
+				}
 			}
 			if(preview){
 				List<String> cmds=Arrays.asList(cmdsArray);

@@ -27,7 +27,11 @@ import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
 import uk.co.caprica.vlcj.binding.internal.libvlc_state_t;
+import uk.co.caprica.vlcj.player.MediaPlayer;
+import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
+import uk.co.caprica.vlcj.player.MediaPlayerEventListener;
 import vamix.controller.TextEdit.RenderType;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -786,7 +790,17 @@ public class VamixController {
 				        		videoTime.setText(videTime);
 				        	}
 			        	}else if(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_NothingSpecial){
-			        		if (!(videoFileAdd.equals(""))){
+			        		//create event listener to see if new media is load then load it
+			        		vamix.view.Main.vid.addMediaPlayerEventListener(new MediaPlayerEventAdapter(){
+			        			@Override
+			        			public void newMedia(MediaPlayer arg0){
+    			        			String temp=vamix.view.Main.vid.mrl().substring(7);
+    			        			videoFileAdd=temp;
+    			        			videoPath.setText(temp);
+			        			}
+			        		});
+			        		
+			        		if (!(videoFileAdd.equals(""))){   			
 				        		vamix.view.Main.vid.start();
 				        		try {//sleep thread so can execute next command when previous finish
 				        			Thread.sleep(50);
@@ -797,7 +811,7 @@ public class VamixController {
 				        		videoProgress.setProgress(0.0);
 				        		if (vamix.view.Main.vid.isMute()){
 				        			vamix.view.Main.vid.mute();
-				        		}
+				        		}				        	
 				        		if (!(videoFileAdd.equals(videoPath.getText()))){
 				        			videoPath.setText(videoFileAdd);
 				        		}
