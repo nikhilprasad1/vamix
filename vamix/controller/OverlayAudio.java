@@ -203,7 +203,7 @@ public class OverlayAudio {
 						if(m.find()){
 							//weird problem sometimes avconv gives int 100000000 so dont read it
 							if (!(m.group(1).equals("10000000000"))){
-								publish((int)(Integer.parseInt(m.group(1))*100/(duration-Helper.timeInSec(_startTime))));
+								publish((int)(Integer.parseInt(m.group(1))*100/(1+(duration-Helper.timeInSec(_startTime)))));
 							}
 						}
 					}
@@ -228,7 +228,7 @@ public class OverlayAudio {
 						if(m.find()){
 							//weird problem sometimes avconv gives int 100000000 so dont read it
 							if (!(m.group(1).equals("10000000000"))){
-								publish((int)(Integer.parseInt(m.group(1))*100/Helper.timeInSec(_startTimeOri)));
+								publish((int)(Integer.parseInt(m.group(1))*100/(1+Helper.timeInSec(_startTimeOri))));
 							}
 						}
 					}
@@ -254,7 +254,7 @@ public class OverlayAudio {
 						if(m.find()){
 							//weird problem sometimes avconv gives int 100000000 so dont read it
 							if (!(m.group(1).equals("10000000000"))){
-								publish((int)(Integer.parseInt(m.group(1))*100/duration));
+								publish((int)(Integer.parseInt(m.group(1))*100/(1+duration)));
 							}
 						}
 					}
@@ -281,7 +281,7 @@ public class OverlayAudio {
 						if(m.find()){
 							//weird problem sometimes avconv gives int 100000000 so dont read it
 							if (!(m.group(1).equals("10000000000"))){
-								publish((int)(Integer.parseInt(m.group(1))*100/duration));
+								publish((int)(Integer.parseInt(m.group(1))*100/(1+duration)));
 							}
 						}
 					}
@@ -307,7 +307,7 @@ public class OverlayAudio {
 						if(m.find()){
 							//weird problem sometimes avconv gives int 100000000 so dont read it
 							if (!(m.group(1).equals("10000000000"))){
-								publish((int)(Integer.parseInt(m.group(1))*100/duration));
+								publish((int)(Integer.parseInt(m.group(1))*100/(1+duration)));
 							}
 						}
 					}
@@ -332,7 +332,7 @@ public class OverlayAudio {
 						if(m.find()){
 							//weird problem sometimes avconv gives int 100000000 so dont read it
 							if (!(m.group(1).equals("10000000000"))){
-								publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
+								publish((int)(Integer.parseInt(m.group(1))*100/(1+totalLength)));
 							}
 						}
 					}
@@ -358,7 +358,7 @@ public class OverlayAudio {
 						if(m.find()){
 							//weird problem sometimes avconv gives int 100000000 so dont read it
 							if (!(m.group(1).equals("10000000000"))){
-								publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
+								publish((int)(Integer.parseInt(m.group(1))*100/(1+totalLength)));
 							}
 						}
 					}
