@@ -176,7 +176,10 @@ public class TextEdit {
 			//the list of processes
 			List<String> cmds = buildRenderCommandList();
 			//the number of processes that need to be run
-			totalProcesses = cmds.size();			
+			totalProcesses = cmds.size();
+			for (String cmd : cmds) {
+				System.out.println(cmd);
+			}
 			for (String cmd : cmds) {
 				System.out.println(cmd);
 				builder = new ProcessBuilder("/bin/bash","-c",cmd);
