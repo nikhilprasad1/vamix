@@ -462,7 +462,7 @@ public class Helper {
 	 * output: void 
 	 */
 	public static void genTempFolder(){
-		if (!(fileExist(Constants.LOG_PATH))){
+		if (!(fileExist(Constants.LOG_DIR))){
 			//when directory doesnt exist create directory
 			File dir =new File(Constants.LOG_DIR);
 			dir.mkdir();
