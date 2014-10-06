@@ -12,107 +12,139 @@
 
 <AnchorPane fx:id="tabPane" maxHeight="660.0" maxWidth="1000.0" minHeight="600.0" minWidth="1000.0" prefHeight="660.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vamix.controller.VamixController">
    <children>
-      <SplitPane dividerPositions="0.4" layoutY="28.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="600.0" minWidth="1000.0" prefHeight="628.0" prefWidth="1000.0">
+      <SplitPane dividerPositions="0.4" layoutY="28.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="628.0" minWidth="1000.0" prefHeight="628.0" prefWidth="1000.0">
          <items>
             <TabPane fx:id="tabMenu" prefHeight="600.0" prefWidth="1000.0" tabClosingPolicy="UNAVAILABLE">
               <tabs>
                 <Tab fx:id="videoTab" text="Video">
                   <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                           <children>
-                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="565.0" prefWidth="390.0">
+                        <ScrollPane hbarPolicy="NEVER" prefViewportHeight="593.0" prefViewportWidth="395.0">
+                           <content>
+                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="878.0" prefWidth="397.0">
                                  <children>
-                                    <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#e1e4e8" height="165.0" layoutX="9.0" layoutY="10.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="372.0" />
-                                    <Label layoutX="21.0" layoutY="14.0" text="Load Video/Audio" underline="true">
-                                       <font>
-                                          <Font name="System Bold" size="13.0" />
-                                       </font>
-                                    </Label>
-                                    <Label layoutX="21.0" layoutY="37.0" text="Local Video/Audio" />
-                                    <TextField fx:id="videoPath" layoutX="21.0" layoutY="52.0" prefHeight="25.0" prefWidth="246.0" text="..." />
-                                    <Button fx:id="browseBtn" layoutX="258.0" layoutY="20.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="114.0" text="File chooser" />
-                                    <Button fx:id="loadBtn" layoutX="278.0" layoutY="51.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="94.0" text="Load" />
-                                    <Label layoutX="186.0" layoutY="90.0" text="OR" />
-                                    <Label layoutX="21.0" layoutY="108.0" text="Download Video/Audio files" />
-                                    <TextField fx:id="videoURL" layoutX="21.0" layoutY="123.0" prefHeight="25.0" prefWidth="246.0" text="URL" />
-                                    <Button fx:id="downloadBtn" layoutX="278.0" layoutY="123.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="94.0" text="Download" />
-                                    <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#e1e4e8" height="374.0" layoutX="9.0" layoutY="184.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="372.0" />
-                                    <Label layoutX="21.0" layoutY="190.0" text="Create Opening/Closing Scenes" underline="true">
-                                       <font>
-                                          <Font name="System Bold" size="13.0" />
-                                       </font>
-                                    </Label>
-                                    <TabPane layoutX="21.0" layoutY="206.0" prefHeight="343.0" prefWidth="348.0" tabClosingPolicy="UNAVAILABLE">
-                                       <tabs>
-                                          <Tab text="Title">
-                                             <content>
-                                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: e1e4e8;">
-                                                   <children>
-                                                      <Label layoutX="7.0" layoutY="9.0" text="Text to Add (30 words max):" />
-                                                      <TextArea fx:id="titleText" layoutX="8.0" layoutY="24.0" prefHeight="103.0" prefWidth="332.0" text="Title text" />
-                                                      <Label layoutX="7.0" layoutY="136.0" text="Font:" />
-                                                      <Label layoutX="7.0" layoutY="164.0" text="Font Size:" />
-                                                      <Label layoutX="7.0" layoutY="192.0" text="Text colour:" />
-                                                      <Label layoutX="7.0" layoutY="246.0" text="Start:" />
-                                                      <TextField fx:id="startTitle" alignment="CENTER" layoutX="51.0" layoutY="241.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
-                                                      <Button fx:id="setTitle" layoutX="110.0" layoutY="277.0" mnemonicParsing="false" text="Title Text Preview" />
-                                                      <ColorPicker fx:id="titleColour" layoutX="91.0" layoutY="187.0" />
-                                                      <Label layoutX="203.0" layoutY="136.0" text="Text Position" underline="true" />
-                                                      <Label layoutX="204.0" layoutY="164.0" text="X:" />
-                                                      <Label layoutX="204.0" layoutY="192.0" text="Y:" />
-                                                      <TextField fx:id="titleXPos" layoutX="225.0" layoutY="159.0" prefHeight="25.0" prefWidth="111.0" text="0" />
-                                                      <TextField fx:id="titleYPos" layoutX="225.0" layoutY="187.0" prefHeight="25.0" prefWidth="111.0" text="0" />
-                                                      <ComboBox fx:id="titleSize" layoutX="91.0" layoutY="159.0" prefWidth="91.0" />
-                                                      <Label layoutX="8.0" layoutY="218.0" text="Timestamp" underline="true" />
-                                                      <Label layoutX="174.0" layoutY="246.0" text="Finish:" />
-                                                      <TextField fx:id="endTitle" alignment="CENTER" layoutX="225.0" layoutY="241.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
-                                                      <ComboBox fx:id="titleFont" layoutX="91.0" layoutY="131.0" prefWidth="91.0" />
-                                                   </children>
-                                                </AnchorPane>
-                                             </content>
-                                          </Tab>
-                                          <Tab text="Credits">
-                                             <content>
-                                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: e1e4e8;">
-                                                   <children>
-                                                      <Label layoutX="7.0" layoutY="9.0" text="Text to Add (30 words max):" />
-                                                      <TextArea fx:id="creditText" layoutX="8.0" layoutY="24.0" prefHeight="103.0" prefWidth="332.0" text="Credits text" />
-                                                      <Label layoutX="7.0" layoutY="136.0" text="Font:" />
-                                                      <Label layoutX="7.0" layoutY="164.0" text="Font Size:" />
-                                                      <Label layoutX="7.0" layoutY="192.0" text="Text colour:" />
-                                                      <Button fx:id="setCredits" layoutX="96.0" layoutY="277.0" mnemonicParsing="false" text="Credits Text Preview" />
-                                                      <ColorPicker fx:id="creditsColour" layoutX="91.0" layoutY="187.0" />
-                                                      <Label layoutX="203.0" layoutY="136.0" text="Text Position" underline="true" />
-                                                      <Label layoutX="204.0" layoutY="164.0" text="X:" />
-                                                      <Label layoutX="204.0" layoutY="192.0" text="Y:" />
-                                                      <TextField fx:id="creditsXPos" layoutX="225.0" layoutY="159.0" prefHeight="25.0" prefWidth="111.0" text="0" />
-                                                      <TextField fx:id="creditsYPos" layoutX="225.0" layoutY="187.0" prefHeight="25.0" prefWidth="111.0" text="0" />
-                                                      <Label layoutX="8.0" layoutY="218.0" text="Timestamp" underline="true" />
-                                                      <Label layoutX="7.0" layoutY="246.0" text="Start:" />
-                                                      <TextField fx:id="startCredits" alignment="CENTER" layoutX="51.0" layoutY="241.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
-                                                      <Label layoutX="174.0" layoutY="246.0" text="Finish:" />
-                                                      <TextField fx:id="endCredits" alignment="CENTER" layoutX="225.0" layoutY="241.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
-                                                      <ComboBox fx:id="creditsFont" layoutX="91.0" layoutY="131.0" prefWidth="91.0" />
-                                                      <ComboBox fx:id="creditsSize" layoutX="91.0" layoutY="159.0" prefWidth="91.0" />
-                                                   </children>
-                                                </AnchorPane>
-                                             </content>
-                                          </Tab>
-                                       </tabs>
-                                    </TabPane>
+                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="878.0" prefWidth="397.0">
+                                       <children>
+                                          <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#e1e4e8" height="165.0" layoutX="9.0" layoutY="10.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="372.0" />
+                                          <Label layoutX="21.0" layoutY="14.0" text="Load Video/Audio" underline="true">
+                                             <font>
+                                                <Font name="System Bold" size="13.0" />
+                                             </font>
+                                          </Label>
+                                          <Label layoutX="21.0" layoutY="37.0" text="Local Video/Audio" />
+                                          <TextField fx:id="videoPath" layoutX="21.0" layoutY="52.0" prefHeight="25.0" prefWidth="246.0" text="..." />
+                                          <Button fx:id="browseBtn" layoutX="258.0" layoutY="20.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="114.0" text="File chooser" />
+                                          <Button fx:id="loadBtn" layoutX="278.0" layoutY="51.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="94.0" text="Load" />
+                                          <Label layoutX="186.0" layoutY="90.0" text="OR" />
+                                          <Label layoutX="21.0" layoutY="108.0" text="Download Video/Audio files" />
+                                          <TextField fx:id="videoURL" layoutX="21.0" layoutY="123.0" prefHeight="25.0" prefWidth="246.0" text="URL" />
+                                          <Button fx:id="downloadBtn" layoutX="278.0" layoutY="123.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="94.0" text="Download" />
+                                          <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#e1e4e8" height="374.0" layoutX="9.0" layoutY="184.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="372.0" />
+                                          <Label layoutX="21.0" layoutY="190.0" text="Create Opening/Closing Scenes" underline="true">
+                                             <font>
+                                                <Font name="System Bold" size="13.0" />
+                                             </font>
+                                          </Label>
+                                          <TabPane layoutX="21.0" layoutY="206.0" prefHeight="343.0" prefWidth="348.0" tabClosingPolicy="UNAVAILABLE">
+                                             <tabs>
+                                                <Tab text="Title">
+                                                   <content>
+                                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: e1e4e8;">
+                                                         <children>
+                                                            <Label layoutX="7.0" layoutY="9.0" text="Text to Add (30 words max):" />
+                                                            <TextArea fx:id="titleText" layoutX="8.0" layoutY="24.0" prefHeight="103.0" prefWidth="332.0" text="Title text" />
+                                                            <Label layoutX="7.0" layoutY="136.0" text="Font:" />
+                                                            <Label layoutX="7.0" layoutY="164.0" text="Font Size:" />
+                                                            <Label layoutX="7.0" layoutY="192.0" text="Text colour:" />
+                                                            <Label layoutX="7.0" layoutY="246.0" text="Start:" />
+                                                            <TextField fx:id="startTitle" alignment="CENTER" layoutX="51.0" layoutY="241.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
+                                                            <Button fx:id="setTitle" layoutX="110.0" layoutY="277.0" mnemonicParsing="false" text="Title Text Preview" />
+                                                            <ColorPicker fx:id="titleColour" layoutX="91.0" layoutY="187.0" />
+                                                            <Label layoutX="203.0" layoutY="136.0" text="Text Position" underline="true" />
+                                                            <Label layoutX="204.0" layoutY="164.0" text="X:" />
+                                                            <Label layoutX="204.0" layoutY="192.0" text="Y:" />
+                                                            <TextField fx:id="titleXPos" layoutX="225.0" layoutY="159.0" prefHeight="25.0" prefWidth="111.0" text="0" />
+                                                            <TextField fx:id="titleYPos" layoutX="225.0" layoutY="187.0" prefHeight="25.0" prefWidth="111.0" text="0" />
+                                                            <ComboBox fx:id="titleSize" layoutX="91.0" layoutY="159.0" prefWidth="91.0" />
+                                                            <Label layoutX="8.0" layoutY="218.0" text="Timestamp" underline="true" />
+                                                            <Label layoutX="174.0" layoutY="246.0" text="Finish:" />
+                                                            <TextField fx:id="endTitle" alignment="CENTER" layoutX="225.0" layoutY="241.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
+                                                            <ComboBox fx:id="titleFont" layoutX="91.0" layoutY="131.0" prefWidth="91.0" />
+                                                         </children>
+                                                      </AnchorPane>
+                                                   </content>
+                                                </Tab>
+                                                <Tab text="Credits">
+                                                   <content>
+                                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: e1e4e8;">
+                                                         <children>
+                                                            <Label layoutX="7.0" layoutY="9.0" text="Text to Add (30 words max):" />
+                                                            <TextArea fx:id="creditText" layoutX="8.0" layoutY="24.0" prefHeight="103.0" prefWidth="332.0" text="Credits text" />
+                                                            <Label layoutX="7.0" layoutY="136.0" text="Font:" />
+                                                            <Label layoutX="7.0" layoutY="164.0" text="Font Size:" />
+                                                            <Label layoutX="7.0" layoutY="192.0" text="Text colour:" />
+                                                            <Button fx:id="setCredits" layoutX="96.0" layoutY="277.0" mnemonicParsing="false" text="Credits Text Preview" />
+                                                            <ColorPicker fx:id="creditsColour" layoutX="91.0" layoutY="187.0" />
+                                                            <Label layoutX="203.0" layoutY="136.0" text="Text Position" underline="true" />
+                                                            <Label layoutX="204.0" layoutY="164.0" text="X:" />
+                                                            <Label layoutX="204.0" layoutY="192.0" text="Y:" />
+                                                            <TextField fx:id="creditsXPos" layoutX="225.0" layoutY="159.0" prefHeight="25.0" prefWidth="111.0" text="0" />
+                                                            <TextField fx:id="creditsYPos" layoutX="225.0" layoutY="187.0" prefHeight="25.0" prefWidth="111.0" text="0" />
+                                                            <Label layoutX="8.0" layoutY="218.0" text="Timestamp" underline="true" />
+                                                            <Label layoutX="7.0" layoutY="246.0" text="Start:" />
+                                                            <TextField fx:id="startCredits" alignment="CENTER" layoutX="51.0" layoutY="241.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
+                                                            <Label layoutX="174.0" layoutY="246.0" text="Finish:" />
+                                                            <TextField fx:id="endCredits" alignment="CENTER" layoutX="225.0" layoutY="241.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
+                                                            <ComboBox fx:id="creditsFont" layoutX="91.0" layoutY="131.0" prefWidth="91.0" />
+                                                            <ComboBox fx:id="creditsSize" layoutX="91.0" layoutY="159.0" prefWidth="91.0" />
+                                                         </children>
+                                                      </AnchorPane>
+                                                   </content>
+                                                </Tab>
+                                             </tabs>
+                                          </TabPane>
+                                          <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#e1e4e8" height="110.0" layoutX="9.0" layoutY="567.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="372.0" />
+                                          <Label layoutX="21.0" layoutY="575.0" text="Speed Up/Down Input Video" underline="true">
+                                             <font>
+                                                <Font name="System Bold" size="13.0" />
+                                             </font>
+                                          </Label>
+                                          <Label layoutX="97.0" layoutY="605.0" text="Speed Factor: " />
+                                          <TextField fx:id="videoSpeed" alignment="CENTER" layoutX="193.0" layoutY="600.0" prefHeight="25.0" prefWidth="66.0" text="1" />
+                                          <Button fx:id="videoSpeedBtn" layoutX="135.0" layoutY="636.0" mnemonicParsing="false" text="Speed Up/Down" />
+                                          <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#e1e4e8" height="184.0" layoutX="9.0" layoutY="686.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="372.0" />
+                                          <Label layoutX="21.0" layoutY="692.0" text="Fade In/Out Input Video" underline="true">
+                                             <font>
+                                                <Font name="System Bold" size="13.0" />
+                                             </font>
+                                          </Label>
+                                          <Label layoutX="29.0" layoutY="719.0" text="Fade In" underline="true" />
+                                          <Label layoutX="209.0" layoutY="719.0" text="Fade Out" underline="true" />
+                                          <Label alignment="CENTER_RIGHT" layoutX="29.0" layoutY="747.0" text="Start:" />
+                                          <Label alignment="CENTER_RIGHT" layoutX="23.0" layoutY="776.0" text="Finish:" />
+                                          <Label alignment="CENTER_RIGHT" layoutX="209.0" layoutY="747.0" text="Start:" />
+                                          <Label alignment="CENTER_RIGHT" layoutX="203.0" layoutY="776.0" text="Finish:" />
+                                          <TextField fx:id="startFadeIn" alignment="CENTER" layoutX="77.0" layoutY="742.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
+                                          <TextField fx:id="endFadeIn" alignment="CENTER" layoutX="77.0" layoutY="771.0" maxWidth="111.0" text="00:00:00" />
+                                          <TextField fx:id="startFadeOut" alignment="CENTER" layoutX="251.0" layoutY="742.0" maxWidth="111.0" text="00:00:00" />
+                                          <TextField fx:id="endFadeOut" alignment="CENTER" layoutX="251.0" layoutY="771.0" maxWidth="111.0" text="00:00:00" />
+                                          <Button fx:id="fadeBtn" layoutX="152.0" layoutY="835.0" mnemonicParsing="false" text="Apply Fade" />
+                                          <CheckBox fx:id="includeFadeIn" layoutX="77.0" layoutY="807.0" mnemonicParsing="false" text="Fade In" />
+                                          <CheckBox fx:id="includeFadeOut" layoutX="251.0" layoutY="807.0" mnemonicParsing="false" text="Fade Out" />
+                                       </children>
+                                    </AnchorPane>
                                  </children>
                               </AnchorPane>
-                           </children>
-                        </AnchorPane>
+                           </content>
+                        </ScrollPane>
                   </content>
                 </Tab>
                 <Tab fx:id="audioTab" text="Audio">
                   <content>
                         <ScrollPane hbarPolicy="NEVER" prefViewportHeight="593.0" prefViewportWidth="397.0" vbarPolicy="ALWAYS">
                            <content>
-                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="668.0" prefWidth="397.0">
+                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="687.0" prefWidth="397.0">
                                  <children>
-                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="668.0" prefWidth="397.0">
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="687.0" prefWidth="397.0">
                                        <children>
                                           <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#e1e4e8" height="105.0" layoutX="9.0" layoutY="10.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="372.0" />
                                           <Label layoutX="21.0" layoutY="14.0" text="Strip Audio to file" underline="true">
@@ -164,6 +196,15 @@
                                           <Label layoutX="199.0" layoutY="480.0" text="Finish:" />
                                           <TextField fx:id="overlayToEnd" alignment="CENTER" layoutX="246.0" layoutY="475.0" prefHeight="25.0" prefWidth="111.0" text="00:00:00" />
                                           <Label layoutX="205.0" layoutY="425.0" text="Time on video" underline="true" />
+                                          <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#e1e4e8" height="110.0" layoutX="9.0" layoutY="568.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="372.0" />
+                                          <Label layoutX="20.0" layoutY="575.0" text="Speed Up/Down Input Audio" underline="true">
+                                             <font>
+                                                <Font name="System Bold" size="13.0" />
+                                             </font>
+                                          </Label>
+                                          <Label layoutX="97.0" layoutY="604.0" text="Speed Factor: " />
+                                          <TextField fx:id="audioSpeed" alignment="CENTER" layoutX="193.0" layoutY="599.0" prefHeight="25.0" prefWidth="66.0" text="1" />
+                                          <Button fx:id="audioSpeedBtn" layoutX="135.0" layoutY="636.0" mnemonicParsing="false" text="Speed Up/Down" />
                                        </children>
                                     </AnchorPane>
                                  </children>
@@ -172,7 +213,7 @@
                         </ScrollPane>
                   </content>
                 </Tab>
-                  <Tab fx:id="renderTab" text="Render">
+                  <Tab fx:id="renderTab" text="Render Text">
                      <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>
@@ -202,9 +243,9 @@
             <AnchorPane fx:id="videoMediaViewAnch" minHeight="0.0" minWidth="0.0" prefHeight="598.0" prefWidth="595.0" SplitPane.resizableWithParent="false">
                <children>
                   <MediaView fx:id="videoMediaView" fitHeight="540.0" fitWidth="590.0" />
-                  <Button fx:id="playPauseBtn" layoutX="277.0" layoutY="591.0" mnemonicParsing="false" text="Play" />
-                  <Button fx:id="fastForwardBtn" layoutX="341.0" layoutY="591.0" mnemonicParsing="false" text="FF" />
-                  <Button fx:id="rewindBtn" layoutX="203.0" layoutY="591.0" mnemonicParsing="false" text="Rewind" />
+                  <Button fx:id="playPauseBtn" layoutX="273.0" layoutY="591.0" maxHeight="25.0" maxWidth="63.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="63.0" text="Play" />
+                  <Button fx:id="fastForwardBtn" layoutX="342.0" layoutY="591.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="36.0" text="FF" />
+                  <Button fx:id="rewindBtn" layoutX="202.0" layoutY="591.0" mnemonicParsing="false" text="Rewind" />
                   <Slider fx:id="volumeSlider" layoutX="419.0" layoutY="598.0" prefHeight="16.0" prefWidth="99.0" showTickLabels="true" showTickMarks="true" value="50.0" />
                   <CheckBox fx:id="muteCheckbox" layoutX="533.0" layoutY="595.0" mnemonicParsing="false" prefHeight="18.0" prefWidth="63.0" text="Mute" />
                   <Label fx:id="videoTime" layoutX="14.0" layoutY="596.0" text="00:00:00/00:00:00">

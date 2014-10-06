@@ -173,6 +173,33 @@ public class VamixController {
 	
 	@FXML
 	private Button loadBtn;
+	
+	@FXML
+	private TextField videoSpeed;
+	
+	@FXML
+	private Button videoSpeedBtn;
+	
+	@FXML
+	private TextField startFadeIn;
+	
+	@FXML
+	private TextField endFadeIn;
+	
+	@FXML
+	private TextField startFadeOut;
+	
+	@FXML
+	private TextField endFadeOut;
+	
+	@FXML
+	private CheckBox includeFadeIn;
+	
+	@FXML
+	private CheckBox includeFadeOut;
+	
+	@FXML
+	private Button fadeBtn;
 
 	/*
 	 * Varaible for the audio tab
@@ -231,6 +258,12 @@ public class VamixController {
 
 	@FXML
 	private TextField replaceAdd;
+	
+	@FXML
+	private TextField audioSpeed;
+	
+	@FXML
+	private Button audioSpeedBtn;
 
 	/*
 	 * Varaible for the render tab
@@ -341,6 +374,16 @@ public class VamixController {
 		assert creditsFont != null : "fx:id=\"creditsFont\" was not injected: check your FXML file 'VideoView.fxml'.";
 //		assert creditsBGAddr != null : "fx:id=\"creditsBGAddr\" was not injected: check your FXML file 'VideoView.fxml'.";
 //		assert creditsBGBtn != null : "fx:id=\"creditsBGBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		
+		assert videoSpeed != null : "fx:id=\"videoSpeed\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert videoSpeedBtn != null : "fx:id=\"videoSpeedBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert startFadeIn != null : "fx:id=\"startFadeIn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert endFadeIn != null : "fx:id=\"endFadeIn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert startFadeOut != null : "fx:id=\"startFadeOut\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert endFadeOut != null : "fx:id=\"endFadeOut\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert includeFadeIn != null : "fx:id=\"includeFadeIn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert includeFadeOut != null : "fx:id=\"includeFadeOut\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert fadeBtn != null : "fx:id=\"fadeBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 	}
 	
 	private void videoTab(){
@@ -534,6 +577,9 @@ public class VamixController {
 		assert overlayUseStart != null : "fx:id=\"overlayUseStart\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert overlayToEnd != null : "fx:id=\"overlayToEnd\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert overlayToStart != null : "fx:id=\"overlayToStart\" was not injected: check your FXML file 'VideoView.fxml'.";
+		
+		assert audioSpeed != null : "fx:id=\"audioSpeed\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert audioSpeedBtn != null : "fx:id=\"audioSpeedBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 
 	}
 

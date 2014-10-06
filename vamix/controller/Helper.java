@@ -535,5 +535,19 @@ public class Helper {
 		}
 	}
 	
-
+	/**
+	 * This method takes as input a time in the format hh:mm:ss and converts it to a specific frame number given an input video
+	 */
+	public static int getFrameNumber(String time) { 
+		int frameNumber = 0;
+		//get the current input video's fps
+		int frameRate = (int)vamix.view.Main.vid.getFps();
+		//split input string into hrs, mins and secs
+		String[] splitTime = time.split(":");
+		//convert and add to get total seconds
+		int seconds = Integer.parseInt(splitTime[0])*3600 + Integer.parseInt(splitTime[1])*60 + Integer.parseInt(splitTime[2]);
+		//multiply by fps to get frame number at time specified
+		frameNumber = seconds * frameRate;
+		return frameNumber;
+	}
 }
