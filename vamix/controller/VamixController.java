@@ -32,6 +32,7 @@ import uk.co.caprica.vlcj.binding.internal.libvlc_state_t;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
 import uk.co.caprica.vlcj.player.MediaPlayerEventListener;
+import vamix.controller.FadeVideo.FadeType;
 import vamix.controller.TextEdit.RenderType;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -51,6 +52,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.media.MediaView;
@@ -175,10 +177,10 @@ public class VamixController {
 	private Button loadBtn;
 	
 	@FXML
-	private TextField videoSpeed;
+	private TextField rotateAngle;
 	
 	@FXML
-	private Button videoSpeedBtn;
+	private Button rotateBtn;
 	
 	@FXML
 	private TextField startFadeIn;
@@ -200,6 +202,30 @@ public class VamixController {
 	
 	@FXML
 	private Button fadeBtn;
+	
+	@FXML
+	private TextField startTrim;
+	
+	@FXML
+	private TextField endTrim;
+	
+	@FXML
+	private Button trimBtn;
+	
+	@FXML
+	private TextField cropXPos;
+	
+	@FXML
+	private TextField cropYPos;
+	
+	@FXML
+	private TextField cropHeight;
+	
+	@FXML
+	private TextField cropWidth;
+	
+	@FXML
+	private Button cropBtn;
 
 	/*
 	 * Varaible for the audio tab
@@ -258,12 +284,6 @@ public class VamixController {
 
 	@FXML
 	private TextField replaceAdd;
-	
-	@FXML
-	private TextField audioSpeed;
-	
-	@FXML
-	private Button audioSpeedBtn;
 
 	/*
 	 * Varaible for the render tab
@@ -375,8 +395,8 @@ public class VamixController {
 //		assert creditsBGAddr != null : "fx:id=\"creditsBGAddr\" was not injected: check your FXML file 'VideoView.fxml'.";
 //		assert creditsBGBtn != null : "fx:id=\"creditsBGBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 		
-		assert videoSpeed != null : "fx:id=\"videoSpeed\" was not injected: check your FXML file 'VideoView.fxml'.";
-		assert videoSpeedBtn != null : "fx:id=\"videoSpeedBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert rotateAngle != null : "fx:id=\"rotateAngle\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert rotateBtn != null : "fx:id=\"rotateBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert startFadeIn != null : "fx:id=\"startFadeIn\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert endFadeIn != null : "fx:id=\"endFadeIn\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert startFadeOut != null : "fx:id=\"startFadeOut\" was not injected: check your FXML file 'VideoView.fxml'.";
@@ -384,6 +404,15 @@ public class VamixController {
 		assert includeFadeIn != null : "fx:id=\"includeFadeIn\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert includeFadeOut != null : "fx:id=\"includeFadeOut\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert fadeBtn != null : "fx:id=\"fadeBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert startTrim != null : "fx:id=\"startTrim\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert endTrim != null : "fx:id=\"endTrim\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert trimBtn != null : "fx:id=\"trimBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert cropXPos != null : "fx:id=\"cropXPos\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert cropYPos != null : "fx:id=\"cropYPos\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert cropHeight != null : "fx:id=\"cropHeight\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert cropWidth != null : "fx:id=\"cropWidth\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert cropBtn != null : "fx:id=\"cropBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		
 	}
 	
 	private void videoTab(){
@@ -550,6 +579,93 @@ public class VamixController {
 				}
 			}
 		});
+		
+		//the functionality for the fade video button
+		fadeBtn.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evt) {
+				//check if the user wants to only fade in, only fade out or both
+				if (includeFadeIn.isSelected() && includeFadeOut.isSelected()) {
+					//if they want both, check the inputs for both fade in and fade out
+					if (checkFadeInputs(true) && checkFadeInputs(false)) {
+						//check the fade in and fade out times do not overlap
+						int endFadein = Helper.timeInSec(endFadeIn.getText());
+						int startFadeout = Helper.timeInSec(startFadeOut.getText());
+						if (endFadein <= startFadeout) {
+							FadeVideo fader = new FadeVideo(startFadeIn.getText(), endFadeIn.getText(), startFadeOut.getText(), endFadeOut.getText(), videoFileAdd);
+							fader.fadeVideoAsync(FadeType.BOTH);
+						} else {
+							JOptionPane.showMessageDialog(null, "The two fade sequences cannot overlap.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+						}
+					}
+				//else if the user only wants to fade in
+				} else if (includeFadeIn.isSelected()) {
+					if (checkFadeInputs(true)) {
+						FadeVideo fader = new FadeVideo(startFadeIn.getText(), endFadeIn.getText(), null, null, videoFileAdd);
+						fader.fadeVideoAsync(FadeType.IN);
+					}
+				//else if the user only wants to fade out
+				} else if (includeFadeOut.isSelected()) {
+					if (checkFadeInputs(false)) {
+						FadeVideo fader = new FadeVideo(null, null, startFadeOut.getText(), endFadeOut.getText(), videoFileAdd);
+						fader.fadeVideoAsync(FadeType.OUT);
+					}
+				//otherwise if nothing has been selected, give error
+				} else {
+					JOptionPane.showMessageDialog(null, "Please select to a fade option", "Missing input", JOptionPane.ERROR_MESSAGE);
+				}
+			}			
+		});
+		
+		//the functionality for the trim video button
+		trimBtn.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evt) {
+				//check a video is actually loaded into VAMIX
+				if (!(videoFileAdd.equals(""))) {
+					//check if the input video file is a valid video file (is either mp4, avi or flv)
+					if(Helper.validVideoFile(videoFileAdd,"(MPEG v4)|Video")){
+						//check that the start time is valid
+						if (Helper.timeValidTypeChecker(startTrim.getText(), "start time")) {
+							//check that the end time is valid
+							if (Helper.timeValidTypeChecker(endTrim.getText(), "end time")) {
+								//check that the start time is valid relative to the end time
+								if (Helper.timeValidChecker(startTrim.getText(), endTrim.getText(), "trimming")) {
+									//check that both times are less than or equal to length of the input video
+									if ((Helper.timeLessThanVideo(startTrim.getText()) && (Helper.timeLessThanVideo(endTrim.getText())))) {
+										TrimVideo trimmer = new TrimVideo(startTrim.getText(), endTrim.getText(), videoFileAdd);
+										trimmer.trimVideoAsync();
+									}
+								}
+							}
+						}
+					}
+				} else {
+					JOptionPane.showMessageDialog(null, "Please load a video into VAMIX first", "Missing input", JOptionPane.ERROR_MESSAGE);
+				}
+			}			
+		});
+		
+		//the functionality for the crop video button
+		cropBtn.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evt) {
+				
+			}
+		});
+		
+		//set the tool tip for the field where user enters the angle to rotate the video by
+		Tooltip rotateTip = new Tooltip();
+		rotateTip.setText("Valid angles are 90, 180 and 270 degrees");
+		rotateAngle.setTooltip(rotateTip);
+		
+		//the functionality for the rotate video button
+		rotateBtn.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evt) {
+				
+			}
+		});
 	}
 
 	private void audioTabCheck(){
@@ -577,9 +693,6 @@ public class VamixController {
 		assert overlayUseStart != null : "fx:id=\"overlayUseStart\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert overlayToEnd != null : "fx:id=\"overlayToEnd\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert overlayToStart != null : "fx:id=\"overlayToStart\" was not injected: check your FXML file 'VideoView.fxml'.";
-		
-		assert audioSpeed != null : "fx:id=\"audioSpeed\" was not injected: check your FXML file 'VideoView.fxml'.";
-		assert audioSpeedBtn != null : "fx:id=\"audioSpeedBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 
 	}
 
@@ -1262,6 +1375,41 @@ public class VamixController {
 			}
 		}
 		return false;
+	}
+	
+	//method that will check the inputs for the fade functionality
+	private boolean checkFadeInputs(boolean isFadeIn) {
+		boolean isValid = false;
+		TextField start = null, end = null;
+		if (isFadeIn) {
+			start = startFadeIn;
+			end = endFadeIn;
+		} else {
+			start = startFadeOut;
+			end = endFadeOut;
+		}
+		//check a video is actually loaded into VAMIX
+		if (!(videoFileAdd.equals(""))) {
+			//check if the input video file is a valid video file (is either mp4, avi or flv)
+			if(Helper.validVideoFile(videoFileAdd,"(MPEG v4)|Video")){
+				//check that the start time is valid
+				if (Helper.timeValidTypeChecker(start.getText(), "start time")) {
+					//check that the end time is valid
+					if (Helper.timeValidTypeChecker(end.getText(), "end time")) {
+						//check that the start time is valid relative to the end time
+						if (Helper.timeValidChecker(start.getText(), end.getText(), "fading")) {
+							//check that both times are less than or equal to length of the input video
+							if ((Helper.timeLessThanVideo(start.getText()) && (Helper.timeLessThanVideo(end.getText())))) {
+								isValid = true;
+							}
+						}
+					}
+				}
+			}
+		} else {
+			JOptionPane.showMessageDialog(null, "Please load a video into VAMIX first", "Missing input", JOptionPane.ERROR_MESSAGE);
+		}
+		return isValid;
 	}
 	
 	//method that will save the state of vamix to a txt file so it can be loaded on request of the user

@@ -53,12 +53,12 @@ public class Main extends Application {
 			//p.add(fxP);
 			//p.add(mediaPlayerComponent);
 
-			fxP.setBounds(0, 0, 1000, 660);
+			fxP.setBounds(0, 0, 1050, 660);
 			frame.getLayeredPane().add(fxP, JLayeredPane.DEFAULT_LAYER);
 			Scene scene = new Scene(TabPane);
 			fxP.setScene(scene);
 
-			mediaPlayerComponent.setBounds(405, 30, 595, 545);
+			mediaPlayerComponent.setBounds(400, 30, 647, 545);
 			frame.getLayeredPane().add(mediaPlayerComponent, JLayeredPane.PALETTE_LAYER);
 			frame.addWindowListener(new WindowAdapter() {
 				@Override
@@ -83,7 +83,7 @@ public class Main extends Application {
 					}
 				}
 			});
-			frame.setSize(1001, 680);
+			frame.setSize(1051, 685);
 			frame.setResizable(false);
 			frame.setVisible(true);
 

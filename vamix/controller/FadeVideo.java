@@ -7,7 +7,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
@@ -60,9 +59,6 @@ public class FadeVideo {
 		private ProcessBuilder builder;
 		private BufferedReader stdoutBuffered;
 		
-		//helps to calculate a proportionate value for the progress bar (changes for each process)
-		int processDuration;
-		
 		@Override
 		protected Void doInBackground() throws Exception {
 			//generate folder to hold temporary files (if it doesn't exist already)
@@ -80,8 +76,9 @@ public class FadeVideo {
 				String line;
 				while((line = stdoutBuffered.readLine()) != null){
 					if (isCancelled()){
-						process.destroy();//force quit extract
+						process.destroy();//force process to terminate
 					}else {
+						System.out.println(line);
 						//check time in output, use this as indication for progress
 						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
 						if(m.find()) {
@@ -101,7 +98,7 @@ public class FadeVideo {
 		
 		@Override
 		protected void done() {
-			//when it have finish Extracting
+			//when it has finished the process
 			int errorCode=0;
 			try {
 				errorCode=process.waitFor();
@@ -118,7 +115,7 @@ public class FadeVideo {
 			case 0:	
 				JOptionPane.showMessageDialog(fadeFrame, "The fade operation has finished successfully.");
 				break;
-			//user cancelled render
+			//user cancelled fading
 			case -1:
 				JOptionPane.showMessageDialog(fadeFrame, "Fade operation has been cancelled. Note there may be partial output at \n" + _outputFile);
 				break;
@@ -131,10 +128,10 @@ public class FadeVideo {
 			//ask user if they want to load or preview the video
 			if (errorCode==0){ //when finish correctly
 				if ((_fadeType == FadeType.IN) || (_fadeType == FadeType.BOTH)) {
-					String previewDuration = Helper.formatTime(Helper.timeInSec(_endFadeIn) - Helper.timeInSec(_startFadeIn));
+					String previewDuration = Helper.formatTime(Helper.timeInSec(_endFadeIn) - Helper.timeInSec(_startFadeIn) + 20);
 					Helper.loadAndPreview(_outputFile, _startFadeIn, previewDuration);
 				} else {
-					String previewDuration = Helper.formatTime(Helper.timeInSec(_endFadeOut) - Helper.timeInSec(_startFadeOut));
+					String previewDuration = Helper.formatTime(Helper.timeInSec(_endFadeOut) - Helper.timeInSec(_startFadeOut) + 20);
 					Helper.loadAndPreview(_outputFile, _startFadeOut, previewDuration);
 				}
 			}
@@ -146,7 +143,7 @@ public class FadeVideo {
 				//update progress value and process number
 				for(int chunk : chunks){
 					progressBar.setValue(chunk);
-					progressBar.setString(String.valueOf(chunk));
+					progressBar.setString(String.valueOf(chunk) + "%");
 				}
 			}
 		}
@@ -160,7 +157,7 @@ public class FadeVideo {
 				//get the start frame number
 				String startFrame = String.valueOf((Helper.getFrameNumber(_startFadeIn)));
 				//get the number of frames that fade in is to occur over (the duration)
-				String durationFrames = String.valueOf(Helper.getFrameNumber(_startFadeIn) - Helper.getFrameNumber(_endFadeIn));
+				String durationFrames = String.valueOf(Helper.getFrameNumber(_endFadeIn) - Helper.getFrameNumber(_startFadeIn));
 				cmd = "avconv -i " + _inputAddr + " -vf \"fade=in:" + startFrame + ":" + durationFrames + "\" -strict experimental " + _outputFile;
 			//else if the user only wants to fade out a section of the video
 			} else if (_fadeType == FadeType.OUT) {
@@ -169,7 +166,7 @@ public class FadeVideo {
 				//get the start frame number
 				String startFrame = String.valueOf((Helper.getFrameNumber(_startFadeOut)));
 				//get the number of frames that fade in is to occur over (the duration)
-				String durationFrames = String.valueOf(Helper.getFrameNumber(_startFadeOut) - Helper.getFrameNumber(_endFadeOut));
+				String durationFrames = String.valueOf(Helper.getFrameNumber(_endFadeOut) - Helper.getFrameNumber(_startFadeOut));
 				cmd = "avconv -i " + _inputAddr + " -vf \"fade=out:" + startFrame + ":" + durationFrames + "\" -strict experimental " + _outputFile;
 			//otherwise they want both; fade in and fade out
 			} else {
@@ -179,8 +176,8 @@ public class FadeVideo {
 				String startFadeIn = String.valueOf((Helper.getFrameNumber(_startFadeIn)));
 				String startFadeOut = String.valueOf(Helper.getFrameNumber(_startFadeOut));
 				//get the number of frames that fade in and fade out are to occur over (the duration)
-				String durationFadeIn = String.valueOf(Helper.getFrameNumber(_startFadeIn) - Helper.getFrameNumber(_endFadeIn));
-				String durationFadeOut = String.valueOf(Helper.getFrameNumber(_startFadeOut) - Helper.getFrameNumber(_endFadeOut));
+				String durationFadeIn = String.valueOf(Helper.getFrameNumber(_endFadeIn) - Helper.getFrameNumber(_startFadeIn));
+				String durationFadeOut = String.valueOf(Helper.getFrameNumber(_endFadeOut) - Helper.getFrameNumber(_startFadeOut));
 				cmd = "avconv -i " + _inputAddr + " -vf \"fade=in:" + startFadeIn + ":" + durationFadeIn + ", fade=out:" + startFadeOut + ":" + durationFadeOut
 						+ "\" -strict experimental " + _outputFile;
 			}
@@ -199,7 +196,7 @@ public class FadeVideo {
 	}
 	
 	/*
-	 * Method that shows the GUI to show render progress to the user
+	 * Method that shows the GUI to show fading progress to the user
 	 */
 	public void showProgressGUI() {
 		//create the GUI objects required
@@ -211,14 +208,14 @@ public class FadeVideo {
 		progressBar.setStringPainted(true);
 		fadeFrame.setSize(300, 100);
 		
-		//set function of cancel button to cancel the background task of the render worker
+		//set function of cancel button to cancel the background task of the fade worker
 		cancelBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				fadeWorker.cancel(true);
 			}
 		});
-		//if user closes the progress window, assume they want to cancel the rendering
+		//if user closes the progress window, assume they want to cancel the fading
 		fadeFrame.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
