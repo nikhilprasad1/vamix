@@ -245,7 +245,7 @@ public class Helper {
 			//check if the file exist locally
 			if (Helper.fileExist(path+inFileName)){
 				String bash =File.separator+"bin"+File.separator+"bash";
-				String cmd ="echo $(file "+path+inFileName+")";
+				String cmd ="echo $(file \""+path+inFileName+"\")";
 				ProcessBuilder builder=new ProcessBuilder(bash,"-c",cmd); 
 				builder.redirectErrorStream(true);
 
@@ -309,14 +309,14 @@ public class Helper {
 		boolean valid=false;
 		if(time.equals("")){
 			//error message of empty starttime
-			JOptionPane.showMessageDialog(null, "You have entered a empty "+timeType+". Please input a start time.");
+			JOptionPane.showMessageDialog(null, "You have not entered a "+timeType);
 		}else{
 			Matcher m =Pattern.compile("^\\d{2}:\\d{2}:\\d{2}$").matcher(time);
 			if (m.find()){
 				valid=true;
 			}else{
 				//error message of empty file name
-				JOptionPane.showMessageDialog(null, "You have entered an invalid format for "+timeType +". Please input a valid format for start time.");
+				JOptionPane.showMessageDialog(null, "You have entered an invalid format for "+timeType +". Please input in the format hh:mm:ss.");
 			}
 		}
 		return valid;
@@ -333,11 +333,27 @@ public class Helper {
 	public static boolean timeValidChecker(String timeStart,String timeEnd, String timeType){
 		boolean valid=false;
 		if (timeStart.equals(timeEnd)){
-			JOptionPane.showMessageDialog(null, "You have entered the same start time and end time for "+timeType+". Please enter a different end time.");
+			JOptionPane.showMessageDialog(null, "You have entered the same start time and end time for "+timeType+". Please enter a different start or end time.");
 		}else if (timeInSec(timeStart)>=timeInSec(timeEnd)){
 			JOptionPane.showMessageDialog(null, "You have entered a greater start time than end time for "+timeType+". Please enter a different start or end time.");
 		}else{
 			valid=true;//if didnt fail checks set to valid
+		}
+		return valid;
+	}
+	
+	/**
+	 * Function that checks if the time given is within the length of the video
+	 * @param
+	 * input: time - time given in format hh:mm:ss
+	 */
+	public static boolean timeLessThanVideo(String time) {
+		boolean valid = true;
+		int videoLength = (int)(vamix.view.Main.vid.getLength()/1000);
+		int timeGiven = Helper.timeInSec(time);
+		if (timeGiven > videoLength) {
+			valid = false;
+			JOptionPane.showMessageDialog(null, "You have entered a time greater than the length of the video. Please enter a valid time");
 		}
 		return valid;
 	}
@@ -422,7 +438,7 @@ public class Helper {
 			//check if the file exist locally
 			if (Helper.fileExist(path+inFileName)){
 				String bash =File.separator+"bin"+File.separator+"bash";
-				String cmd ="echo $(file "+path+inFileName+")";
+				String cmd ="echo $(file \""+path+inFileName+"\")";
 				ProcessBuilder builder=new ProcessBuilder(bash,"-c",cmd); 
 				builder.redirectErrorStream(true);
 
@@ -535,5 +551,19 @@ public class Helper {
 		}
 	}
 	
-
+	/**
+	 * This method takes as input a time in the format hh:mm:ss and converts it to a specific frame number given an input video
+	 */
+	public static int getFrameNumber(String time) { 
+		int frameNumber = 0;
+		//get the current input video's fps
+		int frameRate = (int)vamix.view.Main.vid.getFps();
+		//split input string into hrs, mins and secs
+		String[] splitTime = time.split(":");
+		//convert and add to get total seconds
+		int seconds = Integer.parseInt(splitTime[0])*3600 + Integer.parseInt(splitTime[1])*60 + Integer.parseInt(splitTime[2]);
+		//multiply by fps to get frame number at time specified
+		frameNumber = seconds * frameRate;
+		return frameNumber;
+	}
 }

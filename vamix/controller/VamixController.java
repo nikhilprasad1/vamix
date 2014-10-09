@@ -32,6 +32,7 @@ import uk.co.caprica.vlcj.binding.internal.libvlc_state_t;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
 import uk.co.caprica.vlcj.player.MediaPlayerEventListener;
+import vamix.controller.FadeVideo.FadeType;
 import vamix.controller.TextEdit.RenderType;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -51,6 +52,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.media.MediaView;
@@ -173,6 +175,57 @@ public class VamixController {
 	
 	@FXML
 	private Button loadBtn;
+	
+	@FXML
+	private TextField rotateAngle;
+	
+	@FXML
+	private Button rotateBtn;
+	
+	@FXML
+	private TextField startFadeIn;
+	
+	@FXML
+	private TextField endFadeIn;
+	
+	@FXML
+	private TextField startFadeOut;
+	
+	@FXML
+	private TextField endFadeOut;
+	
+	@FXML
+	private CheckBox includeFadeIn;
+	
+	@FXML
+	private CheckBox includeFadeOut;
+	
+	@FXML
+	private Button fadeBtn;
+	
+	@FXML
+	private TextField startTrim;
+	
+	@FXML
+	private TextField endTrim;
+	
+	@FXML
+	private Button trimBtn;
+	
+	@FXML
+	private TextField cropXPos;
+	
+	@FXML
+	private TextField cropYPos;
+	
+	@FXML
+	private TextField cropHeight;
+	
+	@FXML
+	private TextField cropWidth;
+	
+	@FXML
+	private Button cropBtn;
 
 	/*
 	 * Varaible for the audio tab
@@ -341,6 +394,25 @@ public class VamixController {
 		assert creditsFont != null : "fx:id=\"creditsFont\" was not injected: check your FXML file 'VideoView.fxml'.";
 //		assert creditsBGAddr != null : "fx:id=\"creditsBGAddr\" was not injected: check your FXML file 'VideoView.fxml'.";
 //		assert creditsBGBtn != null : "fx:id=\"creditsBGBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		
+		assert rotateAngle != null : "fx:id=\"rotateAngle\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert rotateBtn != null : "fx:id=\"rotateBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert startFadeIn != null : "fx:id=\"startFadeIn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert endFadeIn != null : "fx:id=\"endFadeIn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert startFadeOut != null : "fx:id=\"startFadeOut\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert endFadeOut != null : "fx:id=\"endFadeOut\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert includeFadeIn != null : "fx:id=\"includeFadeIn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert includeFadeOut != null : "fx:id=\"includeFadeOut\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert fadeBtn != null : "fx:id=\"fadeBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert startTrim != null : "fx:id=\"startTrim\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert endTrim != null : "fx:id=\"endTrim\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert trimBtn != null : "fx:id=\"trimBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert cropXPos != null : "fx:id=\"cropXPos\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert cropYPos != null : "fx:id=\"cropYPos\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert cropHeight != null : "fx:id=\"cropHeight\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert cropWidth != null : "fx:id=\"cropWidth\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert cropBtn != null : "fx:id=\"cropBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		
 	}
 	
 	private void videoTab(){
@@ -504,6 +576,143 @@ public class VamixController {
 					}
 				} else {
 					JOptionPane.showMessageDialog(null, "Please load a video into VAMIX first", "Missing input", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
+		
+		//the functionality for the fade video button
+		fadeBtn.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evt) {
+				//check if the user wants to only fade in, only fade out or both
+				if (includeFadeIn.isSelected() && includeFadeOut.isSelected()) {
+					//if they want both, check the inputs for both fade in and fade out
+					if (checkFadeInputs(true) && checkFadeInputs(false)) {
+						//check the fade in and fade out times do not overlap
+						int endFadein = Helper.timeInSec(endFadeIn.getText());
+						int startFadeout = Helper.timeInSec(startFadeOut.getText());
+						if (endFadein <= startFadeout) {
+							FadeVideo fader = new FadeVideo(startFadeIn.getText(), endFadeIn.getText(), startFadeOut.getText(), endFadeOut.getText(), videoFileAdd);
+							fader.fadeVideoAsync(FadeType.BOTH);
+						} else {
+							JOptionPane.showMessageDialog(null, "The two fade sequences cannot overlap.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+						}
+					}
+				//else if the user only wants to fade in
+				} else if (includeFadeIn.isSelected()) {
+					if (checkFadeInputs(true)) {
+						FadeVideo fader = new FadeVideo(startFadeIn.getText(), endFadeIn.getText(), null, null, videoFileAdd);
+						fader.fadeVideoAsync(FadeType.IN);
+					}
+				//else if the user only wants to fade out
+				} else if (includeFadeOut.isSelected()) {
+					if (checkFadeInputs(false)) {
+						FadeVideo fader = new FadeVideo(null, null, startFadeOut.getText(), endFadeOut.getText(), videoFileAdd);
+						fader.fadeVideoAsync(FadeType.OUT);
+					}
+				//otherwise if nothing has been selected, give error
+				} else {
+					JOptionPane.showMessageDialog(null, "Please select to a fade option", "Missing input", JOptionPane.ERROR_MESSAGE);
+				}
+			}			
+		});
+		
+		//the functionality for the trim video button
+		trimBtn.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evt) {
+				//check a video is actually loaded into VAMIX
+				if (!(videoFileAdd.equals(""))) {
+					//check if the input video file is a valid video file (is either mp4, avi or flv)
+					if(Helper.validVideoFile(videoFileAdd,"(MPEG v4)|Video")){
+						//check that the start time is valid
+						if (Helper.timeValidTypeChecker(startTrim.getText(), "start time")) {
+							//check that the end time is valid
+							if (Helper.timeValidTypeChecker(endTrim.getText(), "end time")) {
+								//check that the start time is valid relative to the end time
+								if (Helper.timeValidChecker(startTrim.getText(), endTrim.getText(), "trimming")) {
+									//check that both times are less than or equal to length of the input video
+									if ((Helper.timeLessThanVideo(startTrim.getText()) && (Helper.timeLessThanVideo(endTrim.getText())))) {
+										TrimVideo trimmer = new TrimVideo(startTrim.getText(), endTrim.getText(), videoFileAdd);
+										trimmer.trimVideoAsync();
+									}
+								}
+							}
+						}
+					}
+				} else {
+					JOptionPane.showMessageDialog(null, "Please load a video into VAMIX first", "Missing input", JOptionPane.ERROR_MESSAGE);
+				}
+			}			
+		});
+		
+		//the functionality for the crop video button
+		cropBtn.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evt) {
+				boolean allFull = true;
+				//check a video is actually loaded into VAMIX
+				if (!(videoFileAdd.equals(""))) {
+					//check if the input video file is a valid video file (is either mp4, avi or flv)
+					if(Helper.validVideoFile(videoFileAdd,"(MPEG v4)|Video")){
+						//check that all fields have a value
+						if ((cropHeight.getText().equals("")) || (cropWidth.getText().equals("")) || (cropXPos.getText().equals("")) || (cropYPos.getText().equals(""))) {
+							allFull = false;
+						}
+						if (allFull) {
+							//now get the dimensions of the video and make sure that the width, height, x and y values
+							//specified by the user lie within the dimensions
+							int width = vamix.view.Main.vid.getVideoDimension().width;
+							int height = vamix.view.Main.vid.getVideoDimension().height;
+							int cropheight = Integer.parseInt(cropHeight.getText());
+							int cropwidth = Integer.parseInt(cropWidth.getText());
+							int x = Integer.parseInt(cropXPos.getText());
+							int y = Integer.parseInt(cropYPos.getText());
+							//if the height and width specified by user is within video dimensions, continue
+							if ((cropheight <= height) && (cropwidth <= width)) {
+								//now check that the position (x,y) specified, in combination with height and width, does not exceed video dimensions
+								if (((cropheight + y) <= height) && ((cropwidth + x) <= width)) {
+									//if it doesn't, continue with the crop operation
+									CropVideo cropper = new CropVideo(cropWidth.getText(), cropHeight.getText(), cropXPos.getText(), cropYPos.getText(), videoFileAdd);
+									cropper.cropVideoAsync();
+								} else {
+									JOptionPane.showMessageDialog(null, "The (x,y) position specified in combination with the height and width specified "
+											+ "exceeds the video dimensions. Please change these values to comply.", "Invalid input", JOptionPane.ERROR_MESSAGE);
+								}
+							} else {
+								JOptionPane.showMessageDialog(null, "Height and width specified must be within video dimensions\n"
+										+ "Dimensions are h = " + String.valueOf(height) + ", w = " + String.valueOf(width), "Invalid input", JOptionPane.ERROR_MESSAGE);
+							}
+						} else {
+							JOptionPane.showMessageDialog(null, "Atleast one field has no input.", "Missing input", JOptionPane.ERROR_MESSAGE);
+						}
+					}
+				}
+			}
+		});
+		
+		//set the tool tip for the field where user enters the angle to rotate the video by
+		Tooltip rotateTip = new Tooltip();
+		rotateTip.setText("Valid angles are 90, 180 and 270 degrees");
+		rotateAngle.setTooltip(rotateTip);
+		
+		//the functionality for the rotate video button
+		rotateBtn.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evt) {
+				//check a video is actually loaded into VAMIX
+				if (!(videoFileAdd.equals(""))) {
+					//check if the input video file is a valid video file (is either mp4, avi or flv)
+					if(Helper.validVideoFile(videoFileAdd,"(MPEG v4)|Video")){
+						//check that the angle given by the user is either 90, 180 or 270 degrees
+						String angle = rotateAngle.getText();
+						if (!(angle.equals("90") || angle.equals("180") || angle.equals("270"))) {
+							JOptionPane.showMessageDialog(null, "The angle to rotate must be either 90, 180 or 270 degrees.", "Invalid input", JOptionPane.ERROR_MESSAGE);
+						} else {
+							RotateVideo rotateVideo = new RotateVideo(angle, videoFileAdd);
+							rotateVideo.rotateVideoAsync();
+						}
+					}
 				}
 			}
 		});
@@ -1016,6 +1225,7 @@ public class VamixController {
 		//intiliase validness varaible code reuse from a2
 		boolean valid=false; //if file is valid
 		boolean isAudio=false; //boolean for if file is video or audio
+		boolean hasSpaces = false;	//true if the input address has spaces - not allowed
 		String tempVideoFileAdd="";//initialse the video file address
 		String partial=""; //variable for partial of path ie just the name of file
 		JOptionPane.showMessageDialog(null, "Please select the video or audio to edit.");
@@ -1037,52 +1247,55 @@ public class VamixController {
 			}catch(NullPointerException e){
 				valid=true; //cant return nothing
 			}
-
+			if (tempVideoFileAdd.contains(" ")) {hasSpaces = true;}
 			//now get the path of file and just file name
 			Matcher m=Pattern.compile("(.*"+File.separator+")(.*)$").matcher(tempVideoFileAdd);
 			if(m.find()){
 				partial=m.group(2); //get file name
 			}
-
-			if(partial.equals("")){
-				//error message of empty file name
-				JOptionPane.showMessageDialog(null, "You have entered a empty file name. Please input a valid file name.");
-			}else{
-				//check if the file exist locally
-				if (Helper.fileExist(tempVideoFileAdd)){
-					String bash =File.separator+"bin"+File.separator+"bash";
-					String cmd ="echo $(file "+tempVideoFileAdd+")";
-					ProcessBuilder builder=new ProcessBuilder(bash,"-c",cmd); 
-					builder.redirectErrorStream(true);
-
-					try{
-						Process process = builder.start();
-						InputStream stdout = process.getInputStream();
-						BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-						String line;
-						while((line=stdoutBuffered.readLine())!=null){
-							//System.out.println(line);//debug file type
-							Matcher macth =Pattern.compile(Constants.VIDEO_AUDIO_TYPE,Pattern.CASE_INSENSITIVE).matcher(line);
-							if(macth.find()){
-								isAudio=true;
-							}
-						}
-					}catch(Exception e){
-						//e.printStackTrace();
-					}
-					//check if audio using bash commands
-					if (isAudio){
-						videoFileAdd=tempVideoFileAdd;
-						videoPath.setText(videoFileAdd);
-						valid=true;
-					}else{
-						//file is not audio/mpeg type
-						JOptionPane.showMessageDialog(null, "You have entered a non-video file or the file type is not supported.\n Please enter a valid file.");
-					}
+			if (!hasSpaces) {
+				if(partial.equals("")){
+					//error message of empty file name
+					JOptionPane.showMessageDialog(null, "You have entered a empty file name. Please input a valid file name.");
 				}else{
-					//file does not exist so give error
-					JOptionPane.showMessageDialog(null,"You have entered a non-existing file. Please input a valid file type.");
+					//check if the file exist locally
+					if (Helper.fileExist(tempVideoFileAdd)){
+						String bash =File.separator+"bin"+File.separator+"bash";
+						String cmd ="echo $(file \""+tempVideoFileAdd+"\")";
+						ProcessBuilder builder=new ProcessBuilder(bash,"-c",cmd); 
+						builder.redirectErrorStream(true);
+	
+						try{
+							Process process = builder.start();
+							InputStream stdout = process.getInputStream();
+							BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+							String line;
+							while((line=stdoutBuffered.readLine())!=null){
+								//System.out.println(line);//debug file type
+								Matcher macth =Pattern.compile(Constants.VIDEO_AUDIO_TYPE,Pattern.CASE_INSENSITIVE).matcher(line);
+								if(macth.find()){
+									isAudio=true;
+								}
+							}
+						}catch(Exception e){
+							//e.printStackTrace();
+						}
+						//check if audio using bash commands
+						if (isAudio){
+							videoFileAdd=tempVideoFileAdd;
+							videoPath.setText(videoFileAdd);
+							valid=true;
+						}else{
+							//file is not audio/mpeg type
+							JOptionPane.showMessageDialog(null, "You have entered a non-video file or the file type is not supported.\n Please enter a valid file.");
+						}
+					}else{
+						//file does not exist so give error
+						JOptionPane.showMessageDialog(null,"You have entered a non-existing file. Please input a valid file type.");
+					}
 				}
+			} else {
+				JOptionPane.showMessageDialog(null,"Your input file cannot have spaces in the path and name.");
 			}
 		}
 
@@ -1216,6 +1429,41 @@ public class VamixController {
 			}
 		}
 		return false;
+	}
+	
+	//method that will check the inputs for the fade functionality
+	private boolean checkFadeInputs(boolean isFadeIn) {
+		boolean isValid = false;
+		TextField start = null, end = null;
+		if (isFadeIn) {
+			start = startFadeIn;
+			end = endFadeIn;
+		} else {
+			start = startFadeOut;
+			end = endFadeOut;
+		}
+		//check a video is actually loaded into VAMIX
+		if (!(videoFileAdd.equals(""))) {
+			//check if the input video file is a valid video file (is either mp4, avi or flv)
+			if(Helper.validVideoFile(videoFileAdd,"(MPEG v4)|Video")){
+				//check that the start time is valid
+				if (Helper.timeValidTypeChecker(start.getText(), "start time")) {
+					//check that the end time is valid
+					if (Helper.timeValidTypeChecker(end.getText(), "end time")) {
+						//check that the start time is valid relative to the end time
+						if (Helper.timeValidChecker(start.getText(), end.getText(), "fading")) {
+							//check that both times are less than or equal to length of the input video
+							if ((Helper.timeLessThanVideo(start.getText()) && (Helper.timeLessThanVideo(end.getText())))) {
+								isValid = true;
+							}
+						}
+					}
+				}
+			}
+		} else {
+			JOptionPane.showMessageDialog(null, "Please load a video into VAMIX first", "Missing input", JOptionPane.ERROR_MESSAGE);
+		}
+		return isValid;
 	}
 	
 	//method that will save the state of vamix to a txt file so it can be loaded on request of the user
