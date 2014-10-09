@@ -1225,6 +1225,7 @@ public class VamixController {
 		//intiliase validness varaible code reuse from a2
 		boolean valid=false; //if file is valid
 		boolean isAudio=false; //boolean for if file is video or audio
+		boolean hasSpaces = false;	//true if the input address has spaces - not allowed
 		String tempVideoFileAdd="";//initialse the video file address
 		String partial=""; //variable for partial of path ie just the name of file
 		JOptionPane.showMessageDialog(null, "Please select the video or audio to edit.");
@@ -1246,52 +1247,55 @@ public class VamixController {
 			}catch(NullPointerException e){
 				valid=true; //cant return nothing
 			}
-
+			if (tempVideoFileAdd.contains(" ")) {hasSpaces = true;}
 			//now get the path of file and just file name
 			Matcher m=Pattern.compile("(.*"+File.separator+")(.*)$").matcher(tempVideoFileAdd);
 			if(m.find()){
 				partial=m.group(2); //get file name
 			}
-
-			if(partial.equals("")){
-				//error message of empty file name
-				JOptionPane.showMessageDialog(null, "You have entered a empty file name. Please input a valid file name.");
-			}else{
-				//check if the file exist locally
-				if (Helper.fileExist(tempVideoFileAdd)){
-					String bash =File.separator+"bin"+File.separator+"bash";
-					String cmd ="echo $(file "+tempVideoFileAdd+")";
-					ProcessBuilder builder=new ProcessBuilder(bash,"-c",cmd); 
-					builder.redirectErrorStream(true);
-
-					try{
-						Process process = builder.start();
-						InputStream stdout = process.getInputStream();
-						BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-						String line;
-						while((line=stdoutBuffered.readLine())!=null){
-							//System.out.println(line);//debug file type
-							Matcher macth =Pattern.compile(Constants.VIDEO_AUDIO_TYPE,Pattern.CASE_INSENSITIVE).matcher(line);
-							if(macth.find()){
-								isAudio=true;
-							}
-						}
-					}catch(Exception e){
-						//e.printStackTrace();
-					}
-					//check if audio using bash commands
-					if (isAudio){
-						videoFileAdd=tempVideoFileAdd;
-						videoPath.setText(videoFileAdd);
-						valid=true;
-					}else{
-						//file is not audio/mpeg type
-						JOptionPane.showMessageDialog(null, "You have entered a non-video file or the file type is not supported.\n Please enter a valid file.");
-					}
+			if (!hasSpaces) {
+				if(partial.equals("")){
+					//error message of empty file name
+					JOptionPane.showMessageDialog(null, "You have entered a empty file name. Please input a valid file name.");
 				}else{
-					//file does not exist so give error
-					JOptionPane.showMessageDialog(null,"You have entered a non-existing file. Please input a valid file type.");
+					//check if the file exist locally
+					if (Helper.fileExist(tempVideoFileAdd)){
+						String bash =File.separator+"bin"+File.separator+"bash";
+						String cmd ="echo $(file \""+tempVideoFileAdd+"\")";
+						ProcessBuilder builder=new ProcessBuilder(bash,"-c",cmd); 
+						builder.redirectErrorStream(true);
+	
+						try{
+							Process process = builder.start();
+							InputStream stdout = process.getInputStream();
+							BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+							String line;
+							while((line=stdoutBuffered.readLine())!=null){
+								//System.out.println(line);//debug file type
+								Matcher macth =Pattern.compile(Constants.VIDEO_AUDIO_TYPE,Pattern.CASE_INSENSITIVE).matcher(line);
+								if(macth.find()){
+									isAudio=true;
+								}
+							}
+						}catch(Exception e){
+							//e.printStackTrace();
+						}
+						//check if audio using bash commands
+						if (isAudio){
+							videoFileAdd=tempVideoFileAdd;
+							videoPath.setText(videoFileAdd);
+							valid=true;
+						}else{
+							//file is not audio/mpeg type
+							JOptionPane.showMessageDialog(null, "You have entered a non-video file or the file type is not supported.\n Please enter a valid file.");
+						}
+					}else{
+						//file does not exist so give error
+						JOptionPane.showMessageDialog(null,"You have entered a non-existing file. Please input a valid file type.");
+					}
 				}
+			} else {
+				JOptionPane.showMessageDialog(null,"Your input file cannot have spaces in the path and name.");
 			}
 		}
 

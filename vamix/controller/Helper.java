@@ -245,7 +245,7 @@ public class Helper {
 			//check if the file exist locally
 			if (Helper.fileExist(path+inFileName)){
 				String bash =File.separator+"bin"+File.separator+"bash";
-				String cmd ="echo $(file "+path+inFileName+")";
+				String cmd ="echo $(file \""+path+inFileName+"\")";
 				ProcessBuilder builder=new ProcessBuilder(bash,"-c",cmd); 
 				builder.redirectErrorStream(true);
 
@@ -438,7 +438,7 @@ public class Helper {
 			//check if the file exist locally
 			if (Helper.fileExist(path+inFileName)){
 				String bash =File.separator+"bin"+File.separator+"bash";
-				String cmd ="echo $(file "+path+inFileName+")";
+				String cmd ="echo $(file \""+path+inFileName+"\")";
 				ProcessBuilder builder=new ProcessBuilder(bash,"-c",cmd); 
 				builder.redirectErrorStream(true);
 
