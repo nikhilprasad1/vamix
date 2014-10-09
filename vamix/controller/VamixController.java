@@ -650,7 +650,44 @@ public class VamixController {
 		cropBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {
-				
+				boolean allFull = true;
+				//check a video is actually loaded into VAMIX
+				if (!(videoFileAdd.equals(""))) {
+					//check if the input video file is a valid video file (is either mp4, avi or flv)
+					if(Helper.validVideoFile(videoFileAdd,"(MPEG v4)|Video")){
+						//check that all fields have a value
+						if ((cropHeight.getText().equals("")) || (cropWidth.getText().equals("")) || (cropXPos.getText().equals("")) || (cropYPos.getText().equals(""))) {
+							allFull = false;
+						}
+						if (allFull) {
+							//now get the dimensions of the video and make sure that the width, height, x and y values
+							//specified by the user lie within the dimensions
+							int width = vamix.view.Main.vid.getVideoDimension().width;
+							int height = vamix.view.Main.vid.getVideoDimension().height;
+							int cropheight = Integer.parseInt(cropHeight.getText());
+							int cropwidth = Integer.parseInt(cropWidth.getText());
+							int x = Integer.parseInt(cropXPos.getText());
+							int y = Integer.parseInt(cropYPos.getText());
+							//if the height and width specified by user is within video dimensions, continue
+							if ((cropheight <= height) && (cropwidth <= width)) {
+								//now check that the position (x,y) specified, in combination with height and width, does not exceed video dimensions
+								if (((cropheight + y) <= height) && ((cropwidth + x) <= width)) {
+									//if it doesn't, continue with the crop operation
+									CropVideo cropper = new CropVideo(cropWidth.getText(), cropHeight.getText(), cropXPos.getText(), cropYPos.getText(), videoFileAdd);
+									cropper.cropVideoAsync();
+								} else {
+									JOptionPane.showMessageDialog(null, "The (x,y) position specified in combination with the height and width specified "
+											+ "exceeds the video dimensions. Please change these values to comply.", "Invalid input", JOptionPane.ERROR_MESSAGE);
+								}
+							} else {
+								JOptionPane.showMessageDialog(null, "Height and width specified must be within video dimensions\n"
+										+ "Dimensions are h = " + String.valueOf(height) + ", w = " + String.valueOf(width), "Invalid input", JOptionPane.ERROR_MESSAGE);
+							}
+						} else {
+							JOptionPane.showMessageDialog(null, "Atleast one field has no input.", "Missing input", JOptionPane.ERROR_MESSAGE);
+						}
+					}
+				}
 			}
 		});
 		
@@ -663,7 +700,20 @@ public class VamixController {
 		rotateBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {
-				
+				//check a video is actually loaded into VAMIX
+				if (!(videoFileAdd.equals(""))) {
+					//check if the input video file is a valid video file (is either mp4, avi or flv)
+					if(Helper.validVideoFile(videoFileAdd,"(MPEG v4)|Video")){
+						//check that the angle given by the user is either 90, 180 or 270 degrees
+						String angle = rotateAngle.getText();
+						if (!(angle.equals("90") || angle.equals("180") || angle.equals("270"))) {
+							JOptionPane.showMessageDialog(null, "The angle to rotate must be either 90, 180 or 270 degrees.", "Invalid input", JOptionPane.ERROR_MESSAGE);
+						} else {
+							RotateVideo rotateVideo = new RotateVideo(angle, videoFileAdd);
+							rotateVideo.rotateVideoAsync();
+						}
+					}
+				}
 			}
 		});
 	}
