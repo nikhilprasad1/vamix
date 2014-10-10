@@ -240,7 +240,7 @@ public class Helper {
 		
 		if(fileName.equals("")){
 			//error message of empty file name
-			JOptionPane.showMessageDialog(null, "You have entered a empty file name. Please input a valid file name.");
+			JOptionPane.showMessageDialog(null, "You have entered an empty file name. Please input a valid file name.");
 		}else{
 			//check if the file exist locally
 			if (Helper.fileExist(path+inFileName)){
@@ -268,7 +268,7 @@ public class Helper {
 					isValid=true;
 				}else{
 					//file is not audio/mpeg type
-					JOptionPane.showMessageDialog(null, "You have entered a non-video/audio file please enter a valid file.");
+					JOptionPane.showMessageDialog(null, "You have entered a non-video/audio file, please enter a valid file.");
 				}
 			}else{
 				//file does not exist so give error
@@ -433,7 +433,7 @@ public class Helper {
 		
 		if(fileName.equals("")){
 			//error message of empty file name
-			JOptionPane.showMessageDialog(null, "You have entered a empty file name. Please input a valid file name.");
+			JOptionPane.showMessageDialog(null, "You have entered an empty file name. Please input a valid file name.");
 		}else{
 			//check if the file exist locally
 			if (Helper.fileExist(path+inFileName)){

@@ -870,7 +870,7 @@ public class VamixController {
 							//if the directory does exist, check if output file exists, if it does ask user if they want to overwrite
 							if (Helper.fileExist(outputFilePath.getText())) {
 								Object[] options = {"Overwrite", "Cancel"};
-								choice = JOptionPane.showOptionDialog(null, "File " + outFileName +" already exist. Do you wish to overwrite it or cancel and choose another destination?",
+								choice = JOptionPane.showOptionDialog(null, "File " + outFileName +" already exists. Do you wish to overwrite it or cancel and choose another destination?",
 										"Override?",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE,null,options, options[0]);
 								if (choice == 0) {
 									//space MUST come after 'y' or concat bash command in rendering will fail
@@ -1228,7 +1228,7 @@ public class VamixController {
 		boolean hasSpaces = false;	//true if the input address has spaces - not allowed
 		String tempVideoFileAdd="";//initialse the video file address
 		String partial=""; //variable for partial of path ie just the name of file
-		JOptionPane.showMessageDialog(null, "Please select the video or audio to edit.");
+		JOptionPane.showMessageDialog(null, "Please select the video or audio file to edit.");
 		//get input file
 		while(!valid){
 			//setup file chooser
@@ -1256,7 +1256,7 @@ public class VamixController {
 			if (!hasSpaces) {
 				if(partial.equals("")){
 					//error message of empty file name
-					JOptionPane.showMessageDialog(null, "You have entered a empty file name. Please input a valid file name.");
+					JOptionPane.showMessageDialog(null, "You have entered an empty file name. Please input a valid file name.");
 				}else{
 					//check if the file exist locally
 					if (Helper.fileExist(tempVideoFileAdd)){
@@ -1495,6 +1495,17 @@ public class VamixController {
 		    writer.write(creditsYPos.getText() + "\n");
 		    writer.write(startCredits.getText() + "\n");
 		    writer.write(endCredits.getText() + "\n");
+		    writer.write(rotateAngle.getText() + "\n");
+		    writer.write(startFadeIn.getText() + "\n");
+		    writer.write(endFadeIn.getText() + "\n");
+		    writer.write(startFadeOut.getText() + "\n");
+		    writer.write(endFadeOut.getText() + "\n");
+		    writer.write(startTrim.getText() + "\n");
+		    writer.write(endTrim.getText() + "\n");
+		    writer.write(cropXPos.getText() + "\n");
+		    writer.write(cropYPos.getText() + "\n");
+		    writer.write(cropHeight.getText() + "\n");
+		    writer.write(cropWidth.getText() + "\n");
 		    //now write the audio tab values into state file
 		    writer.write(strip_add.getText() + "\n");
 		    writer.write(replaceAdd.getText() + "\n");
@@ -1554,20 +1565,31 @@ public class VamixController {
 			    creditsYPos.setText(values.get(15));
 			    startCredits.setText(values.get(16));
 			    endCredits.setText(values.get(17));
+			    rotateAngle.setText(values.get(18));
+			    startFadeIn.setText(values.get(19));
+			    endFadeIn.setText(values.get(20));
+			    startFadeOut.setText(values.get(21));
+			    endFadeOut.setText(values.get(22));
+			    startTrim.setText(values.get(23));
+			    endTrim.setText(values.get(24));
+			    cropXPos.setText(values.get(25));
+			    cropYPos.setText(values.get(26));
+			    cropHeight.setText(values.get(27));
+			    cropWidth.setText(values.get(28));
 			    //now read the audio tab values from the state file
-			    strip_add.setText(values.get(18));
-			    replaceAdd.setText(values.get(19));
-			    startReplace.setText(values.get(20));
-			    endReplace.setText(values.get(21));
-			    startReplace2.setText(values.get(22));
-			    endReplace2.setText(values.get(23));
-			    overlayAdd.setText(values.get(24));
-			    overlayUseStart.setText(values.get(25));
-			    overlayUseEnd.setText(values.get(26));
-			    overlayToStart.setText(values.get(27));
-			    overlayToEnd.setText(values.get(28));
+			    strip_add.setText(values.get(29));
+			    replaceAdd.setText(values.get(30));
+			    startReplace.setText(values.get(31));
+			    endReplace.setText(values.get(32));
+			    startReplace2.setText(values.get(33));
+			    endReplace2.setText(values.get(34));
+			    overlayAdd.setText(values.get(35));
+			    overlayUseStart.setText(values.get(36));
+			    overlayUseEnd.setText(values.get(37));
+			    overlayToStart.setText(values.get(38));
+			    overlayToEnd.setText(values.get(39));
 			    //now read the render tab values from the state file
-			    outputFilePath.setText(values.get(29));
+			    outputFilePath.setText(values.get(40));
 			} else {
 				JOptionPane.showMessageDialog(null, "No previous state exists.", "Load unavailable", JOptionPane.INFORMATION_MESSAGE);
 			}

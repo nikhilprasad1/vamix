@@ -41,10 +41,10 @@ public class Download {
 		int overrideChoice=-1; //initialise value of override -1 as file doesnt exist
 		String url=_url;//variable for url
 		if (url==null){
-			JOptionPane.showMessageDialog(null, "You have not enter an url. Please input a valid url."); //when url is null
+			JOptionPane.showMessageDialog(null, "You have not entered a URL. Please input a valid URL."); //when url is null
 		}else if(url.equals("")){
 			//error message of empty links
-			JOptionPane.showMessageDialog(null, "You have entered a empty url. Please input a valid url.");
+			JOptionPane.showMessageDialog(null, "You have entered a empty URL. Please input a valid URL.");
 		}else{
 			urlEnd=url.split(File.separator)[url.split(File.separator).length-1];
 			//create object for choice of options
@@ -52,7 +52,7 @@ public class Download {
 			//check if the file exist locally
 			if (Helper.fileExist(Constants.CURRENT_DIR+urlEnd)){
 				//note 0 is override ie first option chosen and 1 is resume
-				overrideChoice=JOptionPane.showOptionDialog(null, "File " +urlEnd +" already exist. Do you wish to override or resume partial download?",
+				overrideChoice=JOptionPane.showOptionDialog(null, "File " +urlEnd +" already exists. Do you wish to override or resume partial download?",
 						"Override?",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE,null,option,option[0]);
 			}	
 			
@@ -172,16 +172,16 @@ public class Download {
 				JOptionPane.showMessageDialog(_DownloadFrame, "Download has finished. Note downloaded to: \n" +Constants.CURRENT_DIR+urlEnd);
 				break;
 			case 3://error message of File IO
-				JOptionPane.showMessageDialog(_DownloadFrame, "File IO error. Make sure the directory is safe to write to. Or not denial by anti-virus.");
+				JOptionPane.showMessageDialog(_DownloadFrame, "File IO error. Make sure the directory is safe to write to. Or not denied by your anti-virus.");
 				break;
 			case 4://error message of Network
-				JOptionPane.showMessageDialog(_DownloadFrame, "Network error. Make sure you are connected to internet correctly. Or link is invalid");
+				JOptionPane.showMessageDialog(_DownloadFrame, "Network error. Make sure you are connected to the internet correctly. Or link is invalid");
 				break;
 			case 8://error message of Sever issue
-				JOptionPane.showMessageDialog(_DownloadFrame, "Server issued error. Possibly server is down. Please try again later.");
+				JOptionPane.showMessageDialog(_DownloadFrame, "Server issued error. Server could be down. Please try again later.");
 				break;
 			default://error message of generic
-				JOptionPane.showMessageDialog(_DownloadFrame, "An error have occured. Please try again. The error code is: "+errorCode);
+				JOptionPane.showMessageDialog(_DownloadFrame, "An error has occured. Please try again. The error code is: "+errorCode);
 				break;
 			}
 			this._DownloadFrame.dispose();

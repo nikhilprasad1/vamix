@@ -58,13 +58,13 @@ public class OverlayAudio {
 				JOptionPane.showMessageDialog(null, "You have not entered an audio file name. Please input a valid file name.");
 			}else if(audioFile.equals("")){
 				//error message of empty file name
-				JOptionPane.showMessageDialog(null, "You have entered a empty file name. Please input a valid file name.");
+				JOptionPane.showMessageDialog(null, "You have entered an empty file name. Please input a valid file name.");
 			}else if (_inFile.equals(_inAudio)){
 				//error message need to not be the same name as input file
-				JOptionPane.showMessageDialog(null, "You have entered a replace file name that is same with input audio file. Please input a valid audio file name that isnt the same.");
+				JOptionPane.showMessageDialog(null, "You cannot use the audio file you are editing as the overlaying audio.");
 			}else if (!(Helper.fileExist(_inAudio))){
 				//not an audio file
-				JOptionPane.showMessageDialog(null, "You have not enter audio file that exists for overlay.");
+				JOptionPane.showMessageDialog(null, "The audio file you have chosen to overlay does not exist, please choose another.");
 			}else {
 				String bash =File.separator+"bin"+File.separator+"bash";
 				String cmd ="echo $(file "+audioFile+")";
@@ -89,7 +89,7 @@ public class OverlayAudio {
 					valid=true;//audio file valid
 				}else{
 					//not an audio file
-					JOptionPane.showMessageDialog(null, "You have not enter a valid audio file for overlay.");
+					JOptionPane.showMessageDialog(null, "You have not entered a valid audio file for overlaying.");
 				}
 			}
 		}
@@ -387,10 +387,10 @@ public class OverlayAudio {
 			}
 			switch(errorCode){
 			case 0://nothing wrong so write to log
-				JOptionPane.showMessageDialog(_overlayAudioFrame, "Overlay audio has finished. \nNote output is saved to "+outputName+".");
+				JOptionPane.showMessageDialog(_overlayAudioFrame, "The overlay process has finished. \nNote output is saved to "+outputName+".");
 				break;
 			case -1://extract cancelled
-				JOptionPane.showMessageDialog(_overlayAudioFrame, "Overlay audio  has been cancelled.");
+				JOptionPane.showMessageDialog(_overlayAudioFrame, "The audio overlay operation has been cancelled.");
 				break;
 			default://error message of generic
 				JOptionPane.showMessageDialog(_overlayAudioFrame, "An error has occurred. Please try again. The error code is: "+errorCode);

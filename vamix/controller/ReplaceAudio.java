@@ -59,10 +59,10 @@ public class ReplaceAudio {
 				JOptionPane.showMessageDialog(null, "You have not entered an audio file name. Please input a valid file name.");
 			}else if(audioFile.equals("")){
 				//error message of empty file name
-				JOptionPane.showMessageDialog(null, "You have entered a empty file name. Please input a valid file name.");
+				JOptionPane.showMessageDialog(null, "You have entered an empty file name. Please input a valid file name.");
 			}else if (_inFile.equals(_inAudio)){
 				//error message need to not be the same name as input file
-				JOptionPane.showMessageDialog(null, "The file to use as replacement has the same name as the input audio file. Please input a valid audio file name that isnt the same.");
+				JOptionPane.showMessageDialog(null, "The file to use as replacement has the same name as the input audio file. Please input a valid audio file name that is not the same.");
 			}else {
 				String bash =File.separator+"bin"+File.separator+"bash";
 				String cmd ="echo $(file "+audioFile+")";
@@ -87,7 +87,7 @@ public class ReplaceAudio {
 					valid=true;//audio file valid
 				}else{
 					//not an audio file
-					JOptionPane.showMessageDialog(null, "You have not enter a valid audio file for replace.");
+					JOptionPane.showMessageDialog(null, "You have not entered a valid audio file for replacement.");
 				}
 			}
 		}
@@ -113,8 +113,8 @@ public class ReplaceAudio {
 		
 		if (valid){ //check if start time and end time make logic sense after the format is valid
 			valid=false;
-			valid=Helper.timeValidChecker(_startTime, _endtime, "audio file for replace");
-			valid=Helper.timeValidChecker(_startTime2, _endtime2, "file to be replace");
+			valid=Helper.timeValidChecker(_startTime, _endtime, "audio file for replacing");
+			valid=Helper.timeValidChecker(_startTime2, _endtime2, "file to be replaced");
 		}
 		
 		if(valid){
@@ -347,10 +347,10 @@ public class ReplaceAudio {
 
 			switch(errorCode){
 			case 0://nothing wrong so write to log
-				JOptionPane.showMessageDialog(_replaceAudioFrame, "Replace audio has finished. \nNote output is saved to "+outputName+".");
+				JOptionPane.showMessageDialog(_replaceAudioFrame, "Replacement has has finished. \nNote output is saved to "+outputName+".");
 				break;
 			case -1://extract cancelled
-				JOptionPane.showMessageDialog(_replaceAudioFrame, "Replace audio  has been cancelled.");
+				JOptionPane.showMessageDialog(_replaceAudioFrame, "Replacement has been cancelled.");
 				break;
 			default://error message of generic
 				JOptionPane.showMessageDialog(_replaceAudioFrame, "An error has occurred. Please try again. The error code is: "+errorCode);

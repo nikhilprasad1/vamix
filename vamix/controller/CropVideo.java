@@ -75,7 +75,6 @@ public class CropVideo {
 					if (isCancelled()){
 						process.destroy();//force process to terminate
 					}else {
-						System.out.println(line);
 						//check time in output, use this as indication for progress
 						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
 						if(m.find()) {

@@ -49,15 +49,15 @@ public class Strip {
 		if(Helper.validInFile(inFileName,Constants.VIDEO_AUDIO_TYPE)){
 			valid=false; //set corretness of outfile to false
 			if (outFileName==null){
-				JOptionPane.showMessageDialog(null, "You have not entered a save file name. Please input a valid file name.");
+				JOptionPane.showMessageDialog(null, "You have not entered a destination to save to. Please input a valid file name.");
 			}else if(outFileName.equals("")){
 				//error message of empty file name
-				JOptionPane.showMessageDialog(null, "You have entered a empty file name. Please input a valid file name.");
+				JOptionPane.showMessageDialog(null, "You have entered an empty file name. Please input a valid file name.");
 			}else{
 				Matcher m =Pattern.compile(".mp3$").matcher(outFileName);
 				if (_curDir.equals(_saveDir)){
 					//error message need to not be the same name as input file
-					JOptionPane.showMessageDialog(null, "You have entered a output file name that is same with input file. Please input a valid file name that isnt the same.");
+					JOptionPane.showMessageDialog(null, "Your input file and output file cannot be the same. Please input a valid file name that is not the same.");
 				}else if (m.find()){
 					if (Helper.fileExist(outFileName)){
 						//file exist ask if override
@@ -74,7 +74,7 @@ public class Strip {
 					}
 				}else{
 					//error message need to end with mp3
-					JOptionPane.showMessageDialog(null, "You have entered a file name that doesnt end with mp3. Please input a valid file name that ends with mp3.");
+					JOptionPane.showMessageDialog(null, "You have entered a file name that does not end with .mp3 \nPlease input a valid file name that ends with .mp3");
 				}
 
 			}
@@ -191,7 +191,7 @@ public class Strip {
 						if(vName.find()){
 							path=vName.group(1); //get file path with name
 						}
-						stripVideo=Helper.fileNameGen(path+".mp4","striped");
+						stripVideo=Helper.fileNameGen(path+".mp4","no audio");
 						cmds.add(stripVideo);
 					}
 					//setup process cmd for striping audio
@@ -253,9 +253,9 @@ public class Strip {
 				break;
 			case -1://extract cancelled
 				if (containVideo){
-					JOptionPane.showMessageDialog(_stripAudioFrame, "Strip audio  has been cancelled. Note output is saved to "+_outFileName+" and \n"+stripVideo+".");
+					JOptionPane.showMessageDialog(_stripAudioFrame, "Strip audio has been cancelled. Note output is saved to "+_outFileName+" and \n"+stripVideo+".");
 				}else{
-					JOptionPane.showMessageDialog(_stripAudioFrame, "Strip audio  has been cancelled. Note output is saved to "+_outFileName+".");
+					JOptionPane.showMessageDialog(_stripAudioFrame, "Strip audio has been cancelled. Note output is saved to "+_outFileName+".");
 				}
 				break;
 			case 143://when no audio or video stream
