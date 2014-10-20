@@ -28,8 +28,6 @@ public class Main extends Application {
 	@Override
 	public void start(Stage initStage) {
 		try{
-			//this.initStage=initStage;
-			//this.initStage.setTitle("yfu959 npra508 VAMIX Assignment 3"); //set name as vamix
 			setupGUI(); //setup the gui for javafx
 		} catch(Exception ex){
 			//error
@@ -40,7 +38,7 @@ public class Main extends Application {
 		try {
 			mediaPlayerComponent=new EmbeddedMediaPlayerComponent();
 			vid=mediaPlayerComponent.getMediaPlayer();
-			frame =new JFrame("yfu959 npra508 VAMIX Assignment 3");
+			frame =new JFrame("npra508 VAMIX Project 1.1b");
 
 			final JFXPanel fxP=new JFXPanel();
 			FXMLLoader loader = new FXMLLoader();
@@ -48,12 +46,7 @@ public class Main extends Application {
 			loader.setLocation(Main.class.getResource("VideoView.fxml"));
 			AnchorPane TabPane = (AnchorPane) loader.load();
 
-			//p.setLayout(null);
-			//p.add(mediaPlayerComponent);
-			//p.add(fxP);
-			//p.add(mediaPlayerComponent);
-
-			fxP.setBounds(0, 0, 1050, 660);
+			fxP.setBounds(0, 0, 1050, 675);
 			frame.getLayeredPane().add(fxP, JLayeredPane.DEFAULT_LAYER);
 			Scene scene = new Scene(TabPane);
 			fxP.setScene(scene);
@@ -83,13 +76,9 @@ public class Main extends Application {
 					}
 				}
 			});
-			frame.setSize(1051, 685);
+			frame.setSize(1051, 690);
 			frame.setResizable(false);
 			frame.setVisible(true);
-
-			//get version number of javafx
-			//System.out.println(com.sun.javafx.runtime.VersionInfo.getRuntimeVersion());
-			//initStage.show();	
 		} catch (IOException e) {
 			//e.printStackTrace();
 		}

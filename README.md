@@ -1,4 +1,0 @@
-vamix
-=====
-
-vamix project

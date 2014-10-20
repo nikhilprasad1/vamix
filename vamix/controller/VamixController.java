@@ -53,6 +53,8 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.media.MediaView;
@@ -327,6 +329,9 @@ public class VamixController {
 
 	@FXML
 	private Button playPauseBtn;
+	
+	@FXML
+	private ImageView playPauseImage;
 
 	@FXML
 	private Label videoTime;
@@ -968,6 +973,7 @@ public class VamixController {
 		 * Section for the media player id checks
 		 */
 		assert playPauseBtn != null : "fx:id=\"playPauseBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert playPauseImage != null : "fx:id=\"playPauseImage\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert rewindBtn != null : "fx:id=\"rewindBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert fastForwardBtn != null : "fx:id=\"fastForwardBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 
@@ -1002,7 +1008,8 @@ public class VamixController {
 				        	if (currentTime>=VidTime){//when reach end of file loop
 				        		vamix.view.Main.vid.playMedia(videoFileAdd); 
 				        		if (!(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Playing)){
-				        			playPauseBtn.setText("Pause");
+				        			Image pauseImg = new Image(getClass().getResourceAsStream("/pause.png"));
+									playPauseImage.setImage(pauseImg);
 				        		}
 				        		String videTime= Helper.timeOfVideo(currentTime,VidTime);
 				        		videoTime.setText(videTime);
@@ -1028,7 +1035,8 @@ public class VamixController {
 				        		} catch (InterruptedException e1) {
 				        		}
 				        		vamix.view.Main.vid.pause();
-				        		playPauseBtn.setText("Play");
+				        		Image playImg = new Image(getClass().getResourceAsStream("/play.png"));
+								playPauseImage.setImage(playImg);
 				        		videoProgress.setProgress(0.0);
 				        		if (vamix.view.Main.vid.isMute()){
 				        			vamix.view.Main.vid.mute();
@@ -1062,11 +1070,13 @@ public class VamixController {
 				}else if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Playing){
 					//when play pause the video
 					vamix.view.Main.vid.pause();
-					playPauseBtn.setText("Play");
+					Image playImg = new Image(getClass().getResourceAsStream("/play.png"));
+					playPauseImage.setImage(playImg);
 				}else if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Paused){
 					//when pause play the video
 					vamix.view.Main.vid.pause();
-					playPauseBtn.setText("Pause");
+					Image pauseImg = new Image(getClass().getResourceAsStream("/pause.png"));
+					playPauseImage.setImage(pauseImg);
 				}
 			}
 		});
