@@ -60,7 +60,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.media.MediaView;
 
 /**
- * Controller class for the VAMIX GUI
+ * Controller class for the VAMIX GUI (VideoView.fxml). GUI was built using JavaFX 2.0 and SceneBuilder. SceneBuilder requires the GUI has
+ * only one controller class and since this class must deal with all user input and user interactions with the GUI, it had to be a large class.
+ * @author Nikhil Prasad and Guyver (Yeu-Shin) Fu
  **/
 public class VamixController {
 
@@ -350,6 +352,7 @@ public class VamixController {
 		renderTabCheck();
 		playerCheck();
 		menuCheck();
+		setToolTips();
 		menuActions();
 		videoTab();
 		audioTab();
@@ -461,7 +464,7 @@ public class VamixController {
 		creditsFont.setItems(fonts);
 		//set their defaults
 		titleFont.setValue("FreeSans");
-		creditsFont.setValue("FreeSans");
+		creditsFont.setValue("FreeSans");	
 		
 		//download function button
 		downloadBtn.setOnAction(new EventHandler<ActionEvent>() {
@@ -693,10 +696,6 @@ public class VamixController {
 			}
 		});
 		
-		//set the tool tip for the field where user enters the angle to rotate the video by
-		Tooltip rotateTip = new Tooltip();
-		rotateTip.setText("Valid angles are 90, 180 and 270 degrees");
-		rotateAngle.setTooltip(rotateTip);
 		
 		//the functionality for the rotate video button
 		rotateBtn.setOnAction(new EventHandler<ActionEvent>() {
@@ -1176,6 +1175,66 @@ public class VamixController {
 				vamix.view.Main.vid.setTime((long)(arg0.getX()*vamix.view.Main.vid.getLength()/(long)videoProgress.getWidth()));
 			}
 		});
+	}
+	
+	private void setToolTips() {
+		
+		//set the tool tip for the buttons which the user clicks to open the file browser
+		Tooltip openTip = new Tooltip("Click to open file browser");
+		browseBtn.setTooltip(openTip);
+		saveToBtn.setTooltip(openTip);
+		save_file_chooser.setTooltip(openTip);
+		chooseAudioButton.setTooltip(openTip);
+		chooseOverlayBtn.setTooltip(openTip);
+				
+		//tool tip for entering download URL
+		Tooltip urlTip = new Tooltip("Enter URL to download from");
+		videoURL.setTooltip(urlTip);
+		
+		//tool tip for (x,y) text position fields
+		Tooltip xPosTip = new Tooltip("Enter the x coordinate for positioning the text on the video");
+		titleXPos.setTooltip(xPosTip);
+		creditsXPos.setTooltip(xPosTip);
+		Tooltip yPosTip = new Tooltip("Enter the y coordinate for positioning the text on the video");
+		titleYPos.setTooltip(yPosTip);
+		creditsYPos.setTooltip(yPosTip);
+		
+		//tool tips to clarify to user what time input is required for text editing (those fields which require time in hh:mm:ss)
+		Tooltip startTextTip = new Tooltip("Enter time on video to begin showing text at");
+		startTitle.setTooltip(startTextTip);
+		startCredits.setTooltip(startTextTip);
+		Tooltip endTextTip = new Tooltip("Enter time on video to stop showing text at");
+		endTitle.setTooltip(endTextTip);
+		endCredits.setTooltip(endTextTip);
+		//set the tool tip for the field where user enters the angle to rotate the video by
+		Tooltip rotateTip = new Tooltip("Valid angles are 90, 180 and 270 degrees");
+		rotateAngle.setTooltip(rotateTip);
+		
+		//tool tips to clarify to user what time inputs are required for fading video
+		Tooltip startFadeTip = new Tooltip("Enter time on video to begin fading");
+		startFadeIn.setTooltip(startFadeTip);
+		startFadeOut.setTooltip(startFadeTip);
+		Tooltip endFadeTip = new Tooltip("Enter time on video to end fading");
+		endFadeIn.setTooltip(endFadeTip);
+		endFadeOut.setTooltip(endFadeTip);
+		
+		//tool tips to clarify to user what time inputs are required for trimming video
+		Tooltip startTrimTip = new Tooltip("Enter time on video to start trimming at");
+		startTrim.setTooltip(startTrimTip);
+		Tooltip endTrimTip = new Tooltip("Enter time on video to end trimming at");
+		endTrim.setTooltip(endTrimTip);
+		
+		//tool tips to clarify to user what inputs are required for cropping a video
+		Tooltip xCropTip = new Tooltip("Enter the x coordinate for the top-left corner of the cropped video");
+		cropXPos.setTooltip(xCropTip);
+		Tooltip yCropTip = new Tooltip("Enter the y coordinate for the top-left corner of the cropped video");
+		cropYPos.setTooltip(yCropTip);
+		Tooltip cropHeightTip = new Tooltip("Enter the height to crop from the (x,y) position specified");
+		cropHeight.setTooltip(cropHeightTip);
+		Tooltip cropWidthTip = new Tooltip("Enter the width to crop from the (x,y) position specified");
+		cropWidth.setTooltip(cropWidthTip);
+		
+		
 	}
 
 	private void mainPanesCheck(){

@@ -36,9 +36,9 @@
                                           <Button fx:id="browseBtn" layoutX="278.0" layoutY="20.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="94.0" text="Open File" />
                                           <Button fx:id="loadBtn" layoutX="278.0" layoutY="51.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="94.0" text="Load" />
                                           <Label layoutX="186.0" layoutY="90.0" text="OR" />
-                                          <Label layoutX="21.0" layoutY="108.0" text="Download Video/Audio files" />
-                                          <TextField fx:id="videoURL" layoutX="21.0" layoutY="123.0" prefHeight="25.0" prefWidth="246.0" text="URL" />
-                                          <Button fx:id="downloadBtn" layoutX="278.0" layoutY="123.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="94.0" text="Download" />
+                                          <Label layoutX="21.0" layoutY="112.0" text="Download Video/Audio files" />
+                                          <TextField fx:id="videoURL" layoutX="21.0" layoutY="127.0" prefHeight="25.0" prefWidth="246.0" text="URL" />
+                                          <Button fx:id="downloadBtn" layoutX="278.0" layoutY="127.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="94.0" text="Download" />
                                           <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#e1e4e8" height="374.0" layoutX="9.0" layoutY="184.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="372.0" />
                                           <Label layoutX="21.0" layoutY="190.0" text="Create Opening/Closing Scenes" underline="true">
                                              <font>
@@ -254,6 +254,11 @@
                         </AnchorPane>
                   </content>
                 </Tab>
+                  <Tab text="Subtitles">
+                    <content>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                    </content>
+                  </Tab>
               </tabs>
             </TabPane>
             <AnchorPane fx:id="videoMediaViewAnch" minHeight="0.0" minWidth="0.0" prefHeight="598.0" prefWidth="595.0" SplitPane.resizableWithParent="false">
