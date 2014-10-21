@@ -191,7 +191,7 @@ public class Strip {
 						if(vName.find()){
 							path=vName.group(1); //get file path with name
 						}
-						stripVideo=Helper.fileNameGen(path+".mp4","no audio");
+						stripVideo=Helper.fileNameGen(path+".mp4","no_audio");
 						cmds.add(stripVideo);
 					}
 					//setup process cmd for striping audio
