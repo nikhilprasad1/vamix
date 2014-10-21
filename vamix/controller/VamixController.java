@@ -313,9 +313,6 @@ public class VamixController {
 	 */
 
 	@FXML
-	private MediaView videoMediaView;
-
-	@FXML
 	private Button fastForwardBtn;
 
 	@FXML
@@ -980,7 +977,6 @@ public class VamixController {
 		assert videoTime != null : "fx:id=\"videoTime\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert videoProgress != null : "fx:id=\"videoProgress\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert volumeSlider != null : "fx:id=\"volumeSlider\" was not injected: check your FXML file 'VideoView.fxml'.";
-		assert videoMediaView != null : "fx:id=\"videoMediaView\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert muteCheckbox != null : "fx:id=\"muteCheckbox\" was not injected: check your FXML file 'VideoView.fxml'.";
 
 	}

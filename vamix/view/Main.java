@@ -46,12 +46,12 @@ public class Main extends Application {
 			loader.setLocation(Main.class.getResource("VideoView.fxml"));
 			AnchorPane TabPane = (AnchorPane) loader.load();
 
-			fxP.setBounds(0, 0, 1050, 675);
+			fxP.setBounds(0, 0, 1208, 774);
 			frame.getLayeredPane().add(fxP, JLayeredPane.DEFAULT_LAYER);
 			Scene scene = new Scene(TabPane);
 			fxP.setScene(scene);
 
-			mediaPlayerComponent.setBounds(400, 30, 647, 545);
+			mediaPlayerComponent.setBounds(412, 29, 795, 650);
 			frame.getLayeredPane().add(mediaPlayerComponent, JLayeredPane.PALETTE_LAYER);
 			frame.addWindowListener(new WindowAdapter() {
 				@Override
@@ -76,7 +76,7 @@ public class Main extends Application {
 					}
 				}
 			});
-			frame.setSize(1051, 690);
+			frame.setSize(1208, 789);
 			frame.setResizable(false);
 			frame.setVisible(true);
 		} catch (IOException e) {
