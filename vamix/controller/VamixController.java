@@ -27,11 +27,10 @@ import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
 import uk.co.caprica.vlcj.binding.internal.libvlc_state_t;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
-import uk.co.caprica.vlcj.player.MediaPlayerEventListener;
+import util.FileBrowsers;
 import vamix.controller.FadeVideo.FadeType;
 import vamix.controller.TextEdit.RenderType;
 import javafx.application.Platform;
@@ -50,6 +49,8 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
@@ -57,7 +58,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.media.MediaView;
 
 /**
  * Controller class for the VAMIX GUI (VideoView.fxml). GUI was built using JavaFX 2.0 and SceneBuilder. SceneBuilder requires the GUI has
@@ -71,13 +71,19 @@ public class VamixController {
 
 	@FXML
 	private URL location;
-
+	
+	/*
+	 * Two main containers for the GUI
+	 */
 	@FXML
 	private AnchorPane tabPane;
 
 	@FXML
 	private TabPane tabMenu;
 	
+	/*
+	 * GUI components for the menu bar
+	 */	
 	@FXML
 	private MenuItem saveStateBtn;
 	
@@ -86,21 +92,18 @@ public class VamixController {
 	
 	@FXML
 	private MenuItem loadFiles;
+	
+	@FXML
+	private MenuItem playWithSubtitlesBtn;
+	
 	/*
-	 * Varaible for the video tab
+	 * GUI components for the video tab
 	 */
-
 	@FXML
 	private TextField titleXPos;
 
 	@FXML
 	private TextField durationTitle;
-	
-//	@FXML
-//	private TextField titleBGAddr;
-//	
-//	@FXML
-//	private Button titleBGBtn;
 	
 	@FXML
 	private TextField creditsXPos;
@@ -110,12 +113,6 @@ public class VamixController {
 
 	@FXML
 	private TextField durationCredits;
-	
-//	@FXML
-//	private TextField creditsBGAddr;
-//	
-//	@FXML
-//	private Button creditsBGBtn;
 	
 	@FXML
 	private TextArea titleText;
@@ -232,9 +229,8 @@ public class VamixController {
 	private Button cropBtn;
 
 	/*
-	 * Varaible for the audio tab
+	 * GUI components for the audio tab
 	 */
-
 	@FXML
 	private Tab audioTab;
 
@@ -290,7 +286,7 @@ public class VamixController {
 	private TextField replaceAdd;
 
 	/*
-	 * Varaible for the render tab
+	 * GUI components for the render tab
 	 */
 	@FXML
 	private Tab renderTab;
@@ -309,11 +305,53 @@ public class VamixController {
 	
 	@FXML
 	private CheckBox includeCredits;
+	
+	/*
+	 * GUI components for the Subtitles tab
+	 */
+	
+	@FXML
+	private Button newSubtitleFileBtn;
+	
+	@FXML
+	private Button editSubtitleFileBtn;
+	
+	@FXML
+	private Button saveSubtitleFileBtn;
+	
+	@FXML
+	private TableView<Subtitle> subtitleTable;
+	
+	@FXML
+	private TableColumn<Subtitle, String> subtitleNumber;
+	
+	@FXML
+	private TableColumn<Subtitle, String> subtitleStart;
+	
+	@FXML
+	private TableColumn<Subtitle, String> subtitleEnd;
+	
+	@FXML
+	private TableColumn<Subtitle, String> subtitleText;
+	
+	@FXML
+	private Button addSubtitleBtn;
+	
+	@FXML
+	private Button deleteSubtitleBtn;
+	
+	@FXML
+	private TextField subtitleToAdd;
+	
+	@FXML
+	private TextField subtitleToDelete;
+	
+	@FXML
+	private Label subtitlePathLabel;
 
 	/*
-	 * Varaible for the section for the media player
+	 * GUI components for the media player
 	 */
-
 	@FXML
 	private Button fastForwardBtn;
 
@@ -337,12 +375,28 @@ public class VamixController {
 
 	@FXML
 	private ProgressBar videoProgress;
+	
+	@FXML
+	private Label subtitlesPlaying;
 
+	//holds the file path of the video currently being played
 	private String videoFileAdd="";
 	
-	private SkipWorker sW;
+	//custom SwingWorker object that deals with real-time play back of video in media player
+	//does the rewinding, playing and fast forwarding
+	private PlaybackWorker playbackWorker;
 	
-	//initialising the functionality of the buttons
+	//object that allows editing of a .srt subtitles file
+	private SubtitlesEditor subtitlesEditor;
+	
+	//holds the file path of the .srt file being edited
+	private String subtitleFilePath;
+	
+	/*
+	 * Method which contains all controller logic for the VAMIX GUI.
+	 * It firstly checks that all GUI components from VideoView.fxml have been correctly injected and then
+	 * runs all the implementation behind them.
+	 */
 	@FXML
 	void initialize() {
 		loadMedia();
@@ -350,6 +404,7 @@ public class VamixController {
 		videoTabCheck();
 		audioTabCheck();
 		renderTabCheck();
+		subtitlesTabCheck();
 		playerCheck();
 		menuCheck();
 		setToolTips();
@@ -357,16 +412,17 @@ public class VamixController {
 		videoTab();
 		audioTab();
 		renderTab();
+		subtitlesTab();
 		player();
 		if (!(videoFileAdd.equals(""))){
 			videoPath.setText(videoFileAdd);
 		}
 	}
-
+	
+	/*
+	 * Method that checks if all of the video tab GUI components have been injected correctly from the VideoView.fxml file
+	 */
 	private void videoTabCheck(){
-		/*
-		 * Section for the video tab id check
-		 */
 		assert downloadBtn != null : "fx:id=\"downloadBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert loadBtn != null : "fx:id=\"loadBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert browseBtn != null : "fx:id=\"browseBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
@@ -385,8 +441,6 @@ public class VamixController {
 		assert startTitle != null : "fx:id=\"startTitle\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert endTitle != null : "fx:id=\"endTitle\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert titleFont != null : "fx:id=\"titleFont\" was not injected: check your FXML file 'VideoView.fxml'.";
-//		assert titleBGAddr != null : "fx:id=\"titleBGAddr\" was not injected: check your FXML file 'VideoView.fxml'.";
-//		assert titleBGBtn != null : "fx:id=\"titleBGBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 
 		assert creditText != null : "fx:id=\"creditText\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert creditsXPos != null : "fx:id=\"creditsXPos\" was not injected: check your FXML file 'VideoView.fxml'.";
@@ -397,8 +451,6 @@ public class VamixController {
 		assert startCredits != null : "fx:id=\"startCredits\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert endCredits != null : "fx:id=\"endCredits\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert creditsFont != null : "fx:id=\"creditsFont\" was not injected: check your FXML file 'VideoView.fxml'.";
-//		assert creditsBGAddr != null : "fx:id=\"creditsBGAddr\" was not injected: check your FXML file 'VideoView.fxml'.";
-//		assert creditsBGBtn != null : "fx:id=\"creditsBGBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 		
 		assert rotateAngle != null : "fx:id=\"rotateAngle\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert rotateBtn != null : "fx:id=\"rotateBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
@@ -416,14 +468,14 @@ public class VamixController {
 		assert cropYPos != null : "fx:id=\"cropYPos\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert cropHeight != null : "fx:id=\"cropHeight\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert cropWidth != null : "fx:id=\"cropWidth\" was not injected: check your FXML file 'VideoView.fxml'.";
-		assert cropBtn != null : "fx:id=\"cropBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
-		
+		assert cropBtn != null : "fx:id=\"cropBtn\" was not injected: check your FXML file 'VideoView.fxml'.";		
 	}
 	
+	/*
+	 * Method that contains for the video tab, all user input checking logic, GUI event handling logic
+	 * and delegating method calls to worker classes for all long-running tasks.
+	 */
 	private void videoTab(){
-		/*
-		 * Section for the video tab functionality
-		 */
 		
 		//populate font size combo boxes with font sizes
 		ObservableList<String> fontSizes = FXCollections.observableArrayList(
@@ -442,8 +494,8 @@ public class VamixController {
 		titleSize.setItems(fontSizes);
 		creditsSize.setItems(fontSizes);
 		//set their defaults
-		titleSize.setValue("14");
-		creditsSize.setValue("14");
+		titleSize.setValue("20");
+		creditsSize.setValue("20");
 		
 		//populate font combo boxes with free fonts
 		ObservableList<String> fonts = FXCollections.observableArrayList(
@@ -470,7 +522,7 @@ public class VamixController {
 		downloadBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {
-				//send url to dl obj and invoke dl function
+				//send url to download object and invoke download function
 				Download dl =new Download(videoURL.getText());
 				dl.downloadFunction();
 			}
@@ -483,6 +535,7 @@ public class VamixController {
 				//load media
 				String previousFile =videoFileAdd;//get current file
 				loadMedia();
+				//check that the user hasn't selected the file currently being played
 				if (!(previousFile.equals(videoPath.getText()))&Helper.validInFile(videoPath.getText(),"(video)|Media|Audio|MPEG|ISO Media|ogg|ogv")){
 					vamix.view.Main.vid.prepareMedia(videoPath.getText());
 					videoFileAdd=videoPath.getText();
@@ -492,7 +545,8 @@ public class VamixController {
 			}
 		});
 		
-		//load video function button when click browse
+		//same functionality as above button but it does not open a file dialog, it attempts to use the 
+		//file path in the text field next to itself to load a video
 		loadBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {
@@ -507,6 +561,7 @@ public class VamixController {
 			}
 		});
 		
+		//if the text field where video path is entered is double clicked then do the same action as if the browse button was clicked
 		videoPath.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
@@ -514,6 +569,7 @@ public class VamixController {
 					//load media
 					String previousFile =videoFileAdd;//get current file
 					loadMedia();
+					//check that the user hasn't selected the file currently being played
 					if (!(previousFile.equals(videoPath.getText()))&Helper.validInFile(videoPath.getText(),"(Audio)|Video|MPEG")){
 						vamix.view.Main.vid.prepareMedia(videoPath.getText());
 						videoFileAdd=videoPath.getText();
@@ -531,7 +587,7 @@ public class VamixController {
 				if (!(videoFileAdd.equals(""))) {
 					//first check if the inputs entered by user for this function are valid, if they are then continue
 					if (checkTitleInputs()) {
-						//difficult to show progress for this process so instead notify user with a pop-up message
+						//difficult to show progress for this process so instead notify user with a 3 second pop-up message
 						JOptionPane pane = new JOptionPane("Please wait while VAMIX loads your preview");
 						final JDialog dialog = pane.createDialog("Please wait");
 						Timer timer = new Timer(3000, new ActionListener() {
@@ -543,11 +599,13 @@ public class VamixController {
 						timer.setRepeats(false);
 						timer.start();
 						dialog.setVisible(true);
+						//use custom SwingWorker class to create the preview
 						TextEdit textEditor = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
 								startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), null, null,
 								null, null, null, null, null, null, videoFileAdd, null, "title");
 						textEditor.showScenePreviewAsync();
 					}
+				//otherwise if no video is present, give an error
 				} else {
 					JOptionPane.showMessageDialog(null, "Please load a video into VAMIX first", "Missing input", JOptionPane.ERROR_MESSAGE);
 				}
@@ -561,7 +619,7 @@ public class VamixController {
 				if (!(videoFileAdd.equals(""))) {
 					//first check if the inputs entered by user for this function are valid, if they are then continue
 					if (checkCreditsInputs()) {
-						//difficult to show progress for this process so instead notify user with a pop-up message
+						//difficult to show progress for this process so instead notify user with a 3 second pop-up message
 						JOptionPane pane = new JOptionPane("Please wait while VAMIX loads your preview");
 						final JDialog dialog = pane.createDialog("Please wait");
 						Timer timer = new Timer(3000, new ActionListener() {
@@ -573,12 +631,14 @@ public class VamixController {
 						timer.setRepeats(false);
 						timer.start();
 						dialog.setVisible(true);
+						//use custom SwingWorker class to create the preview
 						TextEdit textEditor = new TextEdit(null, null, null, null, null, null, null, null,
 								creditText.getText(), creditsFont.getValue(), creditsSize.getValue(), creditsColour.getValue().toString(), 
 								startCredits.getText(), endCredits.getText(), creditsXPos.getText(), creditsYPos.getText(), 
 								videoFileAdd, null, "credits");
 						textEditor.showScenePreviewAsync();
 					}
+				//otherwise if no video is present, give an error
 				} else {
 					JOptionPane.showMessageDialog(null, "Please load a video into VAMIX first", "Missing input", JOptionPane.ERROR_MESSAGE);
 				}
@@ -597,6 +657,7 @@ public class VamixController {
 						int endFadein = Helper.timeInSec(endFadeIn.getText());
 						int startFadeout = Helper.timeInSec(startFadeOut.getText());
 						if (endFadein <= startFadeout) {
+							//use custom SwingWorker object to fade the video
 							FadeVideo fader = new FadeVideo(startFadeIn.getText(), endFadeIn.getText(), startFadeOut.getText(), endFadeOut.getText(), videoFileAdd);
 							fader.fadeVideoAsync(FadeType.BOTH);
 						} else {
@@ -638,6 +699,7 @@ public class VamixController {
 								if (Helper.timeValidChecker(startTrim.getText(), endTrim.getText(), "trimming")) {
 									//check that both times are less than or equal to length of the input video
 									if ((Helper.timeLessThanVideo(startTrim.getText()) && (Helper.timeLessThanVideo(endTrim.getText())))) {
+										//use a custom SwingWorker class to trim the video in the background
 										TrimVideo trimmer = new TrimVideo(startTrim.getText(), endTrim.getText(), videoFileAdd);
 										trimmer.trimVideoAsync();
 									}
@@ -719,11 +781,10 @@ public class VamixController {
 		});
 	}
 
+	/*
+	 * Method that checks if all of the audio tab GUI components have been injected correctly from the VideoView.fxml file
+	 */
 	private void audioTabCheck(){
-		/*
-		 * Section for the audio tab id check
-		 */
-		
 		assert strip_button != null : "fx:id=\"strip_button\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert save_file_chooser != null : "fx:id=\"save_file_chooser\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert replaceButton != null : "fx:id=\"replaceButton\" was not injected: check your FXML file 'VideoView.fxml'.";
@@ -744,32 +805,30 @@ public class VamixController {
 		assert overlayUseStart != null : "fx:id=\"overlayUseStart\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert overlayToEnd != null : "fx:id=\"overlayToEnd\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert overlayToStart != null : "fx:id=\"overlayToStart\" was not injected: check your FXML file 'VideoView.fxml'.";
-
 	}
 
+	/*
+	 * Method that contains for the audio tab, GUI event handling logic
+	 * and delegating method calls to worker classes for all long-running tasks.
+	 */
 	private void audioTab(){
-		/*
-		 * Section for the audio tab functionality
-		 */
+		
 		//strip audio function button
 		strip_button.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {
-				//send in and out file to obj then invoke function
-				Strip stripAudio =new Strip(videoFileAdd,strip_add.getText());
+				//send input file and output file destination to custom SwingWorker object then invoke background function
+				ExtractAudio stripAudio =new ExtractAudio(videoFileAdd,strip_add.getText());
 				stripAudio.stripFunction();
 			}
 		});
 		
-		/*
-		 * Section for the audio tab functionality
-		 */
-		//strip audio add when double click file chooser comes up
+		//strip audio add when user double clicks this text field a file browser comes up
 		strip_add.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
 				if ((arg0.getClickCount()>=2)&& !arg0.isConsumed()){
-					//get the address of file to be save
+					//get the destination of file to be saved
 					String temp=Helper.saveFileChooser("MP3 file","mp3");
 					strip_add.setText(temp);
 				}
@@ -780,7 +839,7 @@ public class VamixController {
 		save_file_chooser.setOnMouseClicked(new EventHandler<MouseEvent>() {
 		@Override
 		public void handle(MouseEvent arg0) {
-			//get the address of file to be save
+			//get the destination of file to be saved
 			String temp=Helper.saveFileChooser("MP3 file","mp3");
 			strip_add.setText(temp);
 		}
@@ -790,8 +849,9 @@ public class VamixController {
 		replaceButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {
-				//send in and out file to obj then invoke function
-				ReplaceAudio r=new ReplaceAudio(videoFileAdd,replaceAdd.getText(),startReplace.getText(),endReplace.getText(),startReplace2.getText(),endReplace2.getText());
+				//send input file and output destination to custom SwingWorker object then invoke background function
+				ReplaceAudio r=new ReplaceAudio(videoFileAdd,replaceAdd.getText(),startReplace.getText(),endReplace.getText(),
+						startReplace2.getText(),endReplace2.getText());
 				r.replaceAudioFunction();
 			}
 		});
@@ -800,30 +860,30 @@ public class VamixController {
 		chooseAudioButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {
-				//choose replace audio
+				//open file dialog to let user choose a replacement audio file
 				String temp=Helper.audioFileChooser();
 				replaceAdd.setText(temp);
 			}
 		});
 		
-		//replace file chooser address
+		//when the user double clicks this text field a file browser will show up
 		replaceAdd.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
 				if ((arg0.getClickCount()>=2)&& !arg0.isConsumed()){
-					//choose replace audio
+					//open file dialog to let user choose a replacement audio file
 					String temp=Helper.audioFileChooser();
 					replaceAdd.setText(temp);
 				}
 			}
 		});
 		
-		//overlay file chooser when address clicked
+		//when the user double clicks this text field a file browser will show up
 		overlayAdd.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
 				if ((arg0.getClickCount()>=2)&& !arg0.isConsumed()){
-					//choose replace audio
+					//open file dialog to let user choose an audio file to overlay onto the current video
 					String temp=Helper.audioFileChooser();
 					overlayAdd.setText(temp);
 				}
@@ -834,26 +894,30 @@ public class VamixController {
 		chooseOverlayBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
-				//choose replace audio
+				//open file dialog to let user choose an audio file to overlay onto the current video
 				String temp=Helper.audioFileChooser();
 				overlayAdd.setText(temp);
 			}
 		});
 		
+		//when the overlay audio button is clicked, attempt to overlay chosen audio onto video
 		overlayAudioBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {
-				//send in and out file to obj then invoke function for overlay
+				//send input file and output destination to custom SwingWorker object then invoke function for overlay
 				OverlayAudio o=new OverlayAudio(videoFileAdd,overlayAdd.getText(),overlayUseStart.getText(),overlayUseEnd.getText(),overlayToStart.getText(),overlayToEnd.getText());
 				o.overlayAudioFunction();
 			}
 		});
 	}
 
+	/*
+	 * Method that contains for the render tab, all user input checking logic, GUI event handling logic
+	 * and delegating method calls to worker classes for all long-running tasks.
+	 */
 	private void renderTab(){
-		/*
-		 * Section for the render tab functionality
-		 */
+		
+		//When the render button is clicked, check all user inputs before passing required data to custom SwingWorker object which will do the rendering
 		renderWithAudioBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {
@@ -889,6 +953,7 @@ public class VamixController {
 										int endOfTitle = Helper.timeInSec(endTitle.getText());
 										int startOfCredits = Helper.timeInSec(startCredits.getText());
 										if (endOfTitle < startOfCredits) {
+											//pass all required data to the renderer object so rendering can be done in the background
 											textRenderer = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
 													startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), creditText.getText(), 
 													creditsFont.getValue(), creditsSize.getValue(), creditsColour.getValue().toString(), startCredits.getText(), endCredits.getText(),
@@ -899,20 +964,27 @@ public class VamixController {
 													JOptionPane.ERROR_MESSAGE);
 										}
 									}
+								//if the user only wants to save the title text scene
 								} else if (includeTitle.isSelected()) {
+									//check only the title text inputs
 									if (checkTitleInputs()) {
+										//pass all required data to the renderer object so rendering can be done in the background
 										textRenderer = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
 												startTitle.getText(), endTitle.getText(), titleXPos.getText(), titleYPos.getText(), null, null, null, null, null, null,
 												null, null, videoFileAdd, outputFilePath.getText(), null);
 										textRenderer.renderWithTextAsync(RenderType.OPENING, overwrite);
 									}
+								//if the user only wants to save the credits text scene
 								} else if (includeCredits.isSelected()) {
+									//check only the credits text inputs
 									if (checkCreditsInputs()) {
+										//pass all required data to the renderer object so rendering can be done in the background
 										textRenderer = new TextEdit(null, null, null, null, null, null, null, null, creditText.getText(), 
 												creditsFont.getValue(), creditsSize.getValue(), creditsColour.getValue().toString(), startCredits.getText(), endCredits.getText(),
 												creditsXPos.getText(), creditsYPos.getText(), videoFileAdd, outputFilePath.getText(), null);
 										textRenderer.renderWithTextAsync(RenderType.CLOSING, overwrite);
 									}
+								//otherwise they have not selected any text scenes to display an error
 								} else {
 									JOptionPane.showMessageDialog(null, "Please select a text scene(s) to render with the video", "Select Text Scene",
 											JOptionPane.ERROR_MESSAGE);
@@ -929,8 +1001,7 @@ public class VamixController {
 			}
 		});
 		
-		//outputFilePath.setText(Constants.CURRENT_DIR + "output.mp4");
-		
+		//if the rendered destination path text field is clicked twice, open a file browser
 		outputFilePath.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
@@ -941,7 +1012,8 @@ public class VamixController {
 				}
 			}
 		});
-
+		
+		//if the save file button is clicked open a file browser
 		saveToBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
@@ -952,18 +1024,153 @@ public class VamixController {
 		});
 	}
 
-	private void renderTabCheck(){
-		/*
-		 * Section for the render tab id check
-		 */
+	/*
+	 * Method that checks if all of the render tab GUI components have been injected correctly from the VideoView.fxml file
+	 */
+	private void renderTabCheck() {
 		assert outputFilePath != null : "fx:id=\"outputFilePath\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert saveToBtn != null : "fx:id=\"saveToBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert renderWithAudioBtn != null : "fx:id=\"renderWithAudioBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert includeTitle != null : "fx:id=\"includeTitle\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert includeCredits != null : "fx:id=\"includeCredits\" was not injected: check your FXML file 'VideoView.fxml'.";
-
 	}
-
+	
+	/*
+	 * Method that checks if all of the subtitles tab GUI components have been injected correctly from the VideoView.fxml file
+	 */
+	private void subtitlesTabCheck() {
+		assert newSubtitleFileBtn != null : "fx:id=\"newSubtitleFileBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert editSubtitleFileBtn != null : "fx:id=\"editSubtitleFileBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert saveSubtitleFileBtn != null : "fx:id=\"saveSubtitleFileBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert subtitleTable != null : "fx:id=\"subtitleTable\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert subtitleNumber != null : "fx:id=\"subtitleNumber\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert subtitleStart != null : "fx:id=\"subtitleStart\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert subtitleEnd != null : "fx:id=\"subtitleEnd\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert subtitleText != null : "fx:id=\"subtitleText\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert addSubtitleBtn != null : "fx:id=\"addSubtitleBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert deleteSubtitleBtn != null : "fx:id=\"deleteSubtitleBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert subtitleToAdd != null : "fx:id=\"subtitleToAdd\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert subtitleToDelete != null : "fx:id=\"subtitleToDelete\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert subtitlePathLabel != null : "fx:id=\"subtitlePathLabel\" was not injected: check your FXML file 'VideoView.fxml'.";
+	}
+	
+	/*
+	 * Method that contains for the subtitles tab, all user input checking logic, GUI event handling logic
+	 * and delegating method calls to worker classes for main tasks.
+	 */
+	private void subtitlesTab() {
+		
+		//when the create a new subtitle button is clicked, open a file browser
+		newSubtitleFileBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent arg0) {
+				//open file browser to let user select a subtitle file for editing
+				subtitleFilePath = FileBrowsers.saveFileBrowser("Subtitle files", "srt");
+				//check the output file DIRECTORY exists
+				String outDir = Helper.pathGetter(subtitleFilePath);
+				if (Helper.fileExist(outDir)) {
+					//create a subtitle editor
+					subtitlesEditor = new SubtitlesEditor(subtitleTable, subtitleNumber, subtitleStart, subtitleEnd, subtitleText);
+					subtitlesEditor.createSubtitlesFile(subtitleFilePath);
+					
+					//enable all buttons once a valid file has been chosen
+					saveSubtitleFileBtn.setDisable(false);
+					addSubtitleBtn.setDisable(false);
+					deleteSubtitleBtn.setDisable(false);
+					
+					//update 'editing' label with file path of new file
+					subtitlePathLabel.setText(subtitleFilePath);
+				//if it doesn't exist, give error to user
+				} else {
+					JOptionPane.showMessageDialog(null, "File path entered does not exist.", "Invalid file path",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
+		
+		//open a file browser and allow user to select a subtitle file to edit
+		editSubtitleFileBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent arg0) {
+				//open file browser to let user select a subtitle file for editing
+				subtitleFilePath = FileBrowsers.subtitleFileBrowser();
+				//check if the file chosen exists
+				if (Helper.fileExist(subtitleFilePath)) {
+					//create a subtitle editor
+					subtitlesEditor = new SubtitlesEditor(subtitleTable, subtitleNumber, subtitleStart, subtitleEnd, subtitleText);
+					subtitlesEditor.readSubtitlesFile(subtitleFilePath);
+					
+					//enable all buttons once a valid file has been chosen
+					saveSubtitleFileBtn.setDisable(false);
+					addSubtitleBtn.setDisable(false);
+					deleteSubtitleBtn.setDisable(false);
+					
+					//update 'editing' label with file path of new file
+					subtitlePathLabel.setText(subtitleFilePath);
+				//if it doesn't exist, give an error
+				} else {
+					JOptionPane.showMessageDialog(null, "Please enter a valid subtitle file", "Invalid file path",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
+		
+		//add a subtitle 'row' to the table to let user edit
+		addSubtitleBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent arg0) {
+				//check user input is actually a number
+				if (subtitleToAdd.getText().matches("\\d+")) {
+					//tell subtitle editor which subtitle user wants to add
+					int successful = subtitlesEditor.addSubtitle(Integer.parseInt(subtitleToAdd.getText()));
+					if (successful == -1) {
+						JOptionPane.showMessageDialog(null, "You have entered a subtitle number that is invalid. \nIt cannot be less than 1 or more than 1 greater than "
+								+ "the last subtitle number on the list", "Invalid subtitle number",
+								JOptionPane.ERROR_MESSAGE);
+					}
+				} else {
+					JOptionPane.showMessageDialog(null, "Please enter a subtitle number. It must be greater than zero and at most, 1 more than "
+							+ "the last subtitle number in the list", "Invalid input",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
+		
+		//delete the specified subtitle row from the table
+		deleteSubtitleBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent arg0) {
+				//check user input is actually a number
+				if (subtitleToDelete.getText().matches("\\d+")) {
+					//tell subtitle editor which subtitle user wants to delete
+					int successful = subtitlesEditor.deleteSubtitle(Integer.parseInt(subtitleToDelete.getText()));
+					if (successful == -1) {
+						JOptionPane.showMessageDialog(null, "You have entered a subtitle number that is not on the list", "Invalid subtitle number",
+								JOptionPane.ERROR_MESSAGE);
+					}
+				} else {
+					JOptionPane.showMessageDialog(null, "Please enter a subtitle number. It must a subtitle number from the list", "Invalid input",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
+		
+		//save changes to the subtitle file
+		saveSubtitleFileBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent arg0) {
+				//tell subtitle editor to save changes made to .srt file being edited
+				subtitlesEditor.saveSubtitles(subtitleFilePath);
+				//give message to user telling them their changes have been saved
+				JOptionPane.showMessageDialog(null, "Your changes have been saved", "Saved",
+						JOptionPane.INFORMATION_MESSAGE);
+			}
+		});
+	}
+	
+	/*
+	 * Method that checks if all of the media player GUI components have been injected correctly from the VideoView.fxml file
+	 */
 	private void playerCheck(){
 		/*
 		 * Section for the media player id checks
@@ -977,9 +1184,15 @@ public class VamixController {
 		assert videoProgress != null : "fx:id=\"videoProgress\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert volumeSlider != null : "fx:id=\"volumeSlider\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert muteCheckbox != null : "fx:id=\"muteCheckbox\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert subtitlesPlaying != null : "fx:id=\"subtitlesPlaying\" was not injected: check your FXML file 'VideoView.fxml'.";
 
 	}
 
+	/*
+	 * Method that contains for the media player, all user input checking logic, GUI event handling logic
+	 * and delegating method calls to worker classes for all long-running tasks. This includes rewinding, playing,
+	 * pausing, fast forwarding, muting, volume control and updating the video progress bar and video time
+	 */
 	private void player(){
 		/*
 		 * Section for the media player functionality
@@ -1000,10 +1213,10 @@ public class VamixController {
 				        	double currentTime=(vamix.view.Main.vid.getTime()/1000.0);
 				        	double VidTime=(vamix.view.Main.vid.getLength()/1000.0);
 				        	videoProgress.setProgress((currentTime/VidTime));
-				        	if (currentTime>=VidTime){//when reach end of file loop
+				        	if (currentTime>=VidTime){//when reach end of video/audio loop to the start again
 				        		vamix.view.Main.vid.playMedia(videoFileAdd); 
 				        		if (!(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Playing)){
-				        			Image pauseImg = new Image(getClass().getResourceAsStream("/pause.png"));
+				        			Image pauseImg = new Image(getClass().getResourceAsStream("/resources/pause.png"));
 									playPauseImage.setImage(pauseImg);
 				        		}
 				        		String videTime= Helper.timeOfVideo(currentTime,VidTime);
@@ -1023,6 +1236,7 @@ public class VamixController {
 			        			}
 			        		});
 			        		
+			        		//if a video has been selected
 			        		if (!(videoFileAdd.equals(""))){   			
 				        		vamix.view.Main.vid.start();
 				        		try {//sleep thread so can execute next command when previous finish
@@ -1030,7 +1244,7 @@ public class VamixController {
 				        		} catch (InterruptedException e1) {
 				        		}
 				        		vamix.view.Main.vid.pause();
-				        		Image playImg = new Image(getClass().getResourceAsStream("/play.png"));
+				        		Image playImg = new Image(getClass().getResourceAsStream("/resources/play.png"));
 								playPauseImage.setImage(playImg);
 				        		videoProgress.setProgress(0.0);
 				        		if (vamix.view.Main.vid.isMute()){
@@ -1051,31 +1265,28 @@ public class VamixController {
 			}
 		});
 		
+		//play or pause the video when the play/pause button is pressed
 		videoTimer.start();
-		//System.out.println(vamix.view.Main.vid.getMediaPlayerState()+"");
 		playPauseBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {//before video even got played
-				/*if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_NothingSpecial){
-					vamix.view.Main.vid.play();
-					playPauseBtn.setText("Pause"); //when video ended play video
-				}else */
 				if(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
 					vamix.view.Main.vid.startMedia(videoFileAdd);
 				}else if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Playing){
-					//when play pause the video
+					//if playing, then pause the video
 					vamix.view.Main.vid.pause();
-					Image playImg = new Image(getClass().getResourceAsStream("/play.png"));
+					Image playImg = new Image(getClass().getResourceAsStream("/resources/play.png"));
 					playPauseImage.setImage(playImg);
 				}else if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Paused){
-					//when pause play the video
+					//if paused, then play the video
 					vamix.view.Main.vid.pause();
-					Image pauseImg = new Image(getClass().getResourceAsStream("/pause.png"));
+					Image pauseImg = new Image(getClass().getResourceAsStream("/resources/pause.png"));
 					playPauseImage.setImage(pauseImg);
 				}
 			}
 		});
-
+		
+		//if the mute checkbox is ticked/unticked, toggle mute on the video
 		muteCheckbox.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
@@ -1087,18 +1298,18 @@ public class VamixController {
 
 		});
 		
-		///fast forward when mouse pressed using swingworker as it can continuosly skip
+		///fast forward when mouse pressed using a custom SwingWorker class as it can continuously skip forward
 		fastForwardBtn.setOnMousePressed(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
 				
-				sW=new SkipWorker((long)(vamix.view.Main.vid.getLength()*0.01));
-				sW.execute();
-				//cancel rewind when mouse leave the button even didnt release
+				playbackWorker=new PlaybackWorker((long)(vamix.view.Main.vid.getLength()*0.01));
+				playbackWorker.execute();
+				//cancel rewind when mouse leave the button even if the user didn't release
 				fastForwardBtn.setOnMouseExited(new EventHandler<MouseEvent>() {
 					@Override
 					public void handle(MouseEvent arg0) {
-						sW.cancel(true);
+						playbackWorker.cancel(true);
 					}
 				});
 			}
@@ -1108,21 +1319,21 @@ public class VamixController {
 		fastForwardBtn.setOnMouseReleased(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
-				sW.cancel(true);
+				playbackWorker.cancel(true);
 			}
 		});
 		
-		//rewind when mouse pressed using swingworker as it can continuously skip
+		//rewind when mouse pressed using a custom SwingWorker class as it can continuously skip
 		rewindBtn.setOnMousePressed(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
-				sW=new SkipWorker(-(long)(vamix.view.Main.vid.getLength()*0.01));
-				sW.execute();
-				//cancel rewind when mouse leave the button even didnt release
+				playbackWorker=new PlaybackWorker(-(long)(vamix.view.Main.vid.getLength()*0.01));
+				playbackWorker.execute();
+				//cancel rewind when mouse leave the button even if the user didn't release
 				rewindBtn.setOnMouseExited(new EventHandler<MouseEvent>() {
 					@Override
 					public void handle(MouseEvent arg0) {
-						sW.cancel(true);
+						playbackWorker.cancel(true);
 					}
 				});
 			}
@@ -1132,42 +1343,40 @@ public class VamixController {
 		rewindBtn.setOnMouseReleased(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
-				sW.cancel(true);
+				playbackWorker.cancel(true);
 			}
 		});
-
+		
+		//update video volume when the volume slider is dragged
 		volumeSlider.setOnMouseDragged(new EventHandler<MouseEvent>() {
 			//volume slider set volume continuously when slide
 			@Override
 			public void handle(MouseEvent arg0) {
-				//if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
-					vamix.view.Main.vid.setVolume((int) (2*volumeSlider.getValue()));
-				//}
+				vamix.view.Main.vid.setVolume((int) (2*volumeSlider.getValue()));
 			}
 		});
 		
+		//update video volume when the volume slider is clicked
 		volumeSlider.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			//volume slider set volume continuously when click
 			//note volume is 0-200 so need to times 2 as slider is only to 100
 			@Override
 			public void handle(MouseEvent arg0) {
-				//if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
-					vamix.view.Main.vid.setVolume((int) (2*volumeSlider.getValue()));
-				//}
+				vamix.view.Main.vid.setVolume((int) (2*volumeSlider.getValue()));
 			}
 		});
 		
+		//update the video track time when the video progress bar is dragged
 		videoProgress.setOnMouseDragged(new EventHandler<MouseEvent>() {
 			//video slider set volume continuously when slide
-			//settime is in (ms) of time, get width is in the pixel unit
+			//setTime is in (ms) of time, get width is in the pixel unit
 			@Override
 			public void handle(MouseEvent arg0) {
-				//if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
 				vamix.view.Main.vid.setTime((long)arg0.getX()*vamix.view.Main.vid.getLength()/(long)videoProgress.getWidth());
-				//}
 			}
 		});
 		
+		//update the video track time when the video progress bar is clicked
 		videoProgress.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			//video slider set volume discrete when slide
 			@Override
@@ -1177,6 +1386,9 @@ public class VamixController {
 		});
 	}
 	
+	/*
+	 * Method that sets the tool tips for all GUI objects in VAMIX that require clarification for the user.
+	 */
 	private void setToolTips() {
 		
 		//set the tool tip for the buttons which the user clicks to open the file browser
@@ -1225,9 +1437,9 @@ public class VamixController {
 		endTrim.setTooltip(endTrimTip);
 		
 		//tool tips to clarify to user what inputs are required for cropping a video
-		Tooltip xCropTip = new Tooltip("Enter the x coordinate for the top-left corner of the cropped video");
+		Tooltip xCropTip = new Tooltip("Specify the x coordinate of where to start cropping\n(top left hand corner of output video)");
 		cropXPos.setTooltip(xCropTip);
-		Tooltip yCropTip = new Tooltip("Enter the y coordinate for the top-left corner of the cropped video");
+		Tooltip yCropTip = new Tooltip("Specify the y coordinate of where to start cropping\n(top left hand corner of output video)");
 		cropYPos.setTooltip(yCropTip);
 		Tooltip cropHeightTip = new Tooltip("Enter the height to crop from the (x,y) position specified");
 		cropHeight.setTooltip(cropHeightTip);
@@ -1237,6 +1449,9 @@ public class VamixController {
 		
 	}
 
+	/*
+	 * Method that checks if all of the main container GUI components have been injected correctly from the VideoView.fxml file
+	 */
 	private void mainPanesCheck(){
 		assert tabMenu != null : "fx:id=\"tabMenu\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert tabPane != null : "fx:id=\"tabPane\" was not injected: check your FXML file 'VideoView.fxml'.";
@@ -1245,12 +1460,20 @@ public class VamixController {
 		assert audioTab != null : "fx:id=\"audioTab\" was not injected: check your FXML file 'VideoView.fxml'.";
 	}
 	
+	/*
+	 * Method that checks if all of the menu bar GUI components have been injected correctly from the VideoView.fxml file
+	 */
 	private void menuCheck() {
 		assert saveStateBtn != null : "fx:id=\"saveStateBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert loadStateBtn != null : "fx:id=\"loadStateBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert loadFiles != null : "fx:id=\"loadFiles\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert playWithSubtitlesBtn != null : "fx:id=\"playWithSubtitlesBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 	}
 	
+	/*
+	 * Method that contains for the menu bar, all user input checking logic, GUI event handling logic
+	 * and delegating method calls to worker classes for all long-running tasks.
+	 */
 	private void menuActions() {
 		//action for the save menu item, will save the state of vamix to file
 		saveStateBtn.setOnAction(new EventHandler<ActionEvent>() {
@@ -1276,6 +1499,7 @@ public class VamixController {
 				//load media
 				String previousFile =videoFileAdd;//get current file
 				loadMedia();
+				//check that the file selected is not the same one that is currently playing
 				if (!(previousFile.equals(videoPath.getText()))&Helper.validInFile(videoPath.getText(),"(video)|Media|Audio|MPEG|ISO Media|ogg|ogv")){
 					vamix.view.Main.vid.prepareMedia(videoPath.getText());
 					videoFileAdd=videoPath.getText();
@@ -1284,15 +1508,39 @@ public class VamixController {
 				}
 			}
 		});
+		
+		//action for the play with subtitles menu item, will set the media player to use a specified subtitles file
+		playWithSubtitlesBtn.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evt) {
+				//open file browser to let user select a subtitle file for editing
+				String subtitleToUse = FileBrowsers.subtitleFileBrowser();
+				//check if the file chosen exists
+				if (Helper.fileExist(subtitleToUse)) {
+					//set the media player to use this subtitles file
+					vamix.view.Main.vid.setSubTitleFile(subtitleToUse);
+					//show in corner of player name of subtitle file being used
+					subtitlesPlaying.setText(Helper.fileNameGetter(subtitleToUse));
+				//if it doesn't exist, give an error
+				} else {
+					JOptionPane.showMessageDialog(null, "Please enter a valid subtitle file", "Invalid file path",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
 	}
 	
+	/*
+	 * Method that opens a file dialog which asks the user to select a video or audio file.
+	 * It then checks the validity of the file and if all is good it will allow VAMIX to continue
+	 */
 	private void loadMedia(){
-		//intiliase validness varaible code reuse from a2
+		//initialize validness variable code reuse from a2
 		boolean valid=false; //if file is valid
 		boolean isAudio=false; //boolean for if file is video or audio
 		boolean hasSpaces = false;	//true if the input address has spaces - not allowed
-		String tempVideoFileAdd="";//initialse the video file address
-		String partial=""; //variable for partial of path ie just the name of file
+		String tempVideoFileAdd="";//initialize the video file address
+		String partial=""; //variable for partial of path i.e. just the name of file
 		JOptionPane.showMessageDialog(null, "Please select the video or audio file to edit.");
 		//get input file
 		while(!valid){
@@ -1310,7 +1558,7 @@ public class VamixController {
 			try{
 				tempVideoFileAdd=file.getAbsolutePath();//get path address
 			}catch(NullPointerException e){
-				valid=true; //cant return nothing
+				valid=true; //can't return nothing
 			}
 			if (tempVideoFileAdd.contains(" ")) {hasSpaces = true;}
 			//now get the path of file and just file name
@@ -1366,7 +1614,7 @@ public class VamixController {
 
 	}
 	
-	//method that checks the inputs for the title scene filter
+	//method that checks the user inputs for the title scene filter
 	private boolean checkTitleInputs() {
 		//first check if the user has entered text to be overlaid
 		if (titleText.getText().equals("")) {
@@ -1431,7 +1679,7 @@ public class VamixController {
 		return false;
 	}
 	
-	//method that checks the inputs for the title scene filter
+	//method that checks the user inputs for the credits scene filter
 	private boolean checkCreditsInputs() {
 		//first check if the user has entered text to be overlaid
 		if (creditText.getText().equals("")) {
@@ -1496,7 +1744,7 @@ public class VamixController {
 		return false;
 	}
 	
-	//method that will check the inputs for the fade functionality
+	//method that will check the user inputs for the fade functionality
 	private boolean checkFadeInputs(boolean isFadeIn) {
 		boolean isValid = false;
 		TextField start = null, end = null;

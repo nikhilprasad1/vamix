@@ -105,7 +105,8 @@ public class TrimVideo {
 			switch(errorCode){
 			//everything went well
 			case 0:	
-				JOptionPane.showMessageDialog(trimFrame, "The trim operation has finished successfully.");
+				JOptionPane.showMessageDialog(trimFrame, "The trim operation has finished successfully. Note trimmed video has been saved to:"
+						+ "\n" + _outputFile);
 				break;
 			//user cancelled trimming
 			case -1:
@@ -141,9 +142,10 @@ public class TrimVideo {
 			_outputFile = Helper.fileNameGen(_inputAddr, "trimmed");
 			//get the duration of the trimmed video
 			String duration = String.valueOf(Helper.formatTime(Helper.timeInSec(_endTrim) - Helper.timeInSec(_startTrim)));
+			System.out.println(duration);
 			//build the command
 			cmd = "avconv -i " + _inputAddr + " -ss " + _startTrim + " -t " + duration 
-					+ " -codec copy -strict experimental " + _outputFile;
+					+ " -codec copy " + _outputFile;
 			return cmd;
 		}
 		

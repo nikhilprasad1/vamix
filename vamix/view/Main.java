@@ -19,12 +19,23 @@ import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
+/**
+ * This is the main launcher class for the VAMIX application.
+ * It initializes the GUI, loads the integrated VLCJ media player and then launches the application.
+ * @author Nikhil Prasad and Guyver (Yeu-Shin) Fu
+ *
+ */
 public class Main extends Application {	
-	//private Stage initStage;
+	
+	//the main frame object
 	private JFrame frame;
+	//integrated singleton media player
 	private EmbeddedMediaPlayerComponent mediaPlayerComponent;
 	public static EmbeddedMediaPlayer vid;
-
+	
+	/**
+	 * Method to start a JavaFX application
+	 */
 	@Override
 	public void start(Stage initStage) {
 		try{
@@ -34,12 +45,20 @@ public class Main extends Application {
 		}
 	}
 
+	/**
+	 * Sets up the VAMIX GUI by loading the VideoView.fxml file
+	 * Initiates and places the VLCJ media player on the GUI afterwards
+	 */
 	public void setupGUI(){
+		
 		try {
+			//create the singleton vlcj media player object
 			mediaPlayerComponent=new EmbeddedMediaPlayerComponent();
 			vid=mediaPlayerComponent.getMediaPlayer();
-			frame =new JFrame("npra508 VAMIX Project 1.1b");
-
+			//create the main JFrame object
+			frame =new JFrame("npra508 VAMIX Project Final");
+			
+			//load the fxml GUI file
 			final JFXPanel fxP=new JFXPanel();
 			FXMLLoader loader = new FXMLLoader();
 			
@@ -50,9 +69,13 @@ public class Main extends Application {
 			frame.getLayeredPane().add(fxP, JLayeredPane.DEFAULT_LAYER);
 			Scene scene = new Scene(TabPane);
 			fxP.setScene(scene);
-
+			
+			//place the media player on the JFrame object
 			mediaPlayerComponent.setBounds(412, 29, 795, 650);
 			frame.getLayeredPane().add(mediaPlayerComponent, JLayeredPane.PALETTE_LAYER);
+			
+			//When VAMIX is closed then delete any temporary files used for avconv processing
+			//though make sure not to delete the saved state file.
 			frame.addWindowListener(new WindowAdapter() {
 				@Override
 				public void windowClosing(WindowEvent e){
@@ -76,6 +99,7 @@ public class Main extends Application {
 					}
 				}
 			});
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.setSize(1208, 789);
 			frame.setResizable(false);
 			frame.setVisible(true);
@@ -85,6 +109,7 @@ public class Main extends Application {
 	}
 
 	public static void main(String[] args) {
+		//launch VAMIX
 		launch(args);
 	}
 

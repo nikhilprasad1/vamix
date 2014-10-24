@@ -379,7 +379,7 @@ public class OverlayAudio {
 			try {
 				errorCode=process.waitFor();
 				get();
-				publish(100);//set complete incase doinbackground isnt quick enough
+				publish(100);//set complete in case doinbackground isn't quick enough
 			} catch (InterruptedException e) {
 			} catch (ExecutionException e) {
 			} catch (CancellationException e){
@@ -387,7 +387,8 @@ public class OverlayAudio {
 			}
 			switch(errorCode){
 			case 0://nothing wrong so write to log
-				JOptionPane.showMessageDialog(_overlayAudioFrame, "The overlay process has finished. \nNote output is saved to "+outputName+".");
+				JOptionPane.showMessageDialog(_overlayAudioFrame, "The overlay process has finished. Note output has saved to:\n"
+						+ outputName+".");
 				break;
 			case -1://extract cancelled
 				JOptionPane.showMessageDialog(_overlayAudioFrame, "The audio overlay operation has been cancelled.");

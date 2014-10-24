@@ -2,11 +2,11 @@ package vamix.controller;
 
 import javax.swing.SwingWorker;
 
-public class SkipWorker extends SwingWorker<Void,Integer>{
+public class PlaybackWorker extends SwingWorker<Void,Integer>{
 	
 	private long _skipRate;
 	//constructor to allow the input from user to be use in extractworker
-	SkipWorker(long skipRate){
+	PlaybackWorker(long skipRate){
 		_skipRate=skipRate;
 	}
 

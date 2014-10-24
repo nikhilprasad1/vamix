@@ -37,7 +37,7 @@
                                           <Button fx:id="loadBtn" layoutX="278.0" layoutY="51.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="94.0" text="Load" />
                                           <Label layoutX="186.0" layoutY="90.0" text="OR" />
                                           <Label layoutX="21.0" layoutY="112.0" text="Download Video/Audio files" />
-                                          <TextField fx:id="videoURL" layoutX="21.0" layoutY="127.0" prefHeight="25.0" prefWidth="246.0" text="URL" />
+                                          <TextField fx:id="videoURL" layoutX="21.0" layoutY="127.0" prefHeight="25.0" prefWidth="246.0" promptText="Enter URL" />
                                           <Button fx:id="downloadBtn" layoutX="278.0" layoutY="127.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="94.0" text="Download" />
                                           <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#e1e4e8" height="374.0" layoutX="9.0" layoutY="184.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="372.0" />
                                           <Label layoutX="21.0" layoutY="190.0" text="Create Opening/Closing Scenes" underline="true">
@@ -181,8 +181,8 @@
                                           <Label layoutX="210.0" layoutY="1044.0" text="New Dimensions" underline="true" />
                                           <Label layoutX="197.0" layoutY="1070.0" text="Height:" />
                                           <Label layoutX="201.0" layoutY="1098.0" text="Width:" />
-                                          <TextField fx:id="cropHeight" layoutX="252.0" layoutY="1065.0" prefWidth="111.0" text="0" />
-                                          <TextField fx:id="cropWidth" layoutX="252.0" layoutY="1094.0" prefWidth="111.0" text="0" />
+                                          <TextField fx:id="cropHeight" layoutX="252.0" layoutY="1065.0" prefWidth="111.0" text="100" />
+                                          <TextField fx:id="cropWidth" layoutX="252.0" layoutY="1094.0" prefWidth="111.0" text="100" />
                                           <Button fx:id="cropBtn" layoutX="147.0" layoutY="1135.0" mnemonicParsing="false" text="Crop Video" />
                                        </children>
                                     </AnchorPane>
@@ -256,7 +256,27 @@
                 </Tab>
                   <Tab text="Subtitles">
                     <content>
-                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                           <children>
+                              <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#e1e4e8" height="678.0" layoutX="9.0" layoutY="10.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="388.0" />
+                              <TableView fx:id="subtitleTable" disable="true" layoutX="14.0" layoutY="98.0" prefHeight="510.0" prefWidth="377.0">
+                                <columns>
+                                  <TableColumn fx:id="subtitleNumber" editable="false" prefWidth="40.0" sortType="DESCENDING" text="No." />
+                                  <TableColumn fx:id="subtitleStart" prefWidth="92.0" sortType="DESCENDING" sortable="false" text="Start" />
+                                    <TableColumn fx:id="subtitleEnd" prefWidth="90.0" sortable="false" text="End" />
+                                    <TableColumn fx:id="subtitleText" minWidth="154.0" prefWidth="-1.0" sortable="false" text="Text" />
+                                </columns>
+                              </TableView>
+                              <Button fx:id="newSubtitleFileBtn" layoutX="14.0" layoutY="20.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="186.0" text="Create new subtitles file" />
+                              <Button fx:id="editSubtitleFileBtn" layoutX="205.0" layoutY="20.0" maxHeight="25.0" minHeight="25.0" mnemonicParsing="false" prefHeight="25.0" text="Edit existing subtitiles file" />
+                              <Label layoutX="17.0" layoutY="83.0" text="Editing:" />
+                              <Label fx:id="subtitlePathLabel" layoutX="70.0" layoutY="83.0" prefHeight="15.0" prefWidth="319.0" text="Nothing" />
+                              <Button fx:id="addSubtitleBtn" disable="true" layoutX="220.0" layoutY="618.0" mnemonicParsing="false" prefWidth="114.0" text="Add subtitle" />
+                              <Button fx:id="deleteSubtitleBtn" disable="true" layoutX="220.0" layoutY="654.0" mnemonicParsing="false" text="Delete subtitle" />
+                              <Button fx:id="saveSubtitleFileBtn" disable="true" layoutX="280.0" layoutY="52.0" mnemonicParsing="false" text="Save Subtitles" />
+                              <TextField fx:id="subtitleToAdd" layoutX="42.0" layoutY="618.0" promptText="Enter subtitle number" />
+                              <TextField fx:id="subtitleToDelete" layoutX="42.0" layoutY="654.0" promptText="Enter subtitle number" />
+                           </children></AnchorPane>
                     </content>
                   </Tab>
               </tabs>
@@ -294,6 +314,16 @@
                         <Font size="11.0" />
                      </font></Label>
                   <ProgressBar fx:id="videoProgress" layoutY="654.0" maxHeight="20.0" maxWidth="793.0" minHeight="20.0" minWidth="590.0" opacity="0.35" prefHeight="20.0" prefWidth="793.0" progress="0.0" />
+                  <Label layoutX="14.0" layoutY="704.0" text="Subtitles:">
+                     <font>
+                        <Font size="11.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="subtitlesPlaying" layoutX="70.0" layoutY="704.0" text="None">
+                     <font>
+                        <Font size="11.0" />
+                     </font>
+                  </Label>
                </children>
             </AnchorPane>
          </items>
@@ -313,6 +343,11 @@
                   <MenuItem fx:id="loadStateBtn" mnemonicParsing="false" text="Load state" />
             </items>
           </Menu>
+            <Menu mnemonicParsing="false" text="Subtitle">
+              <items>
+                  <MenuItem fx:id="playWithSubtitlesBtn" mnemonicParsing="false" text="Play with subtitle.." />
+              </items>
+            </Menu>
         </menus>
       </MenuBar>
    </children>

@@ -23,73 +23,85 @@ import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 
 /**
- * This class handles the download function for the program it uses 
- * swingworker for concurrency
+ * This class handles the download functionality for VAMIX.
+ * It does the downloading in the background and also displays progress through its own GUI
+ * @author Nikhil Prasad and Guyver (Yeu-Shin) Fu
  **/
 public class Download {
 
 	private DownloadWorker worker;
 	private String _url;
-	private String urlEnd="";//variable for file name
-	Download(String url){
-		_url=url;
+	private String urlEnd = "";	//variable for file name
+	
+	public Download(String url) {
+		_url = url;
 	}
+	
 	/*
-	 * Function to perform download from a link and basic error handle
+	 * Method that takes the entered URL, does basic error checking and if all is well, downloads from the URL
 	 */
-	public void downloadFunction(){
-		int overrideChoice=-1; //initialise value of override -1 as file doesnt exist
-		String url=_url;//variable for url
-		if (url==null){
+	public void downloadFunction() {
+		int overrideChoice = -1;	//initialize value of override -1 as file doesn't exist
+		String url = _url;	//variable for url
+		if (url == null) {
 			JOptionPane.showMessageDialog(null, "You have not entered a URL. Please input a valid URL."); //when url is null
-		}else if(url.equals("")){
+			
+		} else if (url.equals("")) {
 			//error message of empty links
 			JOptionPane.showMessageDialog(null, "You have entered a empty URL. Please input a valid URL.");
+			
 		}else{
-			urlEnd=url.split(File.separator)[url.split(File.separator).length-1];
+			urlEnd = url.split(File.separator)[url.split(File.separator).length-1];
 			//create object for choice of options
 			Object[] option= {"Override","Resume partial download"};
 			//check if the file exist locally
 			if (Helper.fileExist(Constants.CURRENT_DIR+urlEnd)){
-				//note 0 is override ie first option chosen and 1 is resume
+				//note 0 is override i.e. first option chosen and 1 is resume
 				overrideChoice=JOptionPane.showOptionDialog(null, "File " +urlEnd +" already exists. Do you wish to override or resume partial download?",
 						"Override?",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE,null,option,option[0]);
 			}	
 			
-			//check if mp3 is open source
+			//check if file to be downloaded is open source
 			Object[] options={"It is open source","No, it is not open source"};
 			if (0==(JOptionPane.showOptionDialog(null, "Is the file you are trying to download open source?",
 					"Open Source?",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE,null,options,options[0]))){
 
-				if(overrideChoice==0){ //when override signal delete existing file
-					File file=new File(Constants.CURRENT_DIR +urlEnd);
+				if(overrideChoice == 0) { //when override signal delete existing file
+					File file = new File(Constants.CURRENT_DIR + urlEnd);
 					file.delete();
 				}
-				JFrame downloadFrame=new JFrame("Downloading");
+				
+				//create the progress GUI
+				JFrame downloadFrame = new JFrame("Downloading");
 				Container pane=downloadFrame.getContentPane();
 				pane.setLayout(new GridLayout(2,0));
 				JButton cancelButton =new JButton("Cancel Download");
 				JProgressBar dlProgressBar=new JProgressBar();
 				downloadFrame.setSize(300, 100); //set size of frame
+				
+				//if cancel is pressed, cancel the download
 				cancelButton.addActionListener(new ActionListener() {
-
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						worker.cancel(true);
 					}
 				});
-				//add window listener to close button (cross hair) so it cancel as well
+				
+				//add window listener to close button so it cancel as well
 				downloadFrame.addWindowListener(new WindowAdapter() {
 					@Override
 					public void windowClosing(WindowEvent e){
 						worker.cancel(true);
 					}
 				});
+				
 				downloadFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 				downloadFrame.add(cancelButton,pane); //add cancel button to new frame
 				downloadFrame.add(dlProgressBar,pane); //add progress bar to new frame
 				downloadFrame.setVisible(true); //set visiblity of frame on
 				downloadFrame.setResizable(false); //set frame so it cant be resize
+				
+				//initialize download
 				worker=new DownloadWorker(downloadFrame,dlProgressBar,url);
 				worker.execute();
 			}
@@ -117,9 +129,6 @@ public class Download {
 
 		@Override
 		protected Void doInBackground() throws Exception {
-			//make sure the correct process Builder is setup properly as it is wierd
-			//http://ccmixter.org/content/Zapac/Zapac_-_Test_Drive.mp3
-			//sample link http://upload.wikimedia.org/wikipedia/commons/2/21/Cutest_Koala.jpg
 			String cmd ="wget";
 			ProcessBuilder builder;
 			String downloadOption="-c";
@@ -186,7 +195,7 @@ public class Download {
 			}
 			this._DownloadFrame.dispose();
 			if (errorCode==0){
-				Helper.loadAndPreview(Constants.CURRENT_DIR+urlEnd, null, null);
+				Helper.loadAndPreview(Constants.CURRENT_DIR+urlEnd, "00:00:00", "00:00:30");
 			}
 		}
 

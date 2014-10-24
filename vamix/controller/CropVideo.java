@@ -28,7 +28,7 @@ import javax.swing.SwingWorker;
  */
 public class CropVideo {
 
-	//variables needed for command
+	//variables needed for avconv crop command
 	private String _width, _height, _xcoord, _ycoord, _inputAddr, _outputFile;
 	
 	//GUI objects to show progress of crop process
@@ -78,7 +78,7 @@ public class CropVideo {
 						//check time in output, use this as indication for progress
 						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
 						if(m.find()) {
-							//weird problem sometimes avconv gives int 100000000 so dont read it
+							//weird problem sometimes avconv gives int 100000000 so don't read it
 							if (!(m.group(1).equals("10000000000"))) {
 								publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
 							}
@@ -109,7 +109,8 @@ public class CropVideo {
 			switch(errorCode){
 			//everything went well
 			case 0:	
-				JOptionPane.showMessageDialog(cropFrame, "The crop operation has finished successfully.");
+				JOptionPane.showMessageDialog(cropFrame, "The crop operation has finished successfully. Note cropped video has been saved to:\n"
+						+ _outputFile);
 				break;
 			//user cancelled cropping
 			case -1:
@@ -140,6 +141,9 @@ public class CropVideo {
 			}
 		}
 		
+		/*
+		 * Method that returns the crop command to be executed by avconv
+		 */
 		protected String buildCropCommand() {
 			String cmd = "";
 			//generate the output name for the cropped file

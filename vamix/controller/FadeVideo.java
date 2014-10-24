@@ -112,7 +112,8 @@ public class FadeVideo {
 			switch(errorCode){
 			//everything went well
 			case 0:	
-				JOptionPane.showMessageDialog(fadeFrame, "The fade operation has finished successfully.");
+				JOptionPane.showMessageDialog(fadeFrame, "The fade operation has finished successfully. Note faded video has been saved to:\n"
+						+ _outputFile);
 				break;
 			//user cancelled fading
 			case -1:

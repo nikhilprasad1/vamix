@@ -347,7 +347,8 @@ public class ReplaceAudio {
 
 			switch(errorCode){
 			case 0://nothing wrong so write to log
-				JOptionPane.showMessageDialog(_replaceAudioFrame, "Replacement has has finished. \nNote output is saved to "+outputName+".");
+				JOptionPane.showMessageDialog(_replaceAudioFrame, "Replacement has finished. Note output is saved to:\n" 
+						+outputName+".");
 				break;
 			case -1://extract cancelled
 				JOptionPane.showMessageDialog(_replaceAudioFrame, "Replacement has been cancelled.");

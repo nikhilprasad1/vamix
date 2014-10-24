@@ -106,7 +106,8 @@ public class RotateVideo {
 			switch(errorCode){
 			//everything went well
 			case 0:	
-				JOptionPane.showMessageDialog(rotateFrame, "The rotate operation has finished successfully.");
+				JOptionPane.showMessageDialog(rotateFrame, "The rotate operation has finished successfully. Note rotated video has been saved to:\n"
+						+ _outputFile);
 				break;
 			//user cancelled rotating
 			case -1:

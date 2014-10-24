@@ -24,12 +24,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 
-public class Strip {
+public class ExtractAudio {
 	StripAudioWorker saWork;//class variable for worker so cancel button can work
 	private String _curDir;
 	private String _saveDir;
 	//constructor for extract pass infile and out file
-	Strip(String curDir,String saveDir){
+	ExtractAudio(String curDir,String saveDir){
 		_curDir=curDir;//current directory input file
 		_saveDir=saveDir;//output file directory
 	}
