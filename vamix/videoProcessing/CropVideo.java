@@ -1,4 +1,4 @@
-package vamix.controller;
+package vamix.videoProcessing;
 
 import java.awt.Container;
 import java.awt.GridLayout;
@@ -21,33 +21,39 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 
+import vamix.util.FileGeneratorOperations;
+import vamix.util.TimeOperations;
+
 /**
- * Class that takes care of the rotate video command on an input video
+ * Class that takes care of the crop video command on an input video
  * Does all processing in the background and displays progress to the user
  * @author Nikhil Prasad
  */
-public class RotateVideo {
+public class CropVideo {
 
-	//variables needed for command
-	private String _angle, _inputAddr, _outputFile;
+	//variables needed for avconv crop command
+	private String _width, _height, _xcoord, _ycoord, _inputAddr, _outputFile;
 	
-	//GUI objects to show progress of rotate process
-	JFrame rotateFrame;
+	//GUI objects to show progress of crop process
+	JFrame cropFrame;
 	Container pane;
 	JButton cancelBtn;
 	JProgressBar progressBar;
 	
-	private RotateWorker rotateWorker = new RotateWorker();
+	private CropWorker cropWorker = new CropWorker();
 	
-	public RotateVideo(String angle, String inputAddr) {
-		_angle = angle;
+	public CropVideo(String width, String height, String x, String y, String inputAddr) {
+		_width = width;
+		_height = height;
+		_xcoord = x;
+		_ycoord = y;
 		_inputAddr = inputAddr;
 	}
 	
 	/*
-	 * Sub-class of SwingWorker that will do the rotating process in the background and report progress
+	 * Sub-class of SwingWorker that will do the cropping process in the background and report progress
 	 */
-	class RotateWorker extends SwingWorker<Void, Integer> {
+	class CropWorker extends SwingWorker<Void, Integer> {
 		
 		private Process process;
 		private ProcessBuilder builder;
@@ -56,9 +62,9 @@ public class RotateVideo {
 		@Override
 		protected Void doInBackground() throws Exception {
 			//generate folder to hold temporary files (if it doesn't exist already)
-			Helper.genTempFolder();
+			FileGeneratorOperations.genTempFolder();
 			//now get length of video being edited, helps to calculate progress
-			int totalLength = (int)(vamix.view.Main.vid.getLength()/1000);
+			int totalLength = (int)(vamix.userInterface.Main.vid.getLength()/1000);
 			String cmd = buildCropCommand();
 			builder = new ProcessBuilder("/bin/bash","-c",cmd);
 			builder.redirectErrorStream(true);
@@ -75,7 +81,7 @@ public class RotateVideo {
 						//check time in output, use this as indication for progress
 						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
 						if(m.find()) {
-							//weird problem sometimes avconv gives int 100000000 so dont read it
+							//weird problem sometimes avconv gives int 100000000 so don't read it
 							if (!(m.group(1).equals("10000000000"))) {
 								publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
 							}
@@ -106,24 +112,24 @@ public class RotateVideo {
 			switch(errorCode){
 			//everything went well
 			case 0:	
-				JOptionPane.showMessageDialog(rotateFrame, "The rotate operation has finished successfully. Note rotated video has been saved to:\n"
+				JOptionPane.showMessageDialog(cropFrame, "The crop operation has finished successfully. Note cropped video has been saved to:\n"
 						+ _outputFile);
 				break;
-			//user cancelled rotating
+			//user cancelled cropping
 			case -1:
-				JOptionPane.showMessageDialog(rotateFrame, "Rotate operation has been cancelled. Note there may be partial output at \n" + _outputFile);
+				JOptionPane.showMessageDialog(cropFrame, "Crop operation has been cancelled. Note there may be partial output at \n" + _outputFile);
 				break;
 			//any other error code means something went wrong
 			default:
-				JOptionPane.showMessageDialog(rotateFrame, "An error has occurred. Please try again. The error code is: "+errorCode);
+				JOptionPane.showMessageDialog(cropFrame, "An error has occurred. Please try again. The error code is: "+errorCode);
 				break;
 			}
-			rotateFrame.dispose();
+			cropFrame.dispose();
 			//ask user if they want to load or preview the video
 			if (errorCode==0){ //when finish correctly
 				//show the first 60 seconds of the output video
-				String duration = String.valueOf(Helper.formatTime(60));
-				Helper.loadAndPreview(_outputFile, "00:00:00", duration);
+				String duration = String.valueOf(TimeOperations.formatTime(60));
+				VideoOperations.loadAndPreview(_outputFile, "00:00:00", duration);
 			}
 		}
 		
@@ -138,66 +144,61 @@ public class RotateVideo {
 			}
 		}
 		
+		/*
+		 * Method that returns the crop command to be executed by avconv
+		 */
 		protected String buildCropCommand() {
 			String cmd = "";
-			//generate the output name for the rotated file
-			_outputFile = Helper.fileNameGen(_inputAddr, "rotated");
-			//build the command depending on the angle entered
-			//if the angle is 90
-			if (_angle.equals("90")) {
-				cmd = "avconv -i " + _inputAddr + " -vf \"transpose=1\" -strict experimental " + _outputFile;
-			//else if the angle is 180
-			} else if (_angle.equals("180")) {
-				cmd = "avconv -i " + _inputAddr + " -vf \"transpose=1, transpose=1\" -strict experimental " + _outputFile;
-			//otherwise angle must be 270
-			} else {
-				cmd = "avconv -i " + _inputAddr + " -vf \"transpose=1, transpose=1, transpose=1\" -strict experimental " + _outputFile;
-			}
+			//generate the output name for the cropped file
+			_outputFile = FileGeneratorOperations.fileNameGen(_inputAddr, "cropped");
+			//build the command
+			cmd = "avconv -i " + _inputAddr + " -vf \"crop=" + _width + ":" + _height + ":"
+					+ _xcoord + ":" + _ycoord + "\" -strict experimental " + _outputFile;
 			return cmd;
 		}
 	}
 	
-	/*
-	 * Method that executes the RotateWorker which in turn performs the command to rotate the input video
+	/**
+	 * Method that executes the CropWorker which in turn performs the command to crop the input video
 	 */
-	public void rotateVideoAsync() {
+	public void cropVideoAsync() {
 		showProgressGUI();
-		rotateWorker.execute();
+		cropWorker.execute();
 	}
 	
 	/*
-	 * Method that shows the GUI to show trimming progress to the user
+	 * Method that shows the GUI to show cropping progress to the user
 	 */
-	public void showProgressGUI() {
+	private void showProgressGUI() {
 		//create the GUI objects required
-		rotateFrame = new JFrame("Performing Rotate Operation");
-		pane = rotateFrame.getContentPane();
+		cropFrame = new JFrame("Performing Crop Operation");
+		pane = cropFrame.getContentPane();
 		pane.setLayout(new GridLayout(2,0));
-		cancelBtn = new JButton("Cancel Rotating");
+		cancelBtn = new JButton("Cancel Cropping");
 		progressBar = new JProgressBar();
 		progressBar.setStringPainted(true);
-		rotateFrame.setSize(300, 100);
+		cropFrame.setSize(300, 100);
 		
-		//set function of cancel button to cancel the background task of the rotate worker
+		//set function of cancel button to cancel the background task of the crop worker
 		cancelBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				rotateWorker.cancel(true);
+				cropWorker.cancel(true);
 			}
 		});
-		//if user closes the progress window, assume they want to cancel the rotating
-		rotateFrame.addWindowListener(new WindowAdapter() {
+		//if user closes the progress window, assume they want to cancel the cropping
+		cropFrame.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				rotateWorker.cancel(true);
+				cropWorker.cancel(true);
 			}
 		});
 		//make sure gui objects are disposed on closing of the window
-		rotateFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		cropFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		//add the gui objects to the frame
-		rotateFrame.add(progressBar, pane);
-		rotateFrame.add(cancelBtn, pane);
-		rotateFrame.setVisible(true);
-		rotateFrame.setResizable(false);
+		cropFrame.add(progressBar, pane);
+		cropFrame.add(cancelBtn, pane);
+		cropFrame.setVisible(true);
+		cropFrame.setResizable(false);
 	}
 }

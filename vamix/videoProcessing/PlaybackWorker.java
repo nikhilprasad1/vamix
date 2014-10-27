@@ -1,12 +1,14 @@
-package vamix.controller;
+package vamix.videoProcessing;
 
 import javax.swing.SwingWorker;
+
+import vamix.util.Constants;
 
 public class PlaybackWorker extends SwingWorker<Void,Integer>{
 	
 	private long _skipRate;
 	//constructor to allow the input from user to be use in extractworker
-	PlaybackWorker(long skipRate){
+	public PlaybackWorker(long skipRate){
 		_skipRate=skipRate;
 	}
 
@@ -17,7 +19,7 @@ public class PlaybackWorker extends SwingWorker<Void,Integer>{
 		while(true){
 			if (!isCancelled()){
 				//publish to progress bar
-				vamix.view.Main.vid.skip(_skipRate);
+				vamix.userInterface.Main.vid.skip(_skipRate);
 				Thread.sleep(Constants.SKIP_RATE_THREAD_SLEEP);
 			}else{
 				break;

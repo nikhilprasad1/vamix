@@ -1,4 +1,4 @@
-package vamix.controller;
+package vamix.videoProcessing;
 
 import java.awt.Container;
 import java.awt.GridLayout;
@@ -26,6 +26,11 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
+
+import vamix.util.Constants;
+import vamix.util.FileGeneratorOperations;
+import vamix.util.FileNameOperations;
+import vamix.util.TimeOperations;
 
 /**
  * Class that takes care of merging the opening scene and closing scene with the video being edited
@@ -90,7 +95,7 @@ public class TextEdit {
 		@SuppressWarnings("unused")
 		@Override
 		protected Void doInBackground() {
-			Helper.genTempFolder();	//generate folder to hold temporary files (if it doesn't exist already)
+			FileGeneratorOperations.genTempFolder();	//generate folder to hold temporary files (if it doesn't exist already)
 			String bash = fileSep + "bin"+ fileSep + "bash";
 			String [] cmds = new String[2];
 			if (_titleOrCredits.equals("title")) {
@@ -117,7 +122,7 @@ public class TextEdit {
 					//System.out.println(line);
 				}
 				//create the label with the image generated
-				BufferedImage image = ImageIO.read(new File(Constants.LOG_DIR + fileSep + _titleOrCredits + ".jpg"));
+				BufferedImage image = ImageIO.read(new File(Constants.HIDDEN_DIR + fileSep + _titleOrCredits + ".jpg"));
 				picLabel = new JLabel(new ImageIcon(image));
 			} catch (Exception e) {
 				//e.printStackTrace();
@@ -138,14 +143,14 @@ public class TextEdit {
 			
 			//command to create the snapshot at the start time
 			String cmd1 = "avconv -i " + _inputAddr + " -ss " + start + " -vsync 1 -t 0.01 "
-			+ Constants.LOG_DIR + fileSep + _titleOrCredits + ".jpg";
+			+ Constants.HIDDEN_DIR + fileSep + _titleOrCredits + ".jpg";
 			
 			//command that draws the text on to the image
-			String cmd2 = "avconv -i " + Constants.LOG_DIR + fileSep + _titleOrCredits + ".jpg"
+			String cmd2 = "avconv -i " + Constants.HIDDEN_DIR + fileSep + _titleOrCredits + ".jpg"
 				+ " -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
 				+ "truetype" + fileSep + "freefont" + fileSep + font + ".ttf':text='" + text
 				+ "':x=" + xPos + ":y=" + yPos + ":fontsize=" + size +":fontcolor=" + color + "\" "
-				+ Constants.LOG_DIR + fileSep + _titleOrCredits + ".jpg";
+				+ Constants.HIDDEN_DIR + fileSep + _titleOrCredits + ".jpg";
 			
 			cmds[0] = cmd1;
 			cmds[1] = cmd2;
@@ -176,7 +181,7 @@ public class TextEdit {
 		
 		@Override
 		protected Void doInBackground() {			
-			Helper.genTempFolder();	//generate folder to hold temporary files (if it doesn't exist already)
+			FileGeneratorOperations.genTempFolder();	//generate folder to hold temporary files (if it doesn't exist already)
 			//the list of processes
 			List<String> cmds = buildRenderCommandList();
 			//the number of processes that need to be run
@@ -248,11 +253,11 @@ public class TextEdit {
 			//ask user if they want to load or preview the video
 			if (errorCode==0){ //when finish correctly
 				if ((_renderType == RenderType.OPENING) || (_renderType == RenderType.BOTH)) {
-					String previewDuration = Helper.formatTime(Helper.timeInSec(_endTitle) - Helper.timeInSec(_startTitle));
-					Helper.loadAndPreview(_outputAddr, _startTitle, previewDuration);
+					String previewDuration = TimeOperations.formatTime(TimeOperations.timeInSec(_endTitle) - TimeOperations.timeInSec(_startTitle));
+					VideoOperations.loadAndPreview(_outputAddr, _startTitle, previewDuration);
 				} else {
-					String previewDuration = Helper.formatTime(Helper.timeInSec(_endCredits) - Helper.timeInSec(_startCredits));
-					Helper.loadAndPreview(_outputAddr, _startCredits, previewDuration);
+					String previewDuration = TimeOperations.formatTime(TimeOperations.timeInSec(_endCredits) - TimeOperations.timeInSec(_startCredits));
+					VideoOperations.loadAndPreview(_outputAddr, _startCredits, previewDuration);
 				}
 			}
 		}
@@ -271,33 +276,33 @@ public class TextEdit {
 		protected List<String> buildRenderCommandList() {
 			List<String> cmds = new ArrayList<String>();
 			//first get the filename of the input file (not the full address)
-			String inFileName = Helper.fileNameGetter(_inputAddr);
+			String inFileName = FileNameOperations.fileNameGetter(_inputAddr);
 			//string to hold the path to temporary process files
-			String tempOutput = Constants.LOG_DIR + fileSep + inFileName;
+			String tempOutput = Constants.HIDDEN_DIR + fileSep + inFileName;
 			//now get length of video being edited
-			int totalLength = (int)(vamix.view.Main.vid.getLength()/1000);
+			int totalLength = (int)(vamix.userInterface.Main.vid.getLength()/1000);
 			//if user only wants to add a title OR a credits scene
 			String cmd="";
 			if (_renderType == RenderType.OPENING) {
-				int endLength = Helper.timeInSec(_endTitle);
+				int endLength = TimeOperations.timeInSec(_endTitle);
 				//get duration left (if any) after finish time specified by user
-				String timeAtEnd = Helper.formatTime(totalLength - endLength);
+				String timeAtEnd = TimeOperations.formatTime(totalLength - endLength);
 				//create the bash command strings that will split the input video into 3 parts depending on start time and
 				//finish time specified by user
 				cmd = "avconv -i " + _inputAddr + " -ss 00:00:00 -t " + _startTitle + " -vcodec libx264 -acodec aac "
 						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " + tempOutput + "1.ts";
 				cmds.add(cmd);
 				//set the progress duration for each command
-				processDurations.add(Helper.timeInSec(_startTitle));
-				int duration = Helper.timeInSec(_endTitle)-Helper.timeInSec(_startTitle);
-				cmd = "avconv -i " + _inputAddr +" -ss " + _startTitle +" -t " + Helper.formatTime(duration) + " -vcodec libx264 -acodec aac "
+				processDurations.add(TimeOperations.timeInSec(_startTitle));
+				int duration = TimeOperations.timeInSec(_endTitle)-TimeOperations.timeInSec(_startTitle);
+				cmd = "avconv -i " + _inputAddr +" -ss " + _startTitle +" -t " + TimeOperations.formatTime(duration) + " -vcodec libx264 -acodec aac "
 						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " + tempOutput + "2.ts";
 				cmds.add(cmd);
 				processDurations.add(duration);
 				cmd = "avconv -i " + _inputAddr +" -ss " + _endTitle +" -t " + timeAtEnd + " -vcodec libx264 -acodec aac "
 						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " + tempOutput+ "3.ts";
 				cmds.add(cmd);
-				processDurations.add(Helper.timeInSec(timeAtEnd));
+				processDurations.add(TimeOperations.timeInSec(timeAtEnd));
 				//now create the bash command that draws the text on the bit of video specified by the user
 				cmd = "avconv -i " + tempOutput + "2.ts"  + " -vcodec libx264 -acodec aac -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
 						+ "truetype" + fileSep + "freefont" + fileSep + _titleFont + ".ttf':text='" + _titleText
@@ -313,24 +318,24 @@ public class TextEdit {
 				//the concatenation process is really quick
 				processDurations.add(4);
 			} else if (_renderType == RenderType.CLOSING) {
-				int endLength = Helper.timeInSec(_endCredits);
+				int endLength = TimeOperations.timeInSec(_endCredits);
 				//get duration left (if any) after finish time specified by user
-				String timeAtEnd = Helper.formatTime(totalLength - endLength);
+				String timeAtEnd = TimeOperations.formatTime(totalLength - endLength);
 				//create the bash command strings that will split the input video into 3 parts depending on start time and
 				//finish time specified by user
 				cmd = "avconv -i " + _inputAddr + " -ss 00:00:00 -t " + _startCredits + " -vcodec libx264 -acodec aac "
 						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " +tempOutput + "1.ts";
 				cmds.add(cmd);
-				processDurations.add(Helper.timeInSec(_startCredits));
-				int duration = Helper.timeInSec(_endCredits)-Helper.timeInSec(_startCredits);
-				cmd = "avconv -i " + _inputAddr +" -ss " + _startCredits +" -t " + Helper.formatTime(duration) + " -vcodec libx264 -acodec aac "
+				processDurations.add(TimeOperations.timeInSec(_startCredits));
+				int duration = TimeOperations.timeInSec(_endCredits)-TimeOperations.timeInSec(_startCredits);
+				cmd = "avconv -i " + _inputAddr +" -ss " + _startCredits +" -t " + TimeOperations.formatTime(duration) + " -vcodec libx264 -acodec aac "
 						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " +tempOutput + "2.ts";
 				cmds.add(cmd);
 				processDurations.add(duration);
 				cmd = "avconv -i " + _inputAddr +" -ss " + _endCredits +" -t " + timeAtEnd + " -vcodec libx264 -acodec aac "
 						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " +tempOutput + "3.ts";
 				cmds.add(cmd);
-				processDurations.add(Helper.timeInSec(timeAtEnd));
+				processDurations.add(TimeOperations.timeInSec(timeAtEnd));
 				//now create the bash command that draws the text on the bit of video specified by the user
 				cmd = "avconv -i " + tempOutput + "2.ts"  + " -vcodec libx264 -acodec aac -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
 						+ "truetype" + fileSep + "freefont" + fileSep + _creditsFont + ".ttf':text='" + _creditsText
@@ -346,41 +351,41 @@ public class TextEdit {
 				processDurations.add(4);
 			//otherwise if the user wants both title and credits scenes
 			} else {
-				int endLength = Helper.timeInSec(_endCredits);
+				int endLength = TimeOperations.timeInSec(_endCredits);
 				//get duration left (if any) after finish time specified by user
-				String timeAtEnd = Helper.formatTime(totalLength - endLength);
+				String timeAtEnd = TimeOperations.formatTime(totalLength - endLength);
 				//create the bash command strings that will split the input video into 5 parts depending on start time and
 				//finish time specified by user
 				cmd = "avconv -i " + _inputAddr + " -ss 00:00:00 -t " + _startTitle + " -vcodec libx264 -acodec aac "
 						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " +tempOutput + "1.ts";
 				cmds.add(cmd);
-				processDurations.add(Helper.timeInSec(_startTitle));
-				int duration = Helper.timeInSec(_endTitle)-Helper.timeInSec(_startTitle);
-				cmd = "avconv -i " + _inputAddr +" -ss " + _startTitle +" -t " + Helper.formatTime(duration) + " -vcodec libx264 -acodec aac "
+				processDurations.add(TimeOperations.timeInSec(_startTitle));
+				int duration = TimeOperations.timeInSec(_endTitle)-TimeOperations.timeInSec(_startTitle);
+				cmd = "avconv -i " + _inputAddr +" -ss " + _startTitle +" -t " + TimeOperations.formatTime(duration) + " -vcodec libx264 -acodec aac "
 						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " +tempOutput + "2.ts";
 				cmds.add(cmd);
 				processDurations.add(duration);
-				duration = Helper.timeInSec(_startCredits) - Helper.timeInSec(_endTitle);
-				cmd = "avconv -i " + _inputAddr +" -ss " + _endTitle +" -t " + Helper.formatTime(duration) + " -vcodec libx264 -acodec aac "
+				duration = TimeOperations.timeInSec(_startCredits) - TimeOperations.timeInSec(_endTitle);
+				cmd = "avconv -i " + _inputAddr +" -ss " + _endTitle +" -t " + TimeOperations.formatTime(duration) + " -vcodec libx264 -acodec aac "
 						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " +tempOutput + "3.ts";
 				cmds.add(cmd);
 				processDurations.add(duration);
-				duration = Helper.timeInSec(_endCredits) - Helper.timeInSec(_startCredits);
-				cmd = "avconv -i " + _inputAddr +" -ss " + _startCredits +" -t " + Helper.formatTime(duration) + " -vcodec libx264 -acodec aac "
+				duration = TimeOperations.timeInSec(_endCredits) - TimeOperations.timeInSec(_startCredits);
+				cmd = "avconv -i " + _inputAddr +" -ss " + _startCredits +" -t " + TimeOperations.formatTime(duration) + " -vcodec libx264 -acodec aac "
 						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " +tempOutput + "4.ts";
 				cmds.add(cmd);
 				processDurations.add(duration);
 				cmd = "avconv -i " + _inputAddr +" -ss " + _endCredits +" -t " + timeAtEnd + " -vcodec libx264 -acodec aac "
 						+ "-bsf:v h264_mp4toannexb -f mpegts -strict experimental -y " +tempOutput + "5.ts";
 				cmds.add(cmd);
-				processDurations.add(Helper.timeInSec(timeAtEnd));
+				processDurations.add(TimeOperations.timeInSec(timeAtEnd));
 				//now create the bash command that draws the text on the title section of video specified by the user
 				cmd = "avconv -i " + tempOutput + "2.ts"  + " -vcodec libx264 -acodec aac -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
 						+ "truetype" + fileSep + "freefont" + fileSep + _titleFont + ".ttf':text='" + _titleText
 						+ "':x=" + _titleXPos + ":y=" + _titleYPos + ":fontsize=" + _titleSize +":fontcolor=" + _titleColor + "\" -strict experimental -y "
 						+tempOutput + "6.ts";
 				cmds.add(cmd);
-				processDurations.add(Helper.timeInSec(_endTitle) - Helper.timeInSec(_startTitle));
+				processDurations.add(TimeOperations.timeInSec(_endTitle) - TimeOperations.timeInSec(_startTitle));
 				//now create the bash command that draws the text on the credits section of video specified by the user
 				cmd = "avconv -i " + tempOutput + "4.ts"  + " -vcodec libx264 -acodec aac -vf \"drawtext=fontfile='" + fileSep + "usr" + fileSep + "share" + fileSep + "fonts" + fileSep 
 						+ "truetype" + fileSep + "freefont" + fileSep + _creditsFont + ".ttf':text='" + _creditsText
@@ -388,7 +393,7 @@ public class TextEdit {
 						+tempOutput + "7.ts";
 				//cmd="avconv -i /afs/ec.auckland.ac.nz/users/y/f/yfu959/unixhome/Desktop/206a3/a.mp42.ts -vcodec libx264 -acodec aac -vf \"drawtext=fontfile='/usr/share/fonts/truetype/freefont/FreeSans.ttf':text='hello':x=100:y=100:fontsize=24:fontcolor=white\" -strict experimental -y /afs/ec.auckland.ac.nz/users/y/f/yfu959/unixhome/Desktop/206a3/a.mp44.ts";
 				cmds.add(cmd);
-				processDurations.add(Helper.timeInSec(_endCredits) - Helper.timeInSec(_startCredits));
+				processDurations.add(TimeOperations.timeInSec(_endCredits) - TimeOperations.timeInSec(_startCredits));
 				//now create the bash command that will combine all the split videos together
 				cmd = "avconv -i concat:\"" + tempOutput + "1.ts|" + tempOutput + "6.ts|" + tempOutput + "3.ts|" + tempOutput + "7.ts|" + tempOutput + "5.ts\"" 
 						+ " -c copy -bsf:a aac_adtstoasc " + _overwrite + _outputAddr;

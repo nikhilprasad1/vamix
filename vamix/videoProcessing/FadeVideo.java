@@ -1,4 +1,4 @@
-package vamix.controller;
+package vamix.videoProcessing;
 
 import java.awt.Container;
 import java.awt.GridLayout;
@@ -20,6 +20,9 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
+
+import vamix.util.FileGeneratorOperations;
+import vamix.util.TimeOperations;
 
 /**
  * Class that takes care of the fade in/out commands on an input video
@@ -62,9 +65,9 @@ public class FadeVideo {
 		@Override
 		protected Void doInBackground() throws Exception {
 			//generate folder to hold temporary files (if it doesn't exist already)
-			Helper.genTempFolder();
+			FileGeneratorOperations.genTempFolder();
 			//now get length of video being edited, helps to calculate progress
-			int totalLength = (int)(vamix.view.Main.vid.getLength()/1000);
+			int totalLength = (int)(vamix.userInterface.Main.vid.getLength()/1000);
 			String cmd = buildFadeCommand();
 			builder = new ProcessBuilder("/bin/bash","-c",cmd);
 			builder.redirectErrorStream(true);
@@ -128,11 +131,11 @@ public class FadeVideo {
 			//ask user if they want to load or preview the video
 			if (errorCode==0){ //when finish correctly
 				if ((_fadeType == FadeType.IN) || (_fadeType == FadeType.BOTH)) {
-					String previewDuration = Helper.formatTime(Helper.timeInSec(_endFadeIn) - Helper.timeInSec(_startFadeIn) + 20);
-					Helper.loadAndPreview(_outputFile, _startFadeIn, previewDuration);
+					String previewDuration = TimeOperations.formatTime(TimeOperations.timeInSec(_endFadeIn) - TimeOperations.timeInSec(_startFadeIn) + 20);
+					VideoOperations.loadAndPreview(_outputFile, _startFadeIn, previewDuration);
 				} else {
-					String previewDuration = Helper.formatTime(Helper.timeInSec(_endFadeOut) - Helper.timeInSec(_startFadeOut) + 20);
-					Helper.loadAndPreview(_outputFile, _startFadeOut, previewDuration);
+					String previewDuration = TimeOperations.formatTime(TimeOperations.timeInSec(_endFadeOut) - TimeOperations.timeInSec(_startFadeOut) + 20);
+					VideoOperations.loadAndPreview(_outputFile, _startFadeOut, previewDuration);
 				}
 			}
 		}
@@ -153,31 +156,31 @@ public class FadeVideo {
 			//if the user wants to only fade in a section of the video
 			if (_fadeType == FadeType.IN) {
 				//get the auto generated output file name using "fade_in" as the tag
-				_outputFile = Helper.fileNameGen(_inputAddr, "fade_in");
+				_outputFile = FileGeneratorOperations.fileNameGen(_inputAddr, "fade_in");
 				//get the start frame number
-				String startFrame = String.valueOf((Helper.getFrameNumber(_startFadeIn)));
+				String startFrame = String.valueOf((VideoOperations.getFrameNumber(_startFadeIn)));
 				//get the number of frames that fade in is to occur over (the duration)
-				String durationFrames = String.valueOf(Helper.getFrameNumber(_endFadeIn) - Helper.getFrameNumber(_startFadeIn));
+				String durationFrames = String.valueOf(VideoOperations.getFrameNumber(_endFadeIn) - VideoOperations.getFrameNumber(_startFadeIn));
 				cmd = "avconv -i " + _inputAddr + " -vf \"fade=in:" + startFrame + ":" + durationFrames + "\" -strict experimental " + _outputFile;
 			//else if the user only wants to fade out a section of the video
 			} else if (_fadeType == FadeType.OUT) {
 				//get the auto generated output file name using "fade_out" as the tag
-				_outputFile = Helper.fileNameGen(_inputAddr, "fade_out");
+				_outputFile = FileGeneratorOperations.fileNameGen(_inputAddr, "fade_out");
 				//get the start frame number
-				String startFrame = String.valueOf((Helper.getFrameNumber(_startFadeOut)));
+				String startFrame = String.valueOf((VideoOperations.getFrameNumber(_startFadeOut)));
 				//get the number of frames that fade in is to occur over (the duration)
-				String durationFrames = String.valueOf(Helper.getFrameNumber(_endFadeOut) - Helper.getFrameNumber(_startFadeOut));
+				String durationFrames = String.valueOf(VideoOperations.getFrameNumber(_endFadeOut) - VideoOperations.getFrameNumber(_startFadeOut));
 				cmd = "avconv -i " + _inputAddr + " -vf \"fade=out:" + startFrame + ":" + durationFrames + "\" -strict experimental " + _outputFile;
 			//otherwise they want both; fade in and fade out
 			} else {
 				//get the auto generated output file name using "fade_in_out" as the tag
-				_outputFile = Helper.fileNameGen(_inputAddr, "fade_in_out");
+				_outputFile = FileGeneratorOperations.fileNameGen(_inputAddr, "fade_in_out");
 				//get the start frame number for fade in and fade out
-				String startFadeIn = String.valueOf((Helper.getFrameNumber(_startFadeIn)));
-				String startFadeOut = String.valueOf(Helper.getFrameNumber(_startFadeOut));
+				String startFadeIn = String.valueOf((VideoOperations.getFrameNumber(_startFadeIn)));
+				String startFadeOut = String.valueOf(VideoOperations.getFrameNumber(_startFadeOut));
 				//get the number of frames that fade in and fade out are to occur over (the duration)
-				String durationFadeIn = String.valueOf(Helper.getFrameNumber(_endFadeIn) - Helper.getFrameNumber(_startFadeIn));
-				String durationFadeOut = String.valueOf(Helper.getFrameNumber(_endFadeOut) - Helper.getFrameNumber(_startFadeOut));
+				String durationFadeIn = String.valueOf(VideoOperations.getFrameNumber(_endFadeIn) - VideoOperations.getFrameNumber(_startFadeIn));
+				String durationFadeOut = String.valueOf(VideoOperations.getFrameNumber(_endFadeOut) - VideoOperations.getFrameNumber(_startFadeOut));
 				cmd = "avconv -i " + _inputAddr + " -vf \"fade=in:" + startFadeIn + ":" + durationFadeIn + ", fade=out:" + startFadeOut + ":" + durationFadeOut
 						+ "\" -strict experimental " + _outputFile;
 			}

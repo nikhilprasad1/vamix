@@ -1,4 +1,4 @@
-package vamix.controller;
+package vamix.audioProcessing;
 
 import java.awt.Container;
 import java.awt.GridLayout;
@@ -24,21 +24,36 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 
+import vamix.util.Constants;
+import vamix.util.FileChecker;
+import vamix.util.FileGeneratorOperations;
+import vamix.videoProcessing.VideoOperations;
+
+/**
+ * This class takes a video file and strips the audio away from it.
+ * This results in two output files, an audio file and a silent video file.
+ * @author Nikhil Prasad
+ */
 public class ExtractAudio {
 	StripAudioWorker saWork;//class variable for worker so cancel button can work
 	private String _curDir;
 	private String _saveDir;
-	//constructor for extract pass infile and out file
-	ExtractAudio(String curDir,String saveDir){
+	
+	/**
+	 * Constructor for the extracting object
+	 * @param curDir - location of input file
+	 * @param saveDir - destination of output file
+	 */
+	public ExtractAudio(String curDir,String saveDir){
 		_curDir=curDir;//current directory input file
 		_saveDir=saveDir;//output file directory
 	}
 
-	/*
-	 * Function to perform strip from a file and basic error handle
+	/**
+	 * Function to perform strip from a file as well as basic error handling
 	 */
 	public void stripFunction(){
-		//set validness of filename to false as initialisation and other general initialisation
+		//set validness of filename to false as initialization and other general initialization
 		boolean valid=false; //if inputs are valid
 		String inFileName=_curDir; //input filename
 		String outFileName=_saveDir; //output file name
@@ -46,8 +61,8 @@ public class ExtractAudio {
 		String path=""; //variable for path
 
 		//get output file
-		if(Helper.validInFile(inFileName,Constants.VIDEO_AUDIO_TYPE)){
-			valid=false; //set corretness of outfile to false
+		if(FileChecker.validInFile(inFileName,Constants.VIDEO_AUDIO_TYPE)){
+			valid=false; //set correctness of output file path to false
 			if (outFileName==null){
 				JOptionPane.showMessageDialog(null, "You have not entered a destination to save to. Please input a valid file name.");
 			}else if(outFileName.equals("")){
@@ -59,7 +74,7 @@ public class ExtractAudio {
 					//error message need to not be the same name as input file
 					JOptionPane.showMessageDialog(null, "Your input file and output file cannot be the same. Please input a valid file name that is not the same.");
 				}else if (m.find()){
-					if (Helper.fileExist(outFileName)){
+					if (FileChecker.fileExist(outFileName)){
 						//file exist ask if override
 						Object[] option= {"Override","New output file name"};
 						//check if the file exist locally
@@ -110,14 +125,17 @@ public class ExtractAudio {
 			stripAudioFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 			stripAudioFrame.add(cancelButton,pane); //add cancel button to new frame
 			stripAudioFrame.add(dlProgressBar,pane); //add progress bar to new frame
-			stripAudioFrame.setVisible(true); //set visiblity of frame on
-			stripAudioFrame.setResizable(false); //set frame so it cant be resize
-			//create swing worker obejct and run it
+			stripAudioFrame.setVisible(true); //set visibility of frame on
+			stripAudioFrame.setResizable(false); //set frame so it can't be resize
+			//create swing worker object and run it
 			saWork=new StripAudioWorker(path+inFileName,outFileName,stripAudioFrame,dlProgressBar);
 			saWork.execute();
 		}
 	}
-
+	
+	/*
+	 * Custom SwingWorker object to do the audio stripping process in the background
+	 */
 	class StripAudioWorker extends SwingWorker<Void,Integer>{
 
 		private Process process;
@@ -129,6 +147,7 @@ public class ExtractAudio {
 		private int errorCode=0;
 		boolean containAudio=false;
 		boolean containVideo=false;
+		
 		//constructor to allow the input from user to be use in extractworker
 		StripAudioWorker(String inFileName,String outFileName,JFrame stripAudioFrame,JProgressBar dlProgressBar){
 			_inFileName=inFileName;
@@ -149,7 +168,7 @@ public class ExtractAudio {
 			builder=new ProcessBuilder(cmds); 
 			builder.redirectErrorStream(true);
 			// workout the length of the extracted file tho work out progress bar
-			int totalLength=(int)(vamix.view.Main.vid.getLength()/1000.0);
+			int totalLength=(int)(vamix.userInterface.Main.vid.getLength()/1000.0);
 			//Audio check if file have audio
 			
 			try{
@@ -191,7 +210,7 @@ public class ExtractAudio {
 						if(vName.find()){
 							path=vName.group(1); //get file path with name
 						}
-						stripVideo=Helper.fileNameGen(path+".mp4","no_audio");
+						stripVideo=FileGeneratorOperations.fileNameGen(path+".mp4","no_audio");
 						cmds.add(stripVideo);
 					}
 					//setup process cmd for striping audio
@@ -208,7 +227,7 @@ public class ExtractAudio {
 							Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
 							Matcher mError =Pattern.compile("(Output file #0 does not contain any stream)",Pattern.CASE_INSENSITIVE).matcher(line);
 							if(m.find()){
-								//weird problem sometimes avconv gives int 100000000 so dont read it
+								//weird problem sometimes avconv gives int 100000000 so don't read it
 								if (!(m.group(1).equals("10000000000"))){
 									publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
 								}
@@ -225,7 +244,7 @@ public class ExtractAudio {
 
 
 			}catch(Exception er){
-				//exWork.cancel(true);//cancel the extract work when error encounterd
+				//exWork.cancel(true);//cancel the extract work when error encountered
 			}
 			return null;
 		}
@@ -236,7 +255,7 @@ public class ExtractAudio {
 			try {
 				errorCode=process.waitFor();
 				get();
-				publish(100);//set complete incase doinbackground isnt quick enough
+				publish(100);//set complete in case doinbackground isn't quick enough
 			} catch (InterruptedException e) {
 			} catch (ExecutionException e) {
 			} catch (CancellationException e){
@@ -270,9 +289,9 @@ public class ExtractAudio {
 			}
 			this._stripAudioFrame.dispose();
 			if (errorCode==0){
-				Helper.loadAndPreview(_outFileName, null, null);
+				VideoOperations.loadAndPreview(_outFileName, null, null);
 				if (containVideo){
-					Helper.loadAndPreview(stripVideo, null, null);
+					VideoOperations.loadAndPreview(stripVideo, null, null);
 				}
 			}
 		}

@@ -1,4 +1,4 @@
-package vamix.controller;
+package vamix.subtitleProcessing;
 
 import javafx.beans.property.SimpleStringProperty;
 
@@ -21,6 +21,9 @@ public class Subtitle {
 		this.subtitleText = new SimpleStringProperty(subtitleText);
 	}
 	
+	/*
+	 * Getter and setter methods for each Subtitle property
+	 */
 	public String getSubtitleNumber() {
 		return subtitleNumber.get();
 	}

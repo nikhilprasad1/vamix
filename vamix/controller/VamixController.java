@@ -30,9 +30,26 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import uk.co.caprica.vlcj.binding.internal.libvlc_state_t;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
-import util.FileBrowsers;
-import vamix.controller.FadeVideo.FadeType;
-import vamix.controller.TextEdit.RenderType;
+import vamix.audioProcessing.ExtractAudio;
+import vamix.audioProcessing.OverlayAudio;
+import vamix.audioProcessing.ReplaceAudio;
+import vamix.subtitleProcessing.Subtitle;
+import vamix.subtitleProcessing.SubtitlesEditor;
+import vamix.util.Constants;
+import vamix.util.FileBrowsers;
+import vamix.util.FileChecker;
+import vamix.util.FileGeneratorOperations;
+import vamix.util.FileNameOperations;
+import vamix.util.TimeOperations;
+import vamix.videoProcessing.CropVideo;
+import vamix.videoProcessing.FadeVideo;
+import vamix.videoProcessing.PlaybackWorker;
+import vamix.videoProcessing.RotateVideo;
+import vamix.videoProcessing.TextEdit;
+import vamix.videoProcessing.TrimVideo;
+import vamix.videoProcessing.VideoOperations;
+import vamix.videoProcessing.FadeVideo.FadeType;
+import vamix.videoProcessing.TextEdit.RenderType;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -95,6 +112,9 @@ public class VamixController {
 	
 	@FXML
 	private MenuItem playWithSubtitlesBtn;
+	
+	@FXML
+	private MenuItem openUserManual;
 	
 	/*
 	 * GUI components for the video tab
@@ -369,6 +389,12 @@ public class VamixController {
 	
 	@FXML
 	private ImageView playPauseImage;
+	
+	@FXML 
+	private ImageView rewindImage;
+	
+	@FXML
+	private ImageView fastforwardImage;
 
 	@FXML
 	private Label videoTime;
@@ -536,8 +562,8 @@ public class VamixController {
 				String previousFile =videoFileAdd;//get current file
 				loadMedia();
 				//check that the user hasn't selected the file currently being played
-				if (!(previousFile.equals(videoPath.getText()))&Helper.validInFile(videoPath.getText(),"(video)|Media|Audio|MPEG|ISO Media|ogg|ogv")){
-					vamix.view.Main.vid.prepareMedia(videoPath.getText());
+				if (!(previousFile.equals(videoPath.getText()))&FileChecker.validInFile(videoPath.getText(),"(video)|Media|Audio|MPEG|ISO Media|ogg|ogv")){
+					vamix.userInterface.Main.vid.prepareMedia(videoPath.getText());
 					videoFileAdd=videoPath.getText();
 				}else if (previousFile.equals(videoPath.getText())){
 					JOptionPane.showMessageDialog(null,"You have selected the file that is currently loaded.");
@@ -552,8 +578,8 @@ public class VamixController {
 			public void handle(ActionEvent evt) {
 				//play media if its different from the current one
 				String previousFile =videoFileAdd;//get current file
-				if (!(previousFile.equals(videoPath.getText()))&Helper.validInFile(videoPath.getText(),"(video)|Media|Audio|MPEG|ISO Media|ogg|ogv")){
-					vamix.view.Main.vid.prepareMedia(videoPath.getText());
+				if (!(previousFile.equals(videoPath.getText()))&FileChecker.validInFile(videoPath.getText(),"(video)|Media|Audio|MPEG|ISO Media|ogg|ogv")){
+					vamix.userInterface.Main.vid.prepareMedia(videoPath.getText());
 					videoFileAdd=videoPath.getText();
 				}else if (previousFile.equals(videoPath.getText())){
 					JOptionPane.showMessageDialog(null,"You have selected the file that is currently loaded.");
@@ -570,8 +596,8 @@ public class VamixController {
 					String previousFile =videoFileAdd;//get current file
 					loadMedia();
 					//check that the user hasn't selected the file currently being played
-					if (!(previousFile.equals(videoPath.getText()))&Helper.validInFile(videoPath.getText(),"(Audio)|Video|MPEG")){
-						vamix.view.Main.vid.prepareMedia(videoPath.getText());
+					if (!(previousFile.equals(videoPath.getText()))&FileChecker.validInFile(videoPath.getText(),"(Audio)|Video|MPEG")){
+						vamix.userInterface.Main.vid.prepareMedia(videoPath.getText());
 						videoFileAdd=videoPath.getText();
 					}else if (previousFile.equals(videoPath.getText())){
 						JOptionPane.showMessageDialog(null,"You have selected the file that is currently loaded.");
@@ -654,8 +680,8 @@ public class VamixController {
 					//if they want both, check the inputs for both fade in and fade out
 					if (checkFadeInputs(true) && checkFadeInputs(false)) {
 						//check the fade in and fade out times do not overlap
-						int endFadein = Helper.timeInSec(endFadeIn.getText());
-						int startFadeout = Helper.timeInSec(startFadeOut.getText());
+						int endFadein = TimeOperations.timeInSec(endFadeIn.getText());
+						int startFadeout = TimeOperations.timeInSec(startFadeOut.getText());
 						if (endFadein <= startFadeout) {
 							//use custom SwingWorker object to fade the video
 							FadeVideo fader = new FadeVideo(startFadeIn.getText(), endFadeIn.getText(), startFadeOut.getText(), endFadeOut.getText(), videoFileAdd);
@@ -690,15 +716,15 @@ public class VamixController {
 				//check a video is actually loaded into VAMIX
 				if (!(videoFileAdd.equals(""))) {
 					//check if the input video file is a valid video file (is either mp4, avi or flv)
-					if(Helper.validVideoFile(videoFileAdd,"(MPEG v4)|Video")){
+					if(FileChecker.validVideoFile(videoFileAdd,"(MPEG v4)|Video")){
 						//check that the start time is valid
-						if (Helper.timeValidTypeChecker(startTrim.getText(), "start time")) {
+						if (TimeOperations.timeFormatChecker(startTrim.getText(), "start time")) {
 							//check that the end time is valid
-							if (Helper.timeValidTypeChecker(endTrim.getText(), "end time")) {
+							if (TimeOperations.timeFormatChecker(endTrim.getText(), "end time")) {
 								//check that the start time is valid relative to the end time
-								if (Helper.timeValidChecker(startTrim.getText(), endTrim.getText(), "trimming")) {
+								if (TimeOperations.timeValidChecker(startTrim.getText(), endTrim.getText(), "trimming")) {
 									//check that both times are less than or equal to length of the input video
-									if ((Helper.timeLessThanVideo(startTrim.getText()) && (Helper.timeLessThanVideo(endTrim.getText())))) {
+									if ((VideoOperations.timeLessThanVideo(startTrim.getText()) && (VideoOperations.timeLessThanVideo(endTrim.getText())))) {
 										//use a custom SwingWorker class to trim the video in the background
 										TrimVideo trimmer = new TrimVideo(startTrim.getText(), endTrim.getText(), videoFileAdd);
 										trimmer.trimVideoAsync();
@@ -721,7 +747,7 @@ public class VamixController {
 				//check a video is actually loaded into VAMIX
 				if (!(videoFileAdd.equals(""))) {
 					//check if the input video file is a valid video file (is either mp4, avi or flv)
-					if(Helper.validVideoFile(videoFileAdd,"(MPEG v4)|Video")){
+					if(FileChecker.validVideoFile(videoFileAdd,"(MPEG v4)|Video")){
 						//check that all fields have a value
 						if ((cropHeight.getText().equals("")) || (cropWidth.getText().equals("")) || (cropXPos.getText().equals("")) || (cropYPos.getText().equals(""))) {
 							allFull = false;
@@ -729,8 +755,8 @@ public class VamixController {
 						if (allFull) {
 							//now get the dimensions of the video and make sure that the width, height, x and y values
 							//specified by the user lie within the dimensions
-							int width = vamix.view.Main.vid.getVideoDimension().width;
-							int height = vamix.view.Main.vid.getVideoDimension().height;
+							int width = vamix.userInterface.Main.vid.getVideoDimension().width;
+							int height = vamix.userInterface.Main.vid.getVideoDimension().height;
 							int cropheight = Integer.parseInt(cropHeight.getText());
 							int cropwidth = Integer.parseInt(cropWidth.getText());
 							int x = Integer.parseInt(cropXPos.getText());
@@ -766,7 +792,7 @@ public class VamixController {
 				//check a video is actually loaded into VAMIX
 				if (!(videoFileAdd.equals(""))) {
 					//check if the input video file is a valid video file (is either mp4, avi or flv)
-					if(Helper.validVideoFile(videoFileAdd,"(MPEG v4)|Video")){
+					if(FileChecker.validVideoFile(videoFileAdd,"(MPEG v4)|Video")){
 						//check that the angle given by the user is either 90, 180 or 270 degrees
 						String angle = rotateAngle.getText();
 						if (!(angle.equals("90") || angle.equals("180") || angle.equals("270"))) {
@@ -829,7 +855,7 @@ public class VamixController {
 			public void handle(MouseEvent arg0) {
 				if ((arg0.getClickCount()>=2)&& !arg0.isConsumed()){
 					//get the destination of file to be saved
-					String temp=Helper.saveFileChooser("MP3 file","mp3");
+					String temp = FileBrowsers.saveFileBrowser("MP3 file","mp3");
 					strip_add.setText(temp);
 				}
 			}
@@ -840,7 +866,7 @@ public class VamixController {
 		@Override
 		public void handle(MouseEvent arg0) {
 			//get the destination of file to be saved
-			String temp=Helper.saveFileChooser("MP3 file","mp3");
+			String temp = FileBrowsers.saveFileBrowser("MP3 file","mp3");
 			strip_add.setText(temp);
 		}
 	});
@@ -861,7 +887,7 @@ public class VamixController {
 			@Override
 			public void handle(ActionEvent evt) {
 				//open file dialog to let user choose a replacement audio file
-				String temp=Helper.audioFileChooser();
+				String temp=FileBrowsers.audioFileChooser();
 				replaceAdd.setText(temp);
 			}
 		});
@@ -872,7 +898,7 @@ public class VamixController {
 			public void handle(MouseEvent arg0) {
 				if ((arg0.getClickCount()>=2)&& !arg0.isConsumed()){
 					//open file dialog to let user choose a replacement audio file
-					String temp=Helper.audioFileChooser();
+					String temp=FileBrowsers.audioFileChooser();
 					replaceAdd.setText(temp);
 				}
 			}
@@ -884,7 +910,7 @@ public class VamixController {
 			public void handle(MouseEvent arg0) {
 				if ((arg0.getClickCount()>=2)&& !arg0.isConsumed()){
 					//open file dialog to let user choose an audio file to overlay onto the current video
-					String temp=Helper.audioFileChooser();
+					String temp=FileBrowsers.audioFileChooser();
 					overlayAdd.setText(temp);
 				}
 			}
@@ -895,7 +921,7 @@ public class VamixController {
 			@Override
 			public void handle(MouseEvent arg0) {
 				//open file dialog to let user choose an audio file to overlay onto the current video
-				String temp=Helper.audioFileChooser();
+				String temp=FileBrowsers.audioFileChooser();
 				overlayAdd.setText(temp);
 			}
 		});
@@ -927,13 +953,13 @@ public class VamixController {
 				boolean cancelled = false;
 				if (!(videoFileAdd.equals(""))) {
 					//check if the input video file is a valid video file (is either mp4, avi or flv)
-					if(Helper.validVideoFile(videoFileAdd,"(MPEG v4)|Video")){
+					if(FileChecker.validVideoFile(videoFileAdd,"(MPEG v4)|Video")){
 						//check the output file DIRECTORY exists
-						String outDir = Helper.pathGetter(outputFilePath.getText());
-						String outFileName = Helper.fileNameGetter(outputFilePath.getText());
-						if (Helper.fileExist(outDir)) {
+						String outDir = FileNameOperations.pathGetter(outputFilePath.getText());
+						String outFileName = FileNameOperations.fileNameGetter(outputFilePath.getText());
+						if (FileChecker.fileExist(outDir)) {
 							//if the directory does exist, check if output file exists, if it does ask user if they want to overwrite
-							if (Helper.fileExist(outputFilePath.getText())) {
+							if (FileChecker.fileExist(outputFilePath.getText())) {
 								Object[] options = {"Overwrite", "Cancel"};
 								choice = JOptionPane.showOptionDialog(null, "File " + outFileName +" already exists. Do you wish to overwrite it or cancel and choose another destination?",
 										"Override?",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE,null,options, options[0]);
@@ -950,8 +976,8 @@ public class VamixController {
 									if (checkTitleInputs() && checkCreditsInputs()) {
 										//if the user wants to render both text scenes make sure the credits scene comes after the title scene and 
 										//no overlap occurs
-										int endOfTitle = Helper.timeInSec(endTitle.getText());
-										int startOfCredits = Helper.timeInSec(startCredits.getText());
+										int endOfTitle = TimeOperations.timeInSec(endTitle.getText());
+										int startOfCredits = TimeOperations.timeInSec(startCredits.getText());
 										if (endOfTitle < startOfCredits) {
 											//pass all required data to the renderer object so rendering can be done in the background
 											textRenderer = new TextEdit(titleText.getText(), titleFont.getValue(), titleSize.getValue(), titleColour.getValue().toString(),
@@ -1007,7 +1033,7 @@ public class VamixController {
 			public void handle(MouseEvent arg0) {
 				if ((arg0.getClickCount()>=2)&& !arg0.isConsumed()){
 					//choose the output file 
-					String temp=Helper.saveFileChooser("MP4 files Only", "mp4");
+					String temp = FileBrowsers.saveFileBrowser("MP4 files Only", "mp4");
 					outputFilePath.setText(temp);
 				}
 			}
@@ -1018,7 +1044,7 @@ public class VamixController {
 			@Override
 			public void handle(MouseEvent arg0) {
 				//choose the output file
-				String temp=Helper.saveFileChooser("MP4 files Only", "mp4");
+				String temp = FileBrowsers.saveFileBrowser("MP4 files Only", "mp4");
 				outputFilePath.setText(temp);
 			}
 		});
@@ -1067,8 +1093,8 @@ public class VamixController {
 				//open file browser to let user select a subtitle file for editing
 				subtitleFilePath = FileBrowsers.saveFileBrowser("Subtitle files", "srt");
 				//check the output file DIRECTORY exists
-				String outDir = Helper.pathGetter(subtitleFilePath);
-				if (Helper.fileExist(outDir)) {
+				String outDir = FileNameOperations.pathGetter(subtitleFilePath);
+				if (FileChecker.fileExist(outDir)) {
 					//create a subtitle editor
 					subtitlesEditor = new SubtitlesEditor(subtitleTable, subtitleNumber, subtitleStart, subtitleEnd, subtitleText);
 					subtitlesEditor.createSubtitlesFile(subtitleFilePath);
@@ -1095,7 +1121,7 @@ public class VamixController {
 				//open file browser to let user select a subtitle file for editing
 				subtitleFilePath = FileBrowsers.subtitleFileBrowser();
 				//check if the file chosen exists
-				if (Helper.fileExist(subtitleFilePath)) {
+				if (FileChecker.fileExist(subtitleFilePath)) {
 					//create a subtitle editor
 					subtitlesEditor = new SubtitlesEditor(subtitleTable, subtitleNumber, subtitleStart, subtitleEnd, subtitleText);
 					subtitlesEditor.readSubtitlesFile(subtitleFilePath);
@@ -1178,7 +1204,9 @@ public class VamixController {
 		assert playPauseBtn != null : "fx:id=\"playPauseBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert playPauseImage != null : "fx:id=\"playPauseImage\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert rewindBtn != null : "fx:id=\"rewindBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert rewindImage != null : "fx:id=\"rewindImage\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert fastForwardBtn != null : "fx:id=\"fastForwardBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert fastforwardImage != null : "fx:id=\"fastforwardImage\" was not injected: check your FXML file 'VideoView.fxml'.";
 
 		assert videoTime != null : "fx:id=\"videoTime\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert videoProgress != null : "fx:id=\"videoProgress\" was not injected: check your FXML file 'VideoView.fxml'.";
@@ -1199,8 +1227,19 @@ public class VamixController {
 		 */	
 		//load video but dont play yet
 		if (!(videoFileAdd.equals(""))){
-			vamix.view.Main.vid.prepareMedia(videoFileAdd);
+			vamix.userInterface.Main.vid.prepareMedia(videoFileAdd);
 		}
+		
+		//set all media button icons
+		URL url= getClass().getResource(File.separator+"resources"+File.separator+"play.png");
+		Image icon=new Image(url.toString());
+		playPauseImage.setImage(icon);
+		url= getClass().getResource(File.separator+"resources"+File.separator+"rewind.png");
+		icon=new Image(url.toString());
+		rewindImage.setImage(icon);
+		url= getClass().getResource(File.separator+"resources"+File.separator+"fastforward.png");
+		icon=new Image(url.toString());
+		fastforwardImage.setImage(icon);		
 		
 		//start counter for the video
 		Timer videoTimer=new Timer(200, new ActionListener() {
@@ -1209,28 +1248,29 @@ public class VamixController {
 				Platform.runLater(new Runnable() { //need to invoke on javafx thread
 			        @Override
 			        public void run() { //set the time text and progress bar
-			        	if (!(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_NothingSpecial)){
-				        	double currentTime=(vamix.view.Main.vid.getTime()/1000.0);
-				        	double VidTime=(vamix.view.Main.vid.getLength()/1000.0);
+			        	if (!(vamix.userInterface.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_NothingSpecial)){
+				        	double currentTime=(vamix.userInterface.Main.vid.getTime()/1000.0);
+				        	double VidTime=(vamix.userInterface.Main.vid.getLength()/1000.0);
 				        	videoProgress.setProgress((currentTime/VidTime));
 				        	if (currentTime>=VidTime){//when reach end of video/audio loop to the start again
-				        		vamix.view.Main.vid.playMedia(videoFileAdd); 
-				        		if (!(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Playing)){
-				        			Image pauseImg = new Image(getClass().getResourceAsStream("/resources/pause.png"));
-									playPauseImage.setImage(pauseImg);
+				        		vamix.userInterface.Main.vid.playMedia(videoFileAdd); 
+				        		if (!(vamix.userInterface.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Playing)){
+				        			URL url= getClass().getResource(File.separator+"resources"+File.separator+"pause.png");
+				        			Image icon=new Image(url.toString());
+				        			playPauseImage.setImage(icon);
 				        		}
-				        		String videTime= Helper.timeOfVideo(currentTime,VidTime);
+				        		String videTime= TimeOperations.timeOfVideo(currentTime,VidTime);
 				        		videoTime.setText(videTime);
 				        	}else{ 
-				        		String videTime= Helper.timeOfVideo(currentTime,VidTime);
+				        		String videTime= TimeOperations.timeOfVideo(currentTime,VidTime);
 				        		videoTime.setText(videTime);
 				        	}
-			        	}else if(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_NothingSpecial){
+			        	}else if(vamix.userInterface.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_NothingSpecial){
 			        		//create event listener to see if new media is load then load it
-			        		vamix.view.Main.vid.addMediaPlayerEventListener(new MediaPlayerEventAdapter(){
+			        		vamix.userInterface.Main.vid.addMediaPlayerEventListener(new MediaPlayerEventAdapter(){
 			        			@Override
 			        			public void newMedia(MediaPlayer arg0){
-    			        			String temp=vamix.view.Main.vid.mrl().substring(7);
+    			        			String temp=vamix.userInterface.Main.vid.mrl().substring(7);
     			        			videoFileAdd=temp;
     			        			videoPath.setText(temp);
 			        			}
@@ -1238,22 +1278,23 @@ public class VamixController {
 			        		
 			        		//if a video has been selected
 			        		if (!(videoFileAdd.equals(""))){   			
-				        		vamix.view.Main.vid.start();
+				        		vamix.userInterface.Main.vid.start();
 				        		try {//sleep thread so can execute next command when previous finish
 				        			Thread.sleep(50);
 				        		} catch (InterruptedException e1) {
 				        		}
-				        		vamix.view.Main.vid.pause();
-				        		Image playImg = new Image(getClass().getResourceAsStream("/resources/play.png"));
-								playPauseImage.setImage(playImg);
+				        		vamix.userInterface.Main.vid.pause();
+				        		URL url= getClass().getResource(File.separator+"resources"+File.separator+"play.png");
+			        			Image icon=new Image(url.toString());
+			        			playPauseImage.setImage(icon);
 				        		videoProgress.setProgress(0.0);
-				        		if (vamix.view.Main.vid.isMute()){
-				        			vamix.view.Main.vid.mute();
+				        		if (vamix.userInterface.Main.vid.isMute()){
+				        			vamix.userInterface.Main.vid.mute();
 				        		}				        	
 				        		if (!(videoFileAdd.equals(videoPath.getText()))){
 				        			videoPath.setText(videoFileAdd);
 				        		}
-				        		vamix.view.Main.vid.setVolume(100);
+				        		vamix.userInterface.Main.vid.setVolume(100);
 				        		volumeSlider.setValue(50);
 				        		//set video to unmute
 				        		muteCheckbox.setSelected(false);	
@@ -1270,18 +1311,20 @@ public class VamixController {
 		playPauseBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evt) {//before video even got played
-				if(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
-					vamix.view.Main.vid.startMedia(videoFileAdd);
-				}else if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Playing){
+				if(vamix.userInterface.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Ended){
+					vamix.userInterface.Main.vid.startMedia(videoFileAdd);
+				}else if (vamix.userInterface.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Playing){
 					//if playing, then pause the video
-					vamix.view.Main.vid.pause();
-					Image playImg = new Image(getClass().getResourceAsStream("/resources/play.png"));
-					playPauseImage.setImage(playImg);
-				}else if (vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Paused){
+					vamix.userInterface.Main.vid.pause();
+					URL url= getClass().getResource(File.separator+"resources"+File.separator+"play.png");
+        			Image icon=new Image(url.toString());
+        			playPauseImage.setImage(icon);
+				}else if (vamix.userInterface.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_Paused){
 					//if paused, then play the video
-					vamix.view.Main.vid.pause();
-					Image pauseImg = new Image(getClass().getResourceAsStream("/resources/pause.png"));
-					playPauseImage.setImage(pauseImg);
+					vamix.userInterface.Main.vid.pause();
+					URL url= getClass().getResource(File.separator+"resources"+File.separator+"pause.png");
+        			Image icon=new Image(url.toString());
+        			playPauseImage.setImage(icon);
 				}
 			}
 		});
@@ -1291,8 +1334,8 @@ public class VamixController {
 			@Override
 			public void handle(MouseEvent arg0) {
 			//toggle mute of the video
-				if (!(vamix.view.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_NothingSpecial)){
-					vamix.view.Main.vid.mute();
+				if (!(vamix.userInterface.Main.vid.getMediaPlayerState()==libvlc_state_t.libvlc_NothingSpecial)){
+					vamix.userInterface.Main.vid.mute();
 				}				
 			}
 
@@ -1303,7 +1346,7 @@ public class VamixController {
 			@Override
 			public void handle(MouseEvent arg0) {
 				
-				playbackWorker=new PlaybackWorker((long)(vamix.view.Main.vid.getLength()*0.01));
+				playbackWorker=new PlaybackWorker((long)(vamix.userInterface.Main.vid.getLength()*0.01));
 				playbackWorker.execute();
 				//cancel rewind when mouse leave the button even if the user didn't release
 				fastForwardBtn.setOnMouseExited(new EventHandler<MouseEvent>() {
@@ -1327,7 +1370,7 @@ public class VamixController {
 		rewindBtn.setOnMousePressed(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
-				playbackWorker=new PlaybackWorker(-(long)(vamix.view.Main.vid.getLength()*0.01));
+				playbackWorker=new PlaybackWorker(-(long)(vamix.userInterface.Main.vid.getLength()*0.01));
 				playbackWorker.execute();
 				//cancel rewind when mouse leave the button even if the user didn't release
 				rewindBtn.setOnMouseExited(new EventHandler<MouseEvent>() {
@@ -1352,7 +1395,7 @@ public class VamixController {
 			//volume slider set volume continuously when slide
 			@Override
 			public void handle(MouseEvent arg0) {
-				vamix.view.Main.vid.setVolume((int) (2*volumeSlider.getValue()));
+				vamix.userInterface.Main.vid.setVolume((int) (2*volumeSlider.getValue()));
 			}
 		});
 		
@@ -1362,7 +1405,7 @@ public class VamixController {
 			//note volume is 0-200 so need to times 2 as slider is only to 100
 			@Override
 			public void handle(MouseEvent arg0) {
-				vamix.view.Main.vid.setVolume((int) (2*volumeSlider.getValue()));
+				vamix.userInterface.Main.vid.setVolume((int) (2*volumeSlider.getValue()));
 			}
 		});
 		
@@ -1372,7 +1415,7 @@ public class VamixController {
 			//setTime is in (ms) of time, get width is in the pixel unit
 			@Override
 			public void handle(MouseEvent arg0) {
-				vamix.view.Main.vid.setTime((long)arg0.getX()*vamix.view.Main.vid.getLength()/(long)videoProgress.getWidth());
+				vamix.userInterface.Main.vid.setTime((long)arg0.getX()*vamix.userInterface.Main.vid.getLength()/(long)videoProgress.getWidth());
 			}
 		});
 		
@@ -1381,7 +1424,7 @@ public class VamixController {
 			//video slider set volume discrete when slide
 			@Override
 			public void handle(MouseEvent arg0) {
-				vamix.view.Main.vid.setTime((long)(arg0.getX()*vamix.view.Main.vid.getLength()/(long)videoProgress.getWidth()));
+				vamix.userInterface.Main.vid.setTime((long)(arg0.getX()*vamix.userInterface.Main.vid.getLength()/(long)videoProgress.getWidth()));
 			}
 		});
 	}
@@ -1446,6 +1489,27 @@ public class VamixController {
 		Tooltip cropWidthTip = new Tooltip("Enter the width to crop from the (x,y) position specified");
 		cropWidth.setTooltip(cropWidthTip);
 		
+		//tool tip to clarify audio stripping functionality
+		Tooltip stripTip = new Tooltip("Click to extract audio from video file currently being edited");
+		strip_button.setTooltip(stripTip);
+		
+		//tool tips to clarify the replacing audio feature
+		Tooltip startSecondaryAudioTip = new Tooltip("Enter start time of the section to use from the audio file you have selected");
+		startReplace.setTooltip(startSecondaryAudioTip);
+		Tooltip endSecondaryAudioTip = new Tooltip("Enter start time of the section to use from the audio file you have selected");
+		endReplace.setTooltip(endSecondaryAudioTip);
+		Tooltip startReplaceVideoTip = new Tooltip("Enter start time of the section to replace on the video currently being edited");
+		startReplace2.setTooltip(startReplaceVideoTip);
+		Tooltip endReplaceVideoTip = new Tooltip("Enter end time of the section to replace on the video currently being edited");
+		endReplace2.setTooltip(endReplaceVideoTip);
+		
+		//tool tips to clarify the overlaying audio feature
+		overlayUseStart.setTooltip(startSecondaryAudioTip);
+		overlayUseEnd.setTooltip(endSecondaryAudioTip);
+		Tooltip startOverlayVideoTip = new Tooltip("Enter start time of the section to overlay on to, for the video currently being edited");
+		overlayToStart.setTooltip(startOverlayVideoTip);
+		Tooltip endOverlayVideoTip = new Tooltip("Enter end time of the section to overlay on to, for the video currently being edited");
+		overlayToEnd.setTooltip(endOverlayVideoTip);
 		
 	}
 
@@ -1468,6 +1532,7 @@ public class VamixController {
 		assert loadStateBtn != null : "fx:id=\"loadStateBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert loadFiles != null : "fx:id=\"loadFiles\" was not injected: check your FXML file 'VideoView.fxml'.";
 		assert playWithSubtitlesBtn != null : "fx:id=\"playWithSubtitlesBtn\" was not injected: check your FXML file 'VideoView.fxml'.";
+		assert openUserManual != null : "fx:id=\"openUserManual\" was not injected: check your FXML file 'VideoView.fxml'.";
 	}
 	
 	/*
@@ -1500,8 +1565,8 @@ public class VamixController {
 				String previousFile =videoFileAdd;//get current file
 				loadMedia();
 				//check that the file selected is not the same one that is currently playing
-				if (!(previousFile.equals(videoPath.getText()))&Helper.validInFile(videoPath.getText(),"(video)|Media|Audio|MPEG|ISO Media|ogg|ogv")){
-					vamix.view.Main.vid.prepareMedia(videoPath.getText());
+				if (!(previousFile.equals(videoPath.getText()))&FileChecker.validInFile(videoPath.getText(),"(video)|Media|Audio|MPEG|ISO Media|ogg|ogv")){
+					vamix.userInterface.Main.vid.prepareMedia(videoPath.getText());
 					videoFileAdd=videoPath.getText();
 				}else if (previousFile.equals(videoPath.getText())){
 					JOptionPane.showMessageDialog(null,"You have entered the file that is already loaded.");
@@ -1516,15 +1581,28 @@ public class VamixController {
 				//open file browser to let user select a subtitle file for editing
 				String subtitleToUse = FileBrowsers.subtitleFileBrowser();
 				//check if the file chosen exists
-				if (Helper.fileExist(subtitleToUse)) {
+				if (FileChecker.fileExist(subtitleToUse)) {
 					//set the media player to use this subtitles file
-					vamix.view.Main.vid.setSubTitleFile(subtitleToUse);
+					vamix.userInterface.Main.vid.setSubTitleFile(subtitleToUse);
 					//show in corner of player name of subtitle file being used
-					subtitlesPlaying.setText(Helper.fileNameGetter(subtitleToUse));
+					subtitlesPlaying.setText(FileNameOperations.fileNameGetter(subtitleToUse));
 				//if it doesn't exist, give an error
 				} else {
 					JOptionPane.showMessageDialog(null, "Please enter a valid subtitle file", "Invalid file path",
 							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
+		
+		//action for the open user manual menu item. it will attempt to open the user manual
+		//if it is in the correct location
+		openUserManual.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evt) {
+				try {
+					Runtime.getRuntime().exec("evince "+Constants.CURRENT_DIR+"UserManual.pdf");
+				} catch (IOException exceptionRunTime) {
+					JOptionPane.showMessageDialog(null,"Cannot locate User Manual. Please check that it is in the same location as VAMIX.jar");
 				}
 			}
 		});
@@ -1541,7 +1619,7 @@ public class VamixController {
 		boolean hasSpaces = false;	//true if the input address has spaces - not allowed
 		String tempVideoFileAdd="";//initialize the video file address
 		String partial=""; //variable for partial of path i.e. just the name of file
-		JOptionPane.showMessageDialog(null, "Please select the video or audio file to edit.");
+		JOptionPane.showMessageDialog(null, "Please select the video or audio file to edit.", "Welcome to VAMIX", JOptionPane.PLAIN_MESSAGE);
 		//get input file
 		while(!valid){
 			//setup file chooser
@@ -1572,7 +1650,7 @@ public class VamixController {
 					JOptionPane.showMessageDialog(null, "You have entered an empty file name. Please input a valid file name.");
 				}else{
 					//check if the file exist locally
-					if (Helper.fileExist(tempVideoFileAdd)){
+					if (FileChecker.fileExist(tempVideoFileAdd)){
 						String bash =File.separator+"bin"+File.separator+"bash";
 						String cmd ="echo $(file \""+tempVideoFileAdd+"\")";
 						ProcessBuilder builder=new ProcessBuilder(bash,"-c",cmd); 
@@ -1648,7 +1726,7 @@ public class VamixController {
 								+ Long.parseLong(startTimeSplit[2])*1000;
 						long endLength = Long.parseLong(endTimeSplit[0])*3600000 + Long.parseLong(endTimeSplit[1])*60000
 								+ Long.parseLong(endTimeSplit[2])*1000;
-						long videoLength = vamix.view.Main.vid.getLength();
+						long videoLength = vamix.userInterface.Main.vid.getLength();
 						if ((startLength > videoLength) || (endLength > videoLength) || (endLength < startLength)) {
 							bothValid = false;
 						}
@@ -1713,7 +1791,7 @@ public class VamixController {
 								+ Long.parseLong(startTimeSplit[2])*1000;
 						long endLength = Long.parseLong(endTimeSplit[0])*3600000 + Long.parseLong(endTimeSplit[1])*60000
 								+ Long.parseLong(endTimeSplit[2])*1000;
-						long videoLength = vamix.view.Main.vid.getLength();
+						long videoLength = vamix.userInterface.Main.vid.getLength();
 						if ((startLength > videoLength) || (endLength > videoLength) || (endLength < startLength)) {
 							bothValid = false;
 						}
@@ -1758,15 +1836,15 @@ public class VamixController {
 		//check a video is actually loaded into VAMIX
 		if (!(videoFileAdd.equals(""))) {
 			//check if the input video file is a valid video file (is either mp4, avi or flv)
-			if(Helper.validVideoFile(videoFileAdd,"(MPEG v4)|Video")){
+			if(FileChecker.validVideoFile(videoFileAdd,"(MPEG v4)|Video")){
 				//check that the start time is valid
-				if (Helper.timeValidTypeChecker(start.getText(), "start time")) {
+				if (TimeOperations.timeFormatChecker(start.getText(), "start time")) {
 					//check that the end time is valid
-					if (Helper.timeValidTypeChecker(end.getText(), "end time")) {
+					if (TimeOperations.timeFormatChecker(end.getText(), "end time")) {
 						//check that the start time is valid relative to the end time
-						if (Helper.timeValidChecker(start.getText(), end.getText(), "fading")) {
+						if (TimeOperations.timeValidChecker(start.getText(), end.getText(), "fading")) {
 							//check that both times are less than or equal to length of the input video
-							if ((Helper.timeLessThanVideo(start.getText()) && (Helper.timeLessThanVideo(end.getText())))) {
+							if ((VideoOperations.timeLessThanVideo(start.getText()) && (VideoOperations.timeLessThanVideo(end.getText())))) {
 								isValid = true;
 							}
 						}
@@ -1786,9 +1864,9 @@ public class VamixController {
 		Writer writer = null;
 
 		try {
-			Helper.genTempFolder();
+			FileGeneratorOperations.genTempFolder();
 		    writer = new BufferedWriter(new OutputStreamWriter(
-		          new FileOutputStream(Constants.LOG_DIR + File.separator + "state.txt"), "UTF-8"));
+		          new FileOutputStream(Constants.HIDDEN_DIR + File.separator + "state.txt"), "UTF-8"));
 		    //write the values currently in the video tab gui objects into state file
 		    writer.write(videoPath.getText() + "\n");
 		    writer.write(videoURL.getText() + "\n");
@@ -1846,14 +1924,14 @@ public class VamixController {
 	//NEEDS TO BE UPDATED IF NEW GUI COMPONENTS ARE ADDED
 	private void loadState() {
 		try {
-			if (Helper.fileExist(Constants.LOG_DIR + File.separator + "state.txt")) {
+			if (FileChecker.fileExist(Constants.HIDDEN_DIR + File.separator + "state.txt")) {
 				//read all the GUI object values from the previous session with VAMIX and assign to objects
-				List<String> values = Files.readAllLines(Paths.get(Constants.LOG_DIR + File.separator + "state.txt"), Charset.forName("UTF-8"));
+				List<String> values = Files.readAllLines(Paths.get(Constants.HIDDEN_DIR + File.separator + "state.txt"), Charset.forName("UTF-8"));
 				//read the video tab values from the state file
 				videoPath.setText(values.get(0));
 				//check if the video from the last session still exists, if not tell user and if it does, load it into the media player
-				if (Helper.fileExist(videoPath.getText())) {
-					vamix.view.Main.vid.prepareMedia(videoPath.getText());
+				if (FileChecker.fileExist(videoPath.getText())) {
+					vamix.userInterface.Main.vid.prepareMedia(videoPath.getText());
 					videoFileAdd = videoPath.getText();
 				} else {
 					JOptionPane.showMessageDialog(null , "The previous video file that was being edited used to be located at " + videoPath.getText() + "\nIt is no longer there and will not be loaded.",

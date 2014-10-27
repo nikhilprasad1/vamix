@@ -22,6 +22,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 
+import vamix.util.Constants;
+import vamix.util.FileChecker;
+import vamix.videoProcessing.VideoOperations;
+
 /**
  * This class handles the download functionality for VAMIX.
  * It does the downloading in the background and also displays progress through its own GUI
@@ -55,7 +59,7 @@ public class Download {
 			//create object for choice of options
 			Object[] option= {"Override","Resume partial download"};
 			//check if the file exist locally
-			if (Helper.fileExist(Constants.CURRENT_DIR+urlEnd)){
+			if (FileChecker.fileExist(Constants.CURRENT_DIR+urlEnd)){
 				//note 0 is override i.e. first option chosen and 1 is resume
 				overrideChoice=JOptionPane.showOptionDialog(null, "File " +urlEnd +" already exists. Do you wish to override or resume partial download?",
 						"Override?",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE,null,option,option[0]);
@@ -195,7 +199,7 @@ public class Download {
 			}
 			this._DownloadFrame.dispose();
 			if (errorCode==0){
-				Helper.loadAndPreview(Constants.CURRENT_DIR+urlEnd, "00:00:00", "00:00:30");
+				VideoOperations.loadAndPreview(Constants.CURRENT_DIR+urlEnd, "00:00:00", "00:00:30");
 			}
 		}
 

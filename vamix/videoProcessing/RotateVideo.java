@@ -1,4 +1,4 @@
-package vamix.controller;
+package vamix.videoProcessing;
 
 import java.awt.Container;
 import java.awt.GridLayout;
@@ -21,33 +21,37 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 
+import vamix.util.FileGeneratorOperations;
+import vamix.util.TimeOperations;
+
 /**
- * Class that takes care of the trim video command on an input video
+ * Class that takes care of the rotate video command on an input video
  * Does all processing in the background and displays progress to the user
  * @author Nikhil Prasad
  */
-public class TrimVideo {
-	
+public class RotateVideo {
+
 	//variables needed for command
-	private String _startTrim, _endTrim, _inputAddr,_outputFile;
+	private String _angle, _inputAddr, _outputFile;
 	
-	//GUI objects to show progress of trim process
-	JFrame trimFrame;
+	//GUI objects to show progress of rotate process
+	JFrame rotateFrame;
 	Container pane;
 	JButton cancelBtn;
 	JProgressBar progressBar;
 	
-	//worker object to process in background
-	private TrimWorker trimWorker = new TrimWorker();
+	private RotateWorker rotateWorker = new RotateWorker();
 	
-	public TrimVideo(String startTrim, String endTrim, String inputAddr) {
-		_startTrim = startTrim;
-		_endTrim = endTrim;
+	public RotateVideo(String angle, String inputAddr) {
+		_angle = angle;
 		_inputAddr = inputAddr;
 	}
 	
-	class TrimWorker extends SwingWorker<Void, Integer> {
-
+	/*
+	 * Sub-class of SwingWorker that will do the rotating process in the background and report progress
+	 */
+	class RotateWorker extends SwingWorker<Void, Integer> {
+		
 		private Process process;
 		private ProcessBuilder builder;
 		private BufferedReader stdoutBuffered;
@@ -55,10 +59,10 @@ public class TrimVideo {
 		@Override
 		protected Void doInBackground() throws Exception {
 			//generate folder to hold temporary files (if it doesn't exist already)
-			Helper.genTempFolder();
+			FileGeneratorOperations.genTempFolder();
 			//now get length of video being edited, helps to calculate progress
-			int totalLength = (int)(vamix.view.Main.vid.getLength()/1000);
-			String cmd = buildTrimCommand();
+			int totalLength = (int)(vamix.userInterface.Main.vid.getLength()/1000);
+			String cmd = buildCropCommand();
 			builder = new ProcessBuilder("/bin/bash","-c",cmd);
 			builder.redirectErrorStream(true);
 			try {
@@ -105,23 +109,24 @@ public class TrimVideo {
 			switch(errorCode){
 			//everything went well
 			case 0:	
-				JOptionPane.showMessageDialog(trimFrame, "The trim operation has finished successfully. Note trimmed video has been saved to:"
-						+ "\n" + _outputFile);
+				JOptionPane.showMessageDialog(rotateFrame, "The rotate operation has finished successfully. Note rotated video has been saved to:\n"
+						+ _outputFile);
 				break;
-			//user cancelled trimming
+			//user cancelled rotating
 			case -1:
-				JOptionPane.showMessageDialog(trimFrame, "Trim operation has been cancelled. Note there may be partial output at \n" + _outputFile);
+				JOptionPane.showMessageDialog(rotateFrame, "Rotate operation has been cancelled. Note there may be partial output at \n" + _outputFile);
 				break;
 			//any other error code means something went wrong
 			default:
-				JOptionPane.showMessageDialog(trimFrame, "An error has occurred. Please try again. The error code is: "+errorCode);
+				JOptionPane.showMessageDialog(rotateFrame, "An error has occurred. Please try again. The error code is: "+errorCode);
 				break;
 			}
-			trimFrame.dispose();
+			rotateFrame.dispose();
 			//ask user if they want to load or preview the video
 			if (errorCode==0){ //when finish correctly
-				String duration = String.valueOf(Helper.formatTime(Helper.timeInSec(_endTrim) - Helper.timeInSec(_startTrim)));
-				Helper.loadAndPreview(_outputFile, "00:00:00", duration);
+				//show the first 60 seconds of the output video
+				String duration = String.valueOf(TimeOperations.formatTime(60));
+				VideoOperations.loadAndPreview(_outputFile, "00:00:00", duration);
 			}
 		}
 		
@@ -136,27 +141,31 @@ public class TrimVideo {
 			}
 		}
 		
-		protected String buildTrimCommand() {
+		protected String buildCropCommand() {
 			String cmd = "";
-			//generate the output name for the trimmed file
-			_outputFile = Helper.fileNameGen(_inputAddr, "trimmed");
-			//get the duration of the trimmed video
-			String duration = String.valueOf(Helper.formatTime(Helper.timeInSec(_endTrim) - Helper.timeInSec(_startTrim)));
-			System.out.println(duration);
-			//build the command
-			cmd = "avconv -i " + _inputAddr + " -ss " + _startTrim + " -t " + duration 
-					+ " -codec copy " + _outputFile;
+			//generate the output name for the rotated file
+			_outputFile = FileGeneratorOperations.fileNameGen(_inputAddr, "rotated");
+			//build the command depending on the angle entered
+			//if the angle is 90
+			if (_angle.equals("90")) {
+				cmd = "avconv -i " + _inputAddr + " -vf \"transpose=1\" -strict experimental " + _outputFile;
+			//else if the angle is 180
+			} else if (_angle.equals("180")) {
+				cmd = "avconv -i " + _inputAddr + " -vf \"transpose=1, transpose=1\" -strict experimental " + _outputFile;
+			//otherwise angle must be 270
+			} else {
+				cmd = "avconv -i " + _inputAddr + " -vf \"transpose=1, transpose=1, transpose=1\" -strict experimental " + _outputFile;
+			}
 			return cmd;
 		}
-		
 	}
 	
 	/*
-	 * Method that executes the TrimWorker which in turn performs the command to trim the input video
+	 * Method that executes the RotateWorker which in turn performs the command to rotate the input video
 	 */
-	public void trimVideoAsync() {
+	public void rotateVideoAsync() {
 		showProgressGUI();
-		trimWorker.execute();
+		rotateWorker.execute();
 	}
 	
 	/*
@@ -164,34 +173,34 @@ public class TrimVideo {
 	 */
 	public void showProgressGUI() {
 		//create the GUI objects required
-		trimFrame = new JFrame("Performing Trim Operation");
-		pane = trimFrame.getContentPane();
+		rotateFrame = new JFrame("Performing Rotate Operation");
+		pane = rotateFrame.getContentPane();
 		pane.setLayout(new GridLayout(2,0));
-		cancelBtn = new JButton("Cancel Trimming");
+		cancelBtn = new JButton("Cancel Rotating");
 		progressBar = new JProgressBar();
 		progressBar.setStringPainted(true);
-		trimFrame.setSize(300, 100);
+		rotateFrame.setSize(300, 100);
 		
-		//set function of cancel button to cancel the background task of the trim worker
+		//set function of cancel button to cancel the background task of the rotate worker
 		cancelBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				trimWorker.cancel(true);
+				rotateWorker.cancel(true);
 			}
 		});
-		//if user closes the progress window, assume they want to cancel the trimming
-		trimFrame.addWindowListener(new WindowAdapter() {
+		//if user closes the progress window, assume they want to cancel the rotating
+		rotateFrame.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				trimWorker.cancel(true);
+				rotateWorker.cancel(true);
 			}
 		});
 		//make sure gui objects are disposed on closing of the window
-		trimFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		rotateFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		//add the gui objects to the frame
-		trimFrame.add(progressBar, pane);
-		trimFrame.add(cancelBtn, pane);
-		trimFrame.setVisible(true);
-		trimFrame.setResizable(false);
+		rotateFrame.add(progressBar, pane);
+		rotateFrame.add(cancelBtn, pane);
+		rotateFrame.setVisible(true);
+		rotateFrame.setResizable(false);
 	}
 }

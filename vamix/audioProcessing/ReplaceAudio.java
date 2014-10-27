@@ -1,4 +1,4 @@
-package vamix.controller;
+package vamix.audioProcessing;
 
 import java.awt.Container;
 import java.awt.GridLayout;
@@ -23,8 +23,19 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 
+import vamix.util.Constants;
+import vamix.util.FileChecker;
+import vamix.util.FileGeneratorOperations;
+import vamix.util.FileNameOperations;
+import vamix.util.TimeOperations;
+import vamix.videoProcessing.VideoOperations;
 
+/**
+ * This class replaces the audio on an input video with the audio of an input audio file
+ * @author Nikhil Prasad
+ */
 public class ReplaceAudio {
+	
 	ReplaceAudioWorker raWork;//class variable for worker so cancel button can work
 	private String _inFile;
 	private String _inAudio;
@@ -32,8 +43,8 @@ public class ReplaceAudio {
 	private String _endtime;
 	private	String _startTime2;
 	private String _endtime2;
-	//constructor for replace audio pass infile and out file
-	ReplaceAudio(String inFile,String inAudio,String startTime,String endtime,String startTime2,String endtime2){
+	
+	public ReplaceAudio(String inFile,String inAudio,String startTime,String endtime,String startTime2,String endtime2){
 		_inFile=inFile;//current directory input to be replace file
 		_inAudio=inAudio;//current directory input audio file
 		_startTime=startTime;//start time for replace audio
@@ -42,19 +53,19 @@ public class ReplaceAudio {
 		_endtime2=endtime2;//end time for replace audio
 	}
 
-	/*
-	 * Function to perform replace audio of a file and basic error handle
+	/**
+	 * Function to perform the replacement audio operation as well as basic error handling
 	 */
 	public void replaceAudioFunction(){
-		//set validness of filename to false as initialisation and other general initialisation
+		//set validness of filename to false as initialization and other general initialization
 		boolean valid=false; //if inputs are valid
 		boolean isAudio=false;//if file is audio
 		String inFileName=_inFile; //input to replace filename full path
 		String audioFile=_inAudio; //input audio filename full path
 		
 		//get output file
-		if(Helper.validInFile(inFileName,Constants.VIDEO_AUDIO_TYPE)){
-			valid=false; //set corretness of outfile to false
+		if(FileChecker.validInFile(inFileName,Constants.VIDEO_AUDIO_TYPE)){
+			valid=false; //set correctness of output file to false
 			if (audioFile==null){
 				JOptionPane.showMessageDialog(null, "You have not entered an audio file name. Please input a valid file name.");
 			}else if(audioFile.equals("")){
@@ -93,28 +104,28 @@ public class ReplaceAudio {
 		}
 		
 		if (valid){
-			//send startTime of audio for overlay to get check
-			valid=Helper.timeValidTypeChecker(_startTime,"start time for the audio file used for overlay");
+			//send startTime of audio for replacement to get check
+			valid=TimeOperations.timeFormatChecker(_startTime,"start time for the audio file to be used as replacement");
 		}
 		
 		if (valid){
-			//send endtime of audio for overlay to get check
-			valid=Helper.timeValidTypeChecker(_endtime,"end time for the audio file used for overlay");
+			//send endtime of audio for replacement to get check
+			valid=TimeOperations.timeFormatChecker(_endtime,"end time for the audio file to be used as replacement");
 		}
 		if (valid){
-			//send startTime of audio for overlay to get check
-			valid=Helper.timeValidTypeChecker(_startTime2,"start time for the audio file to be overlay");
+			//send startTime of audio for replacement to get check
+			valid=TimeOperations.timeFormatChecker(_startTime2,"start time for the audio file to be used as replacement");
 		}
 		
 		if (valid){
-			//send endtime of audio for overlay to get check
-			valid=Helper.timeValidTypeChecker(_endtime2,"end time for the audio file to be overlay");
+			//send endtime of audio for replacement to get check
+			valid=TimeOperations.timeFormatChecker(_endtime2,"end time for the audio file to be used as replacement");
 		}
 		
 		if (valid){ //check if start time and end time make logic sense after the format is valid
 			valid=false;
-			valid=Helper.timeValidChecker(_startTime, _endtime, "audio file for replacing");
-			valid=Helper.timeValidChecker(_startTime2, _endtime2, "file to be replaced");
+			valid=TimeOperations.timeValidChecker(_startTime, _endtime, "audio file for replacing");
+			valid=TimeOperations.timeValidChecker(_startTime2, _endtime2, "file to be replaced");
 		}
 		
 		if(valid){
@@ -142,9 +153,9 @@ public class ReplaceAudio {
 			replaceAudioFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 			replaceAudioFrame.add(cancelButton,pane); //add cancel button to new frame
 			replaceAudioFrame.add(dlProgressBar,pane); //add progress bar to new frame
-			replaceAudioFrame.setVisible(true); //set visiblity of frame on
-			replaceAudioFrame.setResizable(false); //set frame so it cant be resize
-			//create swing worker obejct and run it
+			replaceAudioFrame.setVisible(true); //set visibility of frame on
+			replaceAudioFrame.setResizable(false); //set frame so it can't be resize
+			//create swing worker object and run it
 			raWork=new ReplaceAudioWorker(inFileName,audioFile,replaceAudioFrame,dlProgressBar);
 			raWork.execute();
 		}
@@ -159,7 +170,8 @@ public class ReplaceAudio {
 		private JProgressBar _dlProgressBar;
 		private String outputName="";
 		private int i=1;
-		//constructor to allow the input from user to be use in extractworker
+		
+		//constructor to allow the input from user to be use in replaceworker
 		ReplaceAudioWorker(String inFileName,String audioFileName,JFrame replaceAudioFrame,JProgressBar dlProgressBar){
 			_inFileName=inFileName;
 			_audioFileName=audioFileName;
@@ -174,41 +186,41 @@ public class ReplaceAudio {
 		protected Void doInBackground() throws Exception {
 			//make sure the correct process Builder is setup as it is weird	
 			String line;
-			Helper.genTempFolder();//generate temp folder if doesnt exist
-			outputName=Helper.fileNameGen(_inFileName, "replace"); //generate output filename
+			FileGeneratorOperations.genTempFolder();//generate temp folder if doesn't exist
+			outputName=FileGeneratorOperations.fileNameGen(_inFileName, "replace"); //generate output filename
 			//get the audio file name and get the
-			String audio=Helper.fileNameGetter(_audioFileName);
-			String input=Helper.fileNameGetter(_inFileName);
+			String audio=FileNameOperations.fileNameGetter(_audioFileName);
+			String input=FileNameOperations.fileNameGetter(_inFileName);
 			//get the required replace audio section
 			//calculate duration from input
 			//if specify outside file
-			if(Helper.timeInSec(_endtime2)>(int)(vamix.view.Main.vid.getLength()/1000)){
-				_endtime2=Helper.formatTime((int)(vamix.view.Main.vid.getLength()/1000));
+			if(TimeOperations.timeInSec(_endtime2)>(int)(vamix.userInterface.Main.vid.getLength()/1000)){
+				_endtime2=TimeOperations.formatTime((int)(vamix.userInterface.Main.vid.getLength()/1000));
 			}
-			int duration=Helper.timeInSec(_endtime2)-Helper.timeInSec(_startTime2);
+			int duration=TimeOperations.timeInSec(_endtime2)-TimeOperations.timeInSec(_startTime2);
 			//get part for before replace
-			if ((Helper.timeInSec(_endtime)-Helper.timeInSec(_startTime))<(Helper.timeInSec(_endtime2)-Helper.timeInSec(_startTime2))){
-				duration=Helper.timeInSec(_endtime)-Helper.timeInSec(_startTime);
+			if ((TimeOperations.timeInSec(_endtime)-TimeOperations.timeInSec(_startTime))<(TimeOperations.timeInSec(_endtime2)-TimeOperations.timeInSec(_startTime2))){
+				duration=TimeOperations.timeInSec(_endtime)-TimeOperations.timeInSec(_startTime);
 			}
-			String[] cmdsArray=("avconv -i "+_audioFileName+" -vn -c:a libmp3lame -ss "+_startTime+" -t "+Helper.formatTime(duration)+" -y "+Constants.LOG_DIR+File.separator+audio+"1.mp3").split(" ");
+			String[] cmdsArray=("avconv -i "+_audioFileName+" -vn -c:a libmp3lame -ss "+_startTime+" -t "+TimeOperations.formatTime(duration)+" -y "+Constants.HIDDEN_DIR+File.separator+audio+"1.mp3").split(" ");
 			List<String> cmds=Arrays.asList(cmdsArray);
 			ProcessBuilder builder;
 			builder=new ProcessBuilder(cmds); 
 			builder.redirectErrorStream(true);
-			// workout the length of the extracted file tho work out progress bar
-			int totalLength=(int)(vamix.view.Main.vid.getLength()/1000.0);
+			// calculate progress repeatedly and report it
+			int totalLength=(int)(vamix.userInterface.Main.vid.getLength()/1000.0);
 			try{
 				process = builder.start();
 				InputStream stdout = process.getInputStream();
 				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
 				while((line=stdoutBuffered.readLine())!=null){
 					if (isCancelled()){
-						process.destroy();//force quit extract
+						process.destroy();//force quit replace
 					}else {
 						//check time use this as indication for progress
 						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
 						if(m.find()){
-							//weird problem sometimes avconv gives int 100000000 so dont read it
+							//weird problem sometimes avconv gives int 100000000 so don't read it
 							if (!(m.group(1).equals("10000000000"))){
 								publish((int)(Integer.parseInt(m.group(1))*100/(1+duration)));
 							}
@@ -216,9 +228,9 @@ public class ReplaceAudio {
 					}
 				}
 				
-				duration=Helper.timeInSec(_startTime2);
-				//get part before replacae
-				cmdsArray=("avconv -i "+_inFileName+" -vn -c:a libmp3lame -ss 00:00:00 -t "+_startTime2+" -y "+Constants.LOG_DIR+File.separator+input+"1.mp3").split(" ");
+				duration=TimeOperations.timeInSec(_startTime2);
+				//get part before section to be replaced
+				cmdsArray=("avconv -i "+_inFileName+" -vn -c:a libmp3lame -ss 00:00:00 -t "+_startTime2+" -y "+Constants.HIDDEN_DIR+File.separator+input+"1.mp3").split(" ");
 				cmds=Arrays.asList(cmdsArray);
 				builder=new ProcessBuilder(cmds);
 				builder.redirectErrorStream(true);
@@ -229,12 +241,12 @@ public class ReplaceAudio {
 				publish(0);//reset bar
 				while((line=stdoutBuffered.readLine())!=null){
 					if (isCancelled()){
-						process.destroy();//force quit extract
+						process.destroy();//force quit replace
 					}else {
 						//check time use this as indication for progress
 						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
 						if(m.find()){
-							//weird problem sometimes avconv gives int 100000000 so dont read it
+							//weird problem sometimes avconv gives int 100000000 so don't read it
 							if (!(m.group(1).equals("10000000000"))){
 								publish((int)(Integer.parseInt(m.group(1))*100/(1+duration)));
 							}
@@ -242,14 +254,14 @@ public class ReplaceAudio {
 					}
 				}
 				
-				//get part for after replace
-				if ((Helper.timeInSec(_endtime)-Helper.timeInSec(_startTime))<(Helper.timeInSec(_endtime2)-Helper.timeInSec(_startTime2))){
-					duration=Helper.timeInSec(_startTime2)+Helper.timeInSec(_endtime)-Helper.timeInSec(_startTime);
+				//get part for after section to be replaced
+				if ((TimeOperations.timeInSec(_endtime)-TimeOperations.timeInSec(_startTime))<(TimeOperations.timeInSec(_endtime2)-TimeOperations.timeInSec(_startTime2))){
+					duration=TimeOperations.timeInSec(_startTime2)+TimeOperations.timeInSec(_endtime)-TimeOperations.timeInSec(_startTime);
 				}else{
-					duration=Helper.timeInSec(_endtime2);
+					duration=TimeOperations.timeInSec(_endtime2);
 				}
 
-				cmdsArray=("avconv -i "+_inFileName+" -vn -c:a libmp3lame -ss "+Helper.formatTime(duration)+" -t "+Helper.formatTime(totalLength)+" -y "+Constants.LOG_DIR+File.separator+input+"2.mp3").split(" ");
+				cmdsArray=("avconv -i "+_inFileName+" -vn -c:a libmp3lame -ss "+TimeOperations.formatTime(duration)+" -t "+TimeOperations.formatTime(totalLength)+" -y "+Constants.HIDDEN_DIR+File.separator+input+"2.mp3").split(" ");
 				cmds=Arrays.asList(cmdsArray);
 				builder=new ProcessBuilder(cmds);
 				builder.redirectErrorStream(true);
@@ -260,12 +272,12 @@ public class ReplaceAudio {
 				publish(0);//reset bar
 				while((line=stdoutBuffered.readLine())!=null){
 					if (isCancelled()){
-						process.destroy();//force quit extract
+						process.destroy();//force quit replace
 					}else {
 						//check time use this as indication for progress
 						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
 						if(m.find()){
-							//weird problem sometimes avconv gives int 100000000 so dont read it
+							//weird problem sometimes avconv gives int 100000000 so don't read it
 							if (!(m.group(1).equals("10000000000"))){
 								publish((int)(Integer.parseInt(m.group(1))*100/(1+duration)));
 							}
@@ -273,8 +285,8 @@ public class ReplaceAudio {
 					}
 				}
 
-				//merge the audios
-				cmdsArray=("avconv -i concat:"+Constants.LOG_DIR+File.separator+input+"1.mp3"+"|"+Constants.LOG_DIR+File.separator+audio+"1.mp3"+"|"+Constants.LOG_DIR+File.separator+input+"2.mp3"+" -c copy -y "+Constants.LOG_DIR+File.separator+input+"3.mp3").split(" ");
+				//merge the temporary audio files
+				cmdsArray=("avconv -i concat:"+Constants.HIDDEN_DIR+File.separator+input+"1.mp3"+"|"+Constants.HIDDEN_DIR+File.separator+audio+"1.mp3"+"|"+Constants.HIDDEN_DIR+File.separator+input+"2.mp3"+" -c copy -y "+Constants.HIDDEN_DIR+File.separator+input+"3.mp3").split(" ");
 				cmds=Arrays.asList(cmdsArray);
 				builder=new ProcessBuilder(cmds);
 				builder.redirectErrorStream(true);
@@ -285,12 +297,12 @@ public class ReplaceAudio {
 				publish(0);//reset bar
 				while((line=stdoutBuffered.readLine())!=null){
 					if (isCancelled()){
-						process.destroy();//force quit extract
+						process.destroy();//force quit replace
 					}else {
 						//check time use this as indication for progress
 						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
 						if(m.find()){
-							//weird problem sometimes avconv gives int 100000000 so dont read it
+							//weird problem sometimes avconv gives int 100000000 so don't read it
 							if (!(m.group(1).equals("10000000000"))){
 								publish((int)(Integer.parseInt(m.group(1))*100/(1+totalLength)));
 							}
@@ -299,7 +311,7 @@ public class ReplaceAudio {
 				}
 				
 				//replace video's audio with transformed audio
-				cmdsArray=("avconv -i "+_inFileName+" -i "+Constants.LOG_DIR+File.separator+input+"3.mp3 -map 0:v -map 1:a -c:v copy -c:a libmp3lame "+outputName).split(" ");
+				cmdsArray=("avconv -i "+_inFileName+" -i "+Constants.HIDDEN_DIR+File.separator+input+"3.mp3 -map 0:v -map 1:a -c:v copy -c:a libmp3lame "+outputName).split(" ");
 				cmds=Arrays.asList(cmdsArray);
 				builder=new ProcessBuilder(cmds);
 				builder.redirectErrorStream(true);
@@ -310,12 +322,12 @@ public class ReplaceAudio {
 				publish(0);//reset bar
 				while((line=stdoutBuffered.readLine())!=null){
 					if (isCancelled()){
-						process.destroy();//force quit extract
+						process.destroy();//force quit replace
 					}else {
 						//check time use this as indication for progress
 						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
 						if(m.find()){
-							//weird problem sometimes avconv gives int 100000000 so dont read it
+							//weird problem sometimes avconv gives int 100000000 so don't read it
 							if (!(m.group(1).equals("10000000000"))){
 								publish((int)(Integer.parseInt(m.group(1))*100/(1+totalLength)));
 							}
@@ -325,7 +337,7 @@ public class ReplaceAudio {
 					
 
 			}catch(Exception er){
-				//exWork.cancel(true);//cancel the extract work when error encounterd
+				//exWork.cancel(true);//cancel the extract work when error encountered
 			}
 
 			return null;
@@ -333,12 +345,12 @@ public class ReplaceAudio {
 
 		@Override
 		protected void done() {
-			//when it have finish Extracting
+			//when it have finish replacing
 			int errorCode=0;
 			try {
 				errorCode=process.waitFor();
 				get();
-				publish(100);//set complete incase doinbackground isnt quick enough
+				publish(100);//set complete in case doinbackground isn't quick enough
 			} catch (InterruptedException e) {
 			} catch (ExecutionException e) {
 			} catch (CancellationException e){
@@ -350,7 +362,7 @@ public class ReplaceAudio {
 				JOptionPane.showMessageDialog(_replaceAudioFrame, "Replacement has finished. Note output is saved to:\n" 
 						+outputName+".");
 				break;
-			case -1://extract cancelled
+			case -1://replacing cancelled
 				JOptionPane.showMessageDialog(_replaceAudioFrame, "Replacement has been cancelled.");
 				break;
 			default://error message of generic
@@ -360,7 +372,7 @@ public class ReplaceAudio {
 			this._replaceAudioFrame.dispose();
 			//ask user if they want to load or preview the video
 			if (errorCode==0){ //when finish correctly
-				Helper.loadAndPreview(outputName,_startTime2,_endtime2);
+				VideoOperations.loadAndPreview(outputName,_startTime2,_endtime2);
 			}
 		}
 		

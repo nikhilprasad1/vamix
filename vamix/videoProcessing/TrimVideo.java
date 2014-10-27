@@ -1,4 +1,4 @@
-package vamix.controller;
+package vamix.videoProcessing;
 
 import java.awt.Container;
 import java.awt.GridLayout;
@@ -21,37 +21,36 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 
+import vamix.util.FileGeneratorOperations;
+import vamix.util.TimeOperations;
+
 /**
- * Class that takes care of the crop video command on an input video
+ * Class that takes care of the trim video command on an input video
  * Does all processing in the background and displays progress to the user
  * @author Nikhil Prasad
  */
-public class CropVideo {
-
-	//variables needed for avconv crop command
-	private String _width, _height, _xcoord, _ycoord, _inputAddr, _outputFile;
+public class TrimVideo {
 	
-	//GUI objects to show progress of crop process
-	JFrame cropFrame;
+	//variables needed for command
+	private String _startTrim, _endTrim, _inputAddr,_outputFile;
+	
+	//GUI objects to show progress of trim process
+	JFrame trimFrame;
 	Container pane;
 	JButton cancelBtn;
 	JProgressBar progressBar;
 	
-	private CropWorker cropWorker = new CropWorker();
+	//worker object to process in background
+	private TrimWorker trimWorker = new TrimWorker();
 	
-	public CropVideo(String width, String height, String x, String y, String inputAddr) {
-		_width = width;
-		_height = height;
-		_xcoord = x;
-		_ycoord = y;
+	public TrimVideo(String startTrim, String endTrim, String inputAddr) {
+		_startTrim = startTrim;
+		_endTrim = endTrim;
 		_inputAddr = inputAddr;
 	}
 	
-	/*
-	 * Sub-class of SwingWorker that will do the cropping process in the background and report progress
-	 */
-	class CropWorker extends SwingWorker<Void, Integer> {
-		
+	class TrimWorker extends SwingWorker<Void, Integer> {
+
 		private Process process;
 		private ProcessBuilder builder;
 		private BufferedReader stdoutBuffered;
@@ -59,10 +58,10 @@ public class CropVideo {
 		@Override
 		protected Void doInBackground() throws Exception {
 			//generate folder to hold temporary files (if it doesn't exist already)
-			Helper.genTempFolder();
+			FileGeneratorOperations.genTempFolder();
 			//now get length of video being edited, helps to calculate progress
-			int totalLength = (int)(vamix.view.Main.vid.getLength()/1000);
-			String cmd = buildCropCommand();
+			int totalLength = (int)(vamix.userInterface.Main.vid.getLength()/1000);
+			String cmd = buildTrimCommand();
 			builder = new ProcessBuilder("/bin/bash","-c",cmd);
 			builder.redirectErrorStream(true);
 			try {
@@ -78,7 +77,7 @@ public class CropVideo {
 						//check time in output, use this as indication for progress
 						Matcher m =Pattern.compile("time=(\\d+)").matcher(line);
 						if(m.find()) {
-							//weird problem sometimes avconv gives int 100000000 so don't read it
+							//weird problem sometimes avconv gives int 100000000 so dont read it
 							if (!(m.group(1).equals("10000000000"))) {
 								publish((int)(Integer.parseInt(m.group(1))*100/totalLength));
 							}
@@ -109,24 +108,23 @@ public class CropVideo {
 			switch(errorCode){
 			//everything went well
 			case 0:	
-				JOptionPane.showMessageDialog(cropFrame, "The crop operation has finished successfully. Note cropped video has been saved to:\n"
-						+ _outputFile);
+				JOptionPane.showMessageDialog(trimFrame, "The trim operation has finished successfully. Note trimmed video has been saved to:"
+						+ "\n" + _outputFile);
 				break;
-			//user cancelled cropping
+			//user cancelled trimming
 			case -1:
-				JOptionPane.showMessageDialog(cropFrame, "Crop operation has been cancelled. Note there may be partial output at \n" + _outputFile);
+				JOptionPane.showMessageDialog(trimFrame, "Trim operation has been cancelled. Note there may be partial output at \n" + _outputFile);
 				break;
 			//any other error code means something went wrong
 			default:
-				JOptionPane.showMessageDialog(cropFrame, "An error has occurred. Please try again. The error code is: "+errorCode);
+				JOptionPane.showMessageDialog(trimFrame, "An error has occurred. Please try again. The error code is: "+errorCode);
 				break;
 			}
-			cropFrame.dispose();
+			trimFrame.dispose();
 			//ask user if they want to load or preview the video
 			if (errorCode==0){ //when finish correctly
-				//show the first 60 seconds of the output video
-				String duration = String.valueOf(Helper.formatTime(60));
-				Helper.loadAndPreview(_outputFile, "00:00:00", duration);
+				String duration = String.valueOf(TimeOperations.formatTime(TimeOperations.timeInSec(_endTrim) - TimeOperations.timeInSec(_startTrim)));
+				VideoOperations.loadAndPreview(_outputFile, "00:00:00", duration);
 			}
 		}
 		
@@ -141,61 +139,62 @@ public class CropVideo {
 			}
 		}
 		
-		/*
-		 * Method that returns the crop command to be executed by avconv
-		 */
-		protected String buildCropCommand() {
+		protected String buildTrimCommand() {
 			String cmd = "";
-			//generate the output name for the cropped file
-			_outputFile = Helper.fileNameGen(_inputAddr, "cropped");
+			//generate the output name for the trimmed file
+			_outputFile = FileGeneratorOperations.fileNameGen(_inputAddr, "trimmed");
+			//get the duration of the trimmed video
+			String duration = String.valueOf(TimeOperations.formatTime(TimeOperations.timeInSec(_endTrim) - TimeOperations.timeInSec(_startTrim)));
+			System.out.println(duration);
 			//build the command
-			cmd = "avconv -i " + _inputAddr + " -vf \"crop=" + _width + ":" + _height + ":"
-					+ _xcoord + ":" + _ycoord + "\" -strict experimental " + _outputFile;
+			cmd = "avconv -i " + _inputAddr + " -ss " + _startTrim + " -t " + duration 
+					+ " -codec copy " + _outputFile;
 			return cmd;
 		}
+		
 	}
 	
 	/*
-	 * Method that executes the CropWorker which in turn performs the command to crop the input video
+	 * Method that executes the TrimWorker which in turn performs the command to trim the input video
 	 */
-	public void cropVideoAsync() {
+	public void trimVideoAsync() {
 		showProgressGUI();
-		cropWorker.execute();
+		trimWorker.execute();
 	}
 	
 	/*
-	 * Method that shows the GUI to show cropping progress to the user
+	 * Method that shows the GUI to show trimming progress to the user
 	 */
 	public void showProgressGUI() {
 		//create the GUI objects required
-		cropFrame = new JFrame("Performing Crop Operation");
-		pane = cropFrame.getContentPane();
+		trimFrame = new JFrame("Performing Trim Operation");
+		pane = trimFrame.getContentPane();
 		pane.setLayout(new GridLayout(2,0));
-		cancelBtn = new JButton("Cancel Cropping");
+		cancelBtn = new JButton("Cancel Trimming");
 		progressBar = new JProgressBar();
 		progressBar.setStringPainted(true);
-		cropFrame.setSize(300, 100);
+		trimFrame.setSize(300, 100);
 		
-		//set function of cancel button to cancel the background task of the crop worker
+		//set function of cancel button to cancel the background task of the trim worker
 		cancelBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				cropWorker.cancel(true);
+				trimWorker.cancel(true);
 			}
 		});
-		//if user closes the progress window, assume they want to cancel the cropping
-		cropFrame.addWindowListener(new WindowAdapter() {
+		//if user closes the progress window, assume they want to cancel the trimming
+		trimFrame.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				cropWorker.cancel(true);
+				trimWorker.cancel(true);
 			}
 		});
 		//make sure gui objects are disposed on closing of the window
-		cropFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		trimFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		//add the gui objects to the frame
-		cropFrame.add(progressBar, pane);
-		cropFrame.add(cancelBtn, pane);
-		cropFrame.setVisible(true);
-		cropFrame.setResizable(false);
+		trimFrame.add(progressBar, pane);
+		trimFrame.add(cancelBtn, pane);
+		trimFrame.setVisible(true);
+		trimFrame.setResizable(false);
 	}
 }

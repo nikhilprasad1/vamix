@@ -1,4 +1,4 @@
-package vamix.controller;
+package vamix.subtitleProcessing;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -11,8 +11,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -30,7 +28,9 @@ import javafx.scene.control.cell.TextFieldTableCell;
  */
 public class SubtitlesEditor {
 	
+	@SuppressWarnings("rawtypes")
 	private TableView _subtitlesTable;
+	@SuppressWarnings("rawtypes")
 	private TableColumn _subtitleNumber, _startTimes, _endTimes, _subtitlesText;
 	
 	//ObservableList enables tracking of any changes to its elements and so the corresponding subtitles table automatically
@@ -46,6 +46,7 @@ public class SubtitlesEditor {
 	 * @param endTimes
 	 * @param subtitlesText
 	 */
+	@SuppressWarnings("rawtypes")
 	public SubtitlesEditor(TableView subtitlesTable, TableColumn subtitlesNumber, TableColumn startTimes, TableColumn endTimes, TableColumn subtitlesText) {
 		_subtitlesTable = subtitlesTable;
 		_subtitleNumber = subtitlesNumber;
@@ -128,6 +129,7 @@ public class SubtitlesEditor {
 		
 		try {
 			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path), "UTF-8"));
+			//for each subtitle, write it into the .srt file in format required
 			for (Subtitle s : _subtitlesData) {
 				writer.write(s.getSubtitleNumber() + "\n");
 				writer.write(s.getStartTime() + "-->" + s.getEndTime() + "\n");
@@ -137,10 +139,15 @@ public class SubtitlesEditor {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
+			//make sure the writer object is closed to avoid a resource leak
 			   try {writer.close();} catch (Exception ex) {}
 		}
 	}
 	
+	/*
+	 * Comparator that allows sorting of the subtitle list.
+	 * Compares by subtitle order number
+	 */
 	Comparator<? super Subtitle> subtitleComparator = new Comparator<Subtitle>() {
 		@Override
 		public int compare(Subtitle subtitle, Subtitle subtitle1) {

@@ -1,4 +1,4 @@
-package vamix.controller;
+package vamix.util;
 
 import java.io.File;
 
@@ -10,9 +10,8 @@ import java.io.File;
  */
 public class Constants {
 	
-	public static final String LOG_DIR=System.getenv("HOME")+File.separator+".vamix";
-	public static final String LOG_PATH=LOG_DIR+File.separator+"log";
-	public static final String CURRENT_DIR =System.getProperty("user.dir")+File.separator;
+	public static final String HIDDEN_DIR=System.getenv("HOME")+File.separator+".vamix";
+	public static final String CURRENT_DIR = ClassLoader.getSystemClassLoader().getResource(".").getPath();
 	public static final int SKIP_RATE=1000;
 	public static final int REPLACE_PROCESS_NUMBER=5;
 	public static final int OVERLAY_PROCESS_NUMBER=7;

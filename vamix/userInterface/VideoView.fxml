@@ -293,7 +293,7 @@
                      </graphic></Button>
                   <Button fx:id="fastForwardBtn" alignment="CENTER" layoutX="429.0" layoutY="679.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="38.0" textAlignment="CENTER">
                      <graphic>
-                        <ImageView fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="fastforwardImage" fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../../resources/fastforward.png" />
                            </image>
@@ -301,7 +301,7 @@
                      </graphic></Button>
                   <Button fx:id="rewindBtn" alignment="CENTER" layoutX="318.0" layoutY="679.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="38.0" textAlignment="CENTER">
                      <graphic>
-                        <ImageView fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="rewindImage" fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../../resources/rewind.png" />
                            </image>
@@ -346,6 +346,11 @@
             <Menu mnemonicParsing="false" text="Subtitle">
               <items>
                   <MenuItem fx:id="playWithSubtitlesBtn" mnemonicParsing="false" text="Play with subtitle.." />
+              </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Help">
+              <items>
+                  <MenuItem fx:id="openUserManual" mnemonicParsing="false" text="Open User Manual" />
               </items>
             </Menu>
         </menus>
